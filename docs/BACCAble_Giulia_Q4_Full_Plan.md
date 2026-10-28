@@ -397,6 +397,17 @@ If a bus is silent in the S2 sniff, the cable or pair is wrong: these IDs are wh
 
 ---
 
+## 8j. How the functions act on the car, and dormant code found (from the per-message handlers)
+
+- **BACCAble is a bus participant, not a gateway.** The boards do not sit between two halves of a bus. To change a value, they **receive the original frame and immediately transmit a modified copy with the same ID** (e.g. drive-style `0x384` for ESC/TC "race" on C1/C2, shift-light `0x2ED`, key-fob `0x1EF` for windows, steering buttons `0x2FA` for the ACC/HAS pads, always with the CRC recomputed). So each board simply needs a good tap on its bus (CAN H/L + ground), and the car's own ECUs keep running. [Repo: `processingMessage0x000001EF.c`, `…384.c`, `…2ED.c`, `…2FA.c`]
+- **Engine-state logic comes from the rpm frame `0x0FC`** (every ~10 ms): engine on = rpm > 400; C1 counts 500 frames (≈ 5 s) before functions such as the Start&Stop disabler act; below 400 rpm C1 re-arms them, cancels the 4WD disable and starts the 40 s timer that hides the menu. [Repo: `…0FC.c`]
+- **Start&Stop status** is read from `0x226` (byte 2 bits 3–2 = 1 means "disabled in the car"). [Repo]
+- **Immobilizer** (when enabled and the engine is off) watches the C1 bus for diagnostic requests/replies between a tester and the **RF hub (address `0xC7`)**: services 0x10, 0x27, 0x29, 0x3E, 0x2E, 0x3D. On a match it floods the reset message every 10 ms, starts the panic alarm after 1 s and stops after 10 s. Any ELM327/AlfaOBD session on the RF hub looks the same, hence the advice in §8e. [Repo: `processingExtendedMessage.c`]
+- **Dormant "pump force" test code.** `function_pump_force_enabled` is hard-coded to 1 ("enabled for test") and a handler can run an ECM security-access handshake (seed/key algorithm `MM10JA`) and then send `2F 50 11 03 FF` every 200 ms. **The only line that starts the sequence is commented out** in `C1baccablePeriodicCheck()`, and nothing in the menu sets the state machine, so it stays idle (`pumpForceStateMachine = 0xFF`) in the current source. It is not part of any manual function. Keep this in mind if you ever merge a newer upstream version: re-check that it is still inert. [Repo]
+- **Other stubs:** main-menu item 13 "Save Log to filesystem" only writes `hello.txt`; the REMOTE START logic in `0x1EF` is commented out. [Repo]
+
+---
+
 ## 9. Risks and stop conditions
 | Risk | Rule |
 |---|---|
@@ -421,7 +432,7 @@ If a bus is silent in the S2 sniff, the cable or pair is wrong: these IDs are wh
 5. Loose-module flashing procedure (repo documents only the PCB app).
 6. Whether the car's USB ports follow the RF-hub wake for your 2022 car (matters only if you later enable the immobilizer).
 7. The prebuilt images have not run on a UCAN: first flash and boot behaviour (LED pattern, `Version.txt` on C2/BH) is unconfirmed.
-8. Files not read word for word: most of `elm327.c`, `elmlink.c` (headers and top read), `vuMeter.c`, the per-message handlers other than `0x2FA`.
+8. Files not read word for word: most of `elm327.c`, `elmlink.c` (headers and top read), `vuMeter.c` (LED strip, out of scope), the middle of `processingStandardMessage.c`, the middle of `processingExtendedMessage.c` and `uds_parameters.c`. Read in full or in the relevant parts: everything else in `Core/Src`.
 9. Powering C1 from a PC for ELM327 use while C2/BH stay on car USB (§8i) is my inference, not a documented procedure.
 
 ---
