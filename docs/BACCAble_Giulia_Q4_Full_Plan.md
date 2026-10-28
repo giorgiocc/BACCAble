@@ -1,4 +1,4 @@
-# DIY BACCAble — Full Plan, Build Steps and Firmware (v4.3)
+# DIY BACCAble — Full Plan, Build Steps and Firmware (v4.4)
 
 **Mission:** build our own BACCAble from loose boards instead of buying the author's ready-made device, and make it **behave the same as the author's device in every way except the WS281x LED strip** (not built, not wired, left disabled).
 **Car:** 2022 Alfa Romeo Giulia Sprint Q4 · 2.0 petrol · MY22 cluster · SGW with an owned bypass cable (owner confirmed it passes all three buses).
@@ -18,7 +18,7 @@ The author's device (schematic `hardware/newBaccableDedicatedPcb/BACCABLE_SCHEMA
 | Three chips, one per CAN bus (C1, C2, BH) | U10/U20/U30, STM32F072, one transceiver each, CAN on PB8/PB9 | **Three UCAN boards** (STM32F072CB + CAN transceiver, CAN on PB8/PB9) | ✅ — **all three are required** |
 | Firmware | `baccableC1/C2/BH` images from this repo | Same source; C1 built with our flags (§8), C2/BH unchanged | ✅ |
 | Serial link between chips | one `Serial` net on PA14 of all three chips (USART2, 38400 baud, half-duplex, open-drain) | one wire joining the **CK pads** (PA14) of the three UCANs | ✅ |
-| Sleep ("low consume") | C1 **PA4** holds C2/BH in reset; C1 **PA5** puts the C2/BH transceivers in standby; C1 keeps listening and wakes them on CAN activity | C1 **DO pad (PA13)** → **RES pads** of C2 and BH, firmware flag `UCAN_LOW_CONSUME_PINS` (§5) | ✅ chips; ⚠️ slave transceivers are not put in standby (§5) |
+| Sleep ("low consume") | C1 **PA4** holds C2/BH in reset; C1 **PA5** puts the C2/BH transceivers in standby; C1 keeps listening and wakes them on CAN activity | **Reset line:** C1 **DO pad (PA13)** → **RES pads** of C2 and BH (flag `UCAN_LOW_CONSUME_PINS`). **Standby line:** C1 **PA5** (unchanged author pin, fine wire on chip pin 15) → **pin 8 (S/RS) of the CAN transceiver** on C2 and BH (§5.1) | ✅ identical behaviour (same firmware logic, same two lines) |
 | Power | 12 V from OBD pin 16 → fuse F1 → buck U1 (4.5–35 V in) → **3.3 V straight to the chips**; USB 5 V can also feed the buck input through diode D2; ≈ 15 mA asleep, < 30 mA running | **Chosen — Option B:** pin 16 → fuse 1 A → **12→3.3 V buck → 3V3 + G pads** of the three UCANs (§4) | ✅ identical topology; rule: unplug a board's 3V3 plug before plugging USB into it (no D2 diode on a UCAN) |
 | Programming button | one button pulling BOOT0 of all three chips | one push button **B0 ↔ 3V3** per UCAN | ✅ |
 | USB port per chip (flash, sniffer, ELM327, pen drive) | J10/J20/J30 USB-C | each UCAN's own USB-C | ✅ |
@@ -30,7 +30,7 @@ The author's device (schematic `hardware/newBaccableDedicatedPcb/BACCABLE_SCHEMA
 | Pedal-booster serial (C1 USART1 on PB6) | cable to "schizzaForte" | optional fine-wire on C1 pin 42 (§10); the manual says the pedal booster is "under development, do not activate" | ⚪ optional |
 | STS inputs, GSM footprint | on the PCB | **not used by the firmware** (no code reads them) | — nothing to copy |
 
-**What is not the same (honestly):** loose boards in our own box instead of the moulded OBD plug; slave transceivers not put in standby during sleep (slightly higher sleep current than the author's ≈ 15 mA); one boot button per board instead of one shared button.
+**What is not the same (honestly):** loose boards in our own box instead of the moulded OBD plug; the reset line leaves from PA13 instead of PA4 (same signal, a pad instead of a chip pin); one boot button per board instead of one shared button; each UCAN keeps its own power LED and regulator (bypassed by the 3.3 V rail).
 
 **The author's device we are copying** (manual §1.11): one box, three USB-C ports (one per chip: BH, C2, C1 from left to right) and one programming button.
 
@@ -88,6 +88,8 @@ Check these against your own boards before soldering. [Repo][GiUCAN]
   Serial (author's "Serial" net):     C1.CK ──── C2.CK ──── BH.CK      (one wire)
   Sleep reset (author's PA4 line):    C1.DO ──┬─ C2.RES
                                               └─ BH.RES                (one wire)
+  Sleep standby (author's PA5 line):  C1 chip pin 15 (PA5) ──┬─ C2 transceiver pin 8 (S/RS)
+                                                             └─ BH transceiver pin 8 (S/RS)   (one wire)
   Boot buttons:                       B0 ↔ 3V3 push button on each board
 ```
 No series resistors on the serial or reset wires (the author's PCB and diagrams use bare nets; the firmware drives both open-drain). Keep both wires short (≤ ~30 cm). [Repo][Infer]
@@ -156,14 +158,22 @@ Rules for every option: **never put 12 V on a UCAN**; one common ground; C2/BH s
 
 ---
 
-## 5. Sleep (low consume) on UCAN boards — our one firmware change
+## 5. Sleep (low consume) on UCAN boards — identical to the author
 
 **Author's design** (`lowConsume.c`, schematic): C1 never sleeps; after **3.5 s without CAN frames** on its bus it pulls **PA4** low (open-drain) to hold C2 and BH in reset, drives **PA5** to put their transceivers in standby, pauses the serial line and flashes its blue LED; when frames come back it releases both, restarts the serial line, re-sends every function setting to the slaves (≈ 3.5 s later) and arms DNA Memory. Sleep is blocked while a sniffer/ELM327/pen-drive USB session is active. [Repo]
 
-**Problem on a UCAN:** PA4 and PA5 have no pads.
+**Problem on a UCAN:** PA4 and PA5 have no pads. Solved line by line below.
+
+### 5.1 Reset line (author's PA4)
 **Fix in this fork:** new compile flag **`UCAN_LOW_CONSUME_PINS`** in `Core/Inc/lowConsume.h` moves the reset line to **PA13 = the DO pad** (the pin GiUCAN uses for exactly this, wired to the other board's RES pad). Default builds are unchanged. Verified in the C1 image's disassembly: PA13 open-drain output. [Repo][GiUCAN][Built]
 - PA13 is SWDIO: SWD debugging of C1 is no longer possible; USB-DFU flashing is unaffected. At C1 power-up and during C1 flashing PA13 floats high, so the slaves run. [Infer]
-- **Slave transceivers:** on a UCAN each transceiver's standby pin is driven by its own chip (PC13 per GiUCAN), so C1 cannot reach it. While a slave is held in reset its pins are undriven — the same state GiUCAN's BH board is in during its standby on real cars — so the bus is left alone, but the transceiver may keep drawing a few mA. Measure the sleep current (§7 H11). [GiUCAN][Infer]
+### 5.2 Standby line (author's PA5) — no firmware change needed
+- The firmware **already drives PA5 exactly as the author's**: push-pull output, **low = slave transceivers active** (set at start-up and on every wake), **high = standby** (set when C1 goes to sleep). Our flag only moved the reset line; PA5 is untouched. [Repo: `lowConsume.c`]
+- On the author's PCB PA5 runs to the **RS pin (pin 8)** of the C2 and BH transceivers (schematic sheets 3/4, `CanLowConsumeCmd`, with a 10 kΩ pull-down). On a UCAN the transceiver's standby/silent pin (**pin 8, "S"/"RS"**) is wired to that board's own **PC13** (GiUCAN calls it `CAN_S`, "can silent pin"); the BACCAble C2/BH firmware **never drives PC13**, so an external line can control it without a conflict. [Repo][GiUCAN]
+- **Wiring:** one thin wire (30 AWG wire-wrap or enamelled) from **C1's chip pin 15 = PA5** (LQFP48 numbering from the MKS CANable schematic in the repo: PA4 = 14, PA5 = 15) to **pin 8 of the CAN transceiver** (the 8-pin chip next to the green terminal) on **C2** and on **BH**. Pin 15 is on the 0.5 mm-pitch side of the chip: use flux, a fine tip, and check with a loupe that pins 14/16 are not bridged.
+- **Before soldering, identify pin 8 on your boards:** pin 1 is marked by the dot; pin 8 is the pin beside pin 1 on the opposite row. Confirm with the multimeter: **continuity between transceiver pin 8 and the board's chip pin 2 (PC13)**. If there is no continuity, stop and re-check (the board differs from GiUCAN's). [Infer]
+- **Result:** during sleep the slaves are held in reset **and** their transceivers are in standby/silent mode — the author's exact behaviour and the lowest sleep current. At start-up, before C1's firmware sets PA5, the line floats for a few ms (the author's PCB has a pull-down for this; the UCAN keeps its own default on that pin). [Infer]
+- *Optional, fully pin-identical variant:* also take the reset line from C1's chip **pin 14 (PA4)** instead of the DO pad and build C1 **without** `-DUCAN_LOW_CONSUME_PINS` (the author's stock pins). Same behaviour, but one more fine-pitch joint next to pin 15; the DO-pad route is the easier one.
 - **Bench gotcha:** with no car, C1 sees no CAN frames and holds C2/BH in reset after 3.5 s. Flash and test the slaves **before** fitting the reset wire, or power C1 off, or use the `C1_BENCH_ONLY` image (§8).
 
 ![Author's schematic sheet 2: the C1 chip](images/author_schematic_sheet2_C1.png)
@@ -194,7 +204,7 @@ The author's older single-CANable diagram is where "TERMINATION NOT INSERTED" co
 | **H1** | Termination per §6 (practise on the spare). Keep the header open. | CAN_H↔CAN_L open on each board |
 | **H2** | Flash check comes in S1 (needs USB). Solder headers to **CK, DO, RES, B0, 3V3, G** on each board. Fit a push button across **B0–3V3** on each board, reachable from outside the box. | pads clean, no bridges |
 | **H3** | **Serial wire:** C1.CK ↔ C2.CK ↔ BH.CK. | continuity CK-CK-CK, no short to G/3V3 |
-| **H4** | **Reset wire:** C1.DO ↔ C2.RES and C1.DO ↔ BH.RES. *(Leave unplugged until the slaves are flashed — §5 bench gotcha.)* | continuity, no short |
+| **H4** | **Reset wire:** C1.DO ↔ C2.RES and C1.DO ↔ BH.RES. **Standby wire (§5.2):** first check continuity *transceiver pin 8 ↔ chip pin 2* on C2 and BH, then wire C1 chip pin 15 (PA5) → transceiver pin 8 of C2 and of BH; check pins 14/16 of C1 are not bridged. *(Leave unplugged until the slaves are flashed — §5 bench gotcha.)* | continuity, no short |
 | **H5** | **CAN harness** to each terminal (P1: 1 = CAN_L, 2 = CAN_H, 3 = GND): C1 → 6/14, C2 → 12/13, BH → 3/11; terminal GND → OBD 4/5. Twist pairs, mark every H wire. | H/L not swapped (swapped = warning lights, manual §1.5) |
 | **H6** | **Power harness** (§4): first measure **pin 16 ↔ pin 4 ≈ 12 V** on the bypass cable's port (no 12 V → fallback car USB, §4.5). Then OBD 16 → fuse 1 A → 12→3.3 V buck → three 2-pin plugs (3V3 + G); buck GND → OBD 4/5. On the bench, with **no board connected**, power the buck from 12 V and set/check its output. | 12 V on pin 16; buck out **3.30 V ± 0.1 V** |
 | **H7** | **Bench power test:** connect one board's 3V3 plug (USB-C empty): power LED on, 3V3 pad 3.3 V; measure its USB-C VBUS (back-feed check, §4.3). Then all three plugs. Separately confirm each board also runs from USB alone with its 3V3 plug **removed**. | no short, no hot parts, rail stays 3.2–3.4 V |
@@ -241,7 +251,7 @@ sudo dfu-util -d 0483:df11 -c 1 -i 0 -a 0 -s 0x08000000:leave -D C1.bin
 | **S1** | On the **spare**: read device ID and **flash size = 128 KB** in CubeProgrammer, flash `BH`, unplug, replug. | on the data cable it appears as a USB drive "BACCABLE BH" with `Version.txt` (that proves it booted); no steady red blinking |
 | **S2** | Read and flash all boards: `C1`→C1 board, `C2`→C2, `BH`→BH (full chip erase). Reset wire **not** fitted yet. | no steady red blinking on any board; C2/BH show their USB drive label on a data cable |
 | **S3** | **Bench serial test:** flash `C1_BENCH_ONLY` on C1, fit the CK wire, power all three. | after ~3 s the blue LEDs of C2 and BH pulse about once a second (C1 polling them) |
-| **S4** | **Bench sleep test:** flash the real `C1`, fit the reset wire, power all three with no car. | ~4 s after power-up the status LEDs of C2 and BH stop (held in reset; their power LEDs stay on) and C1's blue LED flashes once: the reset wire works. **Bus-safety check:** while they are held in reset, measure DC volts between CAN_H and CAN_L on each slave's terminal (nothing else connected): **≈ 0 V = recessive, safe**; anything clearly above ≈ 0.5 V means the slave would hold its bus dominant — do not install it (§5) |
+| **S4** | **Bench sleep test:** flash the real `C1`, fit the reset wire, power all three with no car. | ~4 s after power-up the status LEDs of C2 and BH stop (held in reset; their power LEDs stay on) and C1's blue LED flashes once: the reset wire works. **Standby check:** C1 pin 15 / slave transceiver pin 8 read ≈ 0 V while awake and ≈ 3.3 V once asleep (the standby wire works). **Bus-safety check:** while they are held in reset, measure DC volts between CAN_H and CAN_L on each slave's terminal (nothing else connected): **≈ 0 V = recessive, safe**; anything clearly above ≈ 0.5 V means the slave would hold its bus dominant — do not install it (§5) |
 | **S5** | **Car, silent sniff (optional but recommended):** flash `SNIFFER_ActAsCanable` on the spare and use SavvyCAN in silent mode (`M1`) on each bus (500 k C1/C2, 125 k BH); the IDs in §11.5 should appear — on the BH bus look specifically for `0x256` and `0x46C`, which DNA Memory needs (§11.12). Then install the three boards (H10) and power them. | no warning lights; with always-on power the boards wake on unlock (blue LEDs active again) |
 | **S6** | **First start:** engine running, cruise control and ACC off → hold **RES** (or DISTANCE) ~2 s → version `BACCABLE ucan-…` on the cluster. With our defaults there is **no** double blue blink and no cluster flash at power-up (those mean "immobilizer active"). Open **SETUP MENU** (§11.7): check **Diesel Params = O** (gasoline), **My23 IPC = O**, Start&Stop = O. | menu works |
 | **S7** | Enable functions **one at a time**, SAVE & EXIT, ignition cycle, check for faults after each: dashboard parameters → shift → seat-belt/odometer → windows, park mirror, park mute → proxy-alignment features (ACC pad, HAS pad, race mask). Leave **DNA Memory off** (selector not compatible, §11.12). | no new faults |
@@ -343,7 +353,7 @@ ESC/TC and the race screen need race mode enabled by **proxy alignment** (manual
 1. Real flash size and any fixed CAN termination on **your** UCANs (H0, S1).
 2. First boot of the prebuilt images and the `UCAN_LOW_CONSUME_PINS` sleep on real boards (S3, S4).
 3. Sleep current of the three-UCAN build (H11).
-4. Behaviour of the slave transceivers while their chips are held in reset: expected recessive/harmless as in GiUCAN's standby — **checked with a voltmeter in S4** before installing.
+4. Standby wire on your boards: transceiver pin 8 ↔ chip pin 2 continuity (H4) and ≈ 0 V awake / ≈ 3.3 V asleep (S4); bus recessive while asleep (S4 voltmeter check).
 
 ## Sources (all in or linked from this fork)
 `README.md`, `LICENSE.MD`, `manuals/Baccable_manual_*.pdf` (v4.9), `hardware/newBaccableDedicatedPcb/*`, `hardware/system_interconnection/*`, `hardware/canable/*` (MKS schematics, STM32F072 datasheet), `hardware/box/*`, `firmware/ledsStripController/{Core,Makefile,MAKEFILE.md,*.ld,baccable.ioc,.cproject}`, `.github/workflows/*`, `tools/*.xlsx` · GiUCAN https://github.com/anegrin/GiUCAN · canable-fw https://github.com/normaldotcom/canable-fw · PIDs https://github.com/danardi78/Alfaromeo-Giulia-Stelvio-PIDs · upstream issue #34 (author on power and three boards).

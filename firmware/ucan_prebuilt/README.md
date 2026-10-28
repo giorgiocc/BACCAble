@@ -16,6 +16,7 @@ Dashboard version string: `BACCABLE ucan-<git short hash>`. Full plan: `docs/BAC
 
 * sleep (low consume) **on**, as on the author's device; the reset line to the slaves leaves from the **DO pad (PA13)**: wire **C1.DO → C2.RES and BH.RES**
 * serial line: wire **C1.CK ↔ C2.CK ↔ BH.CK**
+* transceiver standby (author's PA5 line, firmware unchanged): fine wire from **C1 chip pin 15 (PA5)** to **pin 8 (S/RS) of the CAN transceiver on C2 and on BH**
 * defaults on a blank settings page: gasoline, **immobilizer OFF**, **Start&Stop disabler OFF**; everything else as the author's release. LED strip: leave "Led Controller" deselected.
 * a board that ran BACCAble before keeps its saved settings: use a full chip erase when flashing
 * C2 and BH are the author's stock images
