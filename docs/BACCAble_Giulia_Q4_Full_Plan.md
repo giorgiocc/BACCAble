@@ -174,6 +174,8 @@ Rules for every option: **never put 12 V on a UCAN**; one common ground; C2/BH s
 - **Before soldering, identify pin 8 on your boards:** pin 1 is marked by the dot; pin 8 is the pin beside pin 1 on the opposite row. Confirm with the multimeter: **continuity between transceiver pin 8 and the board's chip pin 2 (PC13)**. If there is no continuity, stop and re-check (the board differs from GiUCAN's). [Infer]
 - **Result:** during sleep the slaves are held in reset **and** their transceivers are in standby/silent mode — the author's exact behaviour and the lowest sleep current. At start-up, before C1's firmware sets PA5, the line floats for a few ms (the author's PCB has a pull-down for this; the UCAN keeps its own default on that pin). [Infer]
 - *Optional, fully pin-identical variant:* also take the reset line from C1's chip **pin 14 (PA4)** instead of the DO pad and build C1 **without** `-DUCAN_LOW_CONSUME_PINS` (the author's stock pins). Same behaviour, but one more fine-pitch joint next to pin 15; the DO-pad route is the easier one.
+
+### 5.3 Bench note
 - **Bench gotcha:** with no car, C1 sees no CAN frames and holds C2/BH in reset after 3.5 s. Flash and test the slaves **before** fitting the reset wire, or power C1 off, or use the `C1_BENCH_ONLY` image (§8).
 
 ![Author's schematic sheet 2: the C1 chip](images/author_schematic_sheet2_C1.png)
