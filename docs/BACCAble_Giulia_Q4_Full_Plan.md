@@ -17,7 +17,7 @@ Evidence tags: **[Repo]** stated by BACCAble repo/manual v4.9 · **[GiUCAN]** fr
 3. **GiUCAN proves the UCAN approach on real cars.** It is a cut-down BACCAble written *only* for FYSETC UCAN (C1 + BH), derived from canable-fw. [GiUCAN]
 4. **Minimum build = 2 boards:** C1 (master, OBD 6/14) + BH (slave, OBD 3/11), joined by one wire between their **CK pads**. **C2 (OBD 12/13) is only needed for ESC/TC, DYNO and front-brake override.** Everything else, including the 4WD disabler (runs on C1), works with two boards. [Repo][Diagram]
 5. **Use FYSETC UCAN V1.0 (STM32F072CBT6, 128 KB flash).** GiUCAN's linker script for it is 64 K flash + 64 K "EEPROM" at 0x08010000 (= 128 KB). The BACCAble C1 image is ~73.6 KB, so a true 64 KB F072C8 will not fit. [GiUCAN][Repo][Schem]
-6. **Power each board over USB-C, 5 V.** UCAN has no 12 V input. Two supported sources: car USB 5 V (switched, no drain) or a 12 V→5 V DC-DC feeding the USB-C inputs. See §5. [Repo][GiUCAN][Schem]
+6. **Power each board over USB-C, 5 V.** UCAN has no 12 V input. Two supported sources, both confirmed by the author for the immobilizer: car USB 5 V (powers a CANable directly) or a 12 V→5 V DC-DC feeding the USB-C inputs (the author's own board runs on both). See §5. [Repo: issue #34][GiUCAN][Schem]
 7. **Settings for your car:** GASOLINE in the setup menu, "My23 IPC" off. Both are runtime menu options. [Repo]
 8. **Termination:** the car buses are already terminated, so the module must add none. On UCAN, R1+R2 (59 Ω + 59 Ω) are hard-wired across CAN H/L, so measure and, per the schematic, remove them. GiUCAN's docs don't mention this; ask the Telegram group. [Schem][Unv]
 9. **Immobilizer function:** needs power that wakes with the RF hub (car USB 5 V or 12 V OBD). If you don't use it, any 5 V source that is up while driving works. [Repo]
@@ -69,10 +69,11 @@ Matches the manual, GiUCAN and the BACCAble diagram. [Diagram] Pins 1–8 are th
 - Each board's USB goes to a 5 V source ("USB hub").
 - Note on the diagram: UCAN, CANable, DykbRadio Nano or candleLight are equivalent *if they mount an STM32F072*.
 
-### 3.3 Adding C2 (three boards) [Infer — the repo's diagram only shows two]
+### 3.3 Adding C2 (three boards) [Repo: author, issue #34]
+The author confirmed (BACCAble issue #34, 7 Dec 2025) that the two-UCAN diagram "was just an example" and that **three CANable/UCAN boards communicate through the same single wire, a half-duplex serial line**, one master and two slaves.
 
 - C2 CAN pair → OBD **12 (H) / 13 (L)**, grounds to OBD 4/5.
-- C2 **CK pad** → the **same single wire** as C1 and BH (one shared serial net; the dedicated PCB does the same). Common GND.
+- C2 **CK pad** → the **same single wire** as C1 and BH (one shared half-duplex serial net, as the author confirmed). Common GND.
 - Third power-only USB-C cable from the same 5 V source.
 - Flash it with the **C2** image.
 - Prerequisite: your bypass cable must pass pins 12/13 (step H7).
@@ -149,6 +150,7 @@ Closed (you own a bypass). Remaining check: that **your** cable passes all buses
 
 - Manual §1.7: the USB hub in the console storage compartment (next to the handbrake) is live when you enter the car and when someone wakes the RF hub. Tap method (opening the hub PCB) is documented but not recommended here. The manual also mentions the USB port in the central area near the cigarette lighter. [Repo]
 - **Never feed 12 V to a UCAN.** Every board powered from the same source; boards share ground and the serial wire. [Schem]
+- Author (issue #34): "12 V requires a DC-DC; 5 V can directly power a CANable. Both solutions work fine for the immobilizer." Open question from that thread, **not answered by the author**: whether the *armrest-front* USB port is powered when the RF hub wakes. The manual names the console-storage hub (next to the handbrake) and the USB port near the cigarette lighter — use one of those, and verify it with a multimeter before relying on it. [Repo][Unv]
 - The manual doesn't require USB power for loose boards; this is GiUCAN's and the author's diagram's approach. [Repo][GiUCAN]
 
 ---
@@ -307,7 +309,7 @@ Build commands (BACCAble, GCC): from `firmware/ledsStripController`, copy `Core/
 ## 10. Still uncertain
 1. Whether UCAN users remove R1/R2; R1/R2 package size.
 2. ~~Whether the bypass cable passes C2 and BH~~ — confirmed by the owner.
-3. Three-board UCAN serial wiring is inferred from the dedicated PCB, not documented for UCAN.
+3. Exact CK-to-CK wire length/layout for three UCANs (the author confirms the single shared wire, but gives no drawing).
 4. Whether the optional PA13/PC13 sleep-pin change works with BACCAble.
 5. Loose-module flashing procedure (repo documents only the PCB app).
 6. Whether the car's USB ports follow the RF-hub wake for your 2022 car.
