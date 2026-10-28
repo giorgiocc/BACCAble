@@ -20,7 +20,7 @@ Evidence tags: **[Repo]** stated by BACCAble repo/manual v4.9 · **[GiUCAN]** fr
 6. **Power each board over USB-C, 5 V.** UCAN has no 12 V input. Two supported sources, both confirmed by the author for the immobilizer: car USB 5 V (powers a CANable directly) or a 12 V→5 V DC-DC feeding the USB-C inputs (the author's own board runs on both). See §5. [Repo: issue #34][GiUCAN][Schem]
 7. **Settings for your car:** GASOLINE in the setup menu, "My23 IPC" off. Both are runtime menu options. [Repo]
 8. **Termination:** the car buses are already terminated, so the module must add none. On UCAN, R1+R2 (59 Ω + 59 Ω) are hard-wired across CAN H/L, so measure and, per the schematic, remove them. GiUCAN's docs don't mention this; ask the Telegram group. [Schem][Unv]
-9. **Immobilizer function:** needs power that wakes with the RF hub (car USB 5 V or 12 V OBD). If you don't use it, any 5 V source that is up while driving works. [Repo]
+9. **Immobilizer and Start&Stop disabler are OFF by default in our build** (owner's choice); both can still be switched on later in the SETUP menu. The immobilizer needs power that wakes with the RF hub (car USB 5 V or 12 V OBD); with it off, any 5 V source that is up while driving works. [Repo]
 
 ---
 
@@ -235,21 +235,21 @@ Pin 16 ↔ 4 ≈ 12 V is not required for USB-powered builds.
 | **S0** | Install STM32CubeProgrammer | hardware gate passed |
 | **S1** | Flash **ActAsCanable** (or GiUCAN SLCAN) on the SPARE; prove DFU flashing | spare works |
 | **S2** | Sniff in silent mode (`M1`) on the car: C1 at 500 kbit/s, BH at 125 kbit/s (C2 at 500 kbit/s) | traffic on every bus |
-| **S3 (recommended)** | Bench-prove the wiring with **GiUCAN C1CAN + BHCAN** (build with `build.sh`, flash from `dist/`): after a few seconds the SNS LED shows Start&Stop disabled; hold cruise RES ~2 s for the dashboard items | CK wiring + bypass proven |
+| **S3 (recommended)** | Bench-prove the wiring with **GiUCAN C1CAN + BHCAN** (build with `build.sh`, flash from `dist/`): note GiUCAN disables Start&Stop by default after ~20 s — add `#define DISABLE_SNS_AUTO_OFF` to its `inc/user_config.h` (and build with `-DINCLUDE_USER_CONFIG_H`, see its `build.sh`) so it stays off, as you want; hold cruise RES ~2 s for the dashboard items | CK wiring + bypass proven |
 | **S4** | Flash BACCAble V.3.8.x+ **C1, BH (and C2)** images; for C1 use a custom build with **`DISABLE_LOW_CONSUME`** (§4.5) | each board reports its flavor |
 | **S5** | First start (manual §2.1): hold RES/DISTANCE ~2 s → SETUP menu. Select **GASOLINE**, leave **My23 IPC off**. Check the defaults in §8e (immobilizer, seat-belt write) | menu opens |
-| **S6** | Enable one at a time, ignition cycle + fault check after each: **Start&Stop disabler → immobilizer (optional) → dashboard parameters (petrol list) → shift lights → convenience (windows, park mirror, QV flap, seat-belt/odometer) → proxy-alignment features (ACC/HAS pads, race mask)** | no new faults |
+| **S6** | Enable one at a time, ignition cycle + fault check after each: **dashboard parameters (petrol list; Start&Stop disabler and immobilizer stay off unless you choose to enable them) → shift lights → convenience (windows, park mirror, QV flap, seat-belt/odometer) → proxy-alignment features (ACC/HAS pads, race mask)** | no new faults |
 | **S7** | **High-risk, last, stationary/closed course only:** 4WD disabler (C1); with C2: ESC/TC, DYNO, front-brake override. Prove rollback first (menu-disable, unplug, ignition cycle, Clear Faults) | rollback proven |
 
-**Build commands — tested.** Toolchain: `gcc-arm-none-eabi` 13.2 (Ubuntu `apt install gcc-arm-none-eabi libnewlib-arm-none-eabi`; any recent ARM GNU toolchain works). From `firmware/ledsStripController`:
+**Build — tested.** Use `docs/build_ucan.sh` (it holds the flags below and writes the images to `firmware/ucan_prebuilt/`; prebuilt copies are committed there, **not yet tested on hardware**). Toolchain: `gcc-arm-none-eabi` 13.2 (`apt install gcc-arm-none-eabi libnewlib-arm-none-eabi`; any recent ARM GNU toolchain works). By hand, from `firmware/ledsStripController`:
 ```bash
-# C1 master: gasoline defaults, sleep disabled (loose UCANs), immobilizer OFF by default (you don't use it; also built and verified)
-CFLAGS="-DIS_GASOLINE -DDISABLE_LOW_CONSUME -DDISABLE_IMMOBILIZER -DRELEASE_FLAVOR=C1_FLAVOR -DC1_FLAVOR=1" make clean all
+# C1 master: gasoline, sleep disabled, immobilizer OFF, Start&Stop disabler OFF
+CFLAGS="-DIS_GASOLINE -DDISABLE_LOW_CONSUME -DDISABLE_IMMOBILIZER -DDISABLE_THE_FUNCTION_SMART_DISABLE_START_STOP -DRELEASE_FLAVOR=C1_FLAVOR -DC1_FLAVOR=1" make clean all
 # slaves (BH on OBD 3/11, C2 on OBD 12/13)
 CFLAGS="-DRELEASE_FLAVOR=BH_FLAVOR -DBH_FLAVOR=1" make clean all
 CFLAGS="-DRELEASE_FLAVOR=C2_FLAVOR -DC2_FLAVOR=1" make clean all
 ```
-Output is `build/baccable-*.elf`, `.bin` and `.hex`. **Built and verified in this session (all three compile and link with no errors):** C1 (gasoline, no low-consume) = **78,620 bytes** (so it needs >64 KB flash; fits the 96 KB C1 linker region), C2 = 37,524 bytes, BH = 36,796 bytes. C1 also compiles with `-DDEBUG_CAN_RX_SIMULATION` added (bench-test build, not for the car). The Makefile picks the C1 linker script automatically when the flags contain `C1_FLAVOR`. The release workflows build exactly these three flavors with just the `-DRELEASE_FLAVOR` flags, so downloading the stable `.elf` files from GitHub Releases and building your own C1 are interchangeable except for the `-DDISABLE_LOW_CONSUME`/`-DIS_GASOLINE` choices (gasoline can also be selected in the SETUP menu at run time). Flashing: STM32CubeProgrammer in USB-DFU mode with the `.elf` (or `.bin` at `0x08000000`); the repo's own flashing app is documented for the dedicated PCB only. [Repo][built]
+Output: `build/baccable-*.elf`, `.bin`, `.hex`. **Built and verified:** C1 = **78,624 bytes** (needs > 64 KB flash; fits the 96 KB C1 linker region), C2 = 37,532, BH = 36,800. Checked with the preprocessor that these flags leave `IMMOBILIZER_ENABLED`, `SMART_DISABLE_START_STOP`, `IS_DIESEL` and `LOW_CONSUME` undefined. C1 also compiles with `-DDEBUG_CAN_RX_SIMULATION` (bench build, not for the car). The Makefile picks the C1 linker script automatically when the flags contain `C1_FLAVOR`. The release workflows build the same three flavors, and the fork's "Build Beta Version" workflow accepts the same flags in its `CFLAGS` input, so GitHub can build them for you. **These defaults apply only when the settings flash page is blank:** a board that already ran BACCAble keeps its saved settings, so do a full chip erase when flashing (or change the items in the SETUP menu). Flashing: STM32CubeProgrammer in USB-DFU mode with the `.elf` (or `.bin` at `0x08000000`); the repo's own flashing app is documented for the dedicated PCB only. [Repo][built]
 
 **Excluded:** REMOTE START and PEDAL BOOSTER ("under development, do not activate" per manual v4.9). **Not for petrol:** DPF/regeneration alert. [Repo]
 
@@ -344,8 +344,8 @@ On a blank flash page every setting falls back to its compile-time default. With
 
 | Setting | Fresh-board default | Notes |
 |---|---|---|
-| **Immobilizer** | **ON** | blocks RF-hub connections (ignition dead, horn alarm, ~10 s). Build with `-DDISABLE_IMMOBILIZER` to start OFF, or toggle at run time (cruise speed-up held 30–40 s, engine running, cruise off, gear in neutral; dashboard blinks 5–6× = off, 3× = on). `-DPERMANENTLY_DISABLE_IMMO` removes it for good. Use OFF before any ELM327/AlfaOBD/MultiECUScan session that touches the RF hub. [Repo] |
-| **Start&Stop disabler** | **ON** | acts only after 10 s from board start and with the engine running > 5 s; does nothing if the car already has S&S off. [Repo] |
+| **Immobilizer** | **ON** in the stock release; **OFF in our build** (`-DDISABLE_IMMOBILIZER`) | blocks RF-hub connections (ignition dead, horn alarm, ~10 s). Build with `-DDISABLE_IMMOBILIZER` to start OFF, or toggle at run time (cruise speed-up held 30–40 s, engine running, cruise off, gear in neutral; dashboard blinks 5–6× = off, 3× = on). `-DPERMANENTLY_DISABLE_IMMO` removes it for good. Use OFF before any ELM327/AlfaOBD/MultiECUScan session that touches the RF hub. [Repo] |
+| **Start&Stop disabler** | **ON** in the stock release; **OFF in our build** (`-DDISABLE_THE_FUNCTION_SMART_DISABLE_START_STOP`) | when enabled it acts only after 10 s from board start and with the engine running > 5 s; does nothing if the car already has S&S off. [Repo] |
 | **Clear Faults** | **ON** | adds the menu item. |
 | **Engine type** | **DIESEL** unless built with `-DIS_GASOLINE` | can also be changed in the SETUP menu (saved). |
 | **Seat-belt alarm** | "enabled" | **no "leave untouched" option:** about 2 s after the engine starts, on every board power-up, C1 opens an extended session with the instrument cluster (`0x18DA60F1`) and sends IO-control `2F 55A0 03 xx` — `01` to enable the chime (default) or `00` to disable it (if the setting is deselected). The status is never read first. Harmless in a stock car, but it is a write to the cluster at every start. [Repo: `functions_C1baccable.c`, `processingExtendedMessage.c`] |
@@ -355,6 +355,25 @@ Other behaviour confirmed in the code:
 - **Settings are saved by SAVE & EXIT** into the last flash page (33 values); a failed erase/write is signalled by the red LED blinking 8×/9×. The "shown parameters" selection and best 0–100 / 100–200 km/h times are stored in two other flash pages.
 - **Dashboard menu** is updated every 500 ms; the menu hides ~39 s after the engine stops.
 - **ELM327 and sniffer** use the same USB port, are mutually exclusive, and when ELM327 runs C1 stops its own bus traffic and dashboard refresh. [Repo]
+
+---
+
+## 8f. Flash map, USB behaviour and what each board needs (from the source)
+
+- **All three boards need flash up to `0x0801FFFF` (128 KB).** C1 keeps settings in the last three pages (`0x0801F800` settings, `0x0801F000` statistics, `0x0801E800` shown params). **C2 and BH use a 64 KB FAT "pen drive" at `0x08010000–0x0801FFFF`** (`USB_FLASH_START_ADDRESS`, `TOTAL_USB_DEVICE_SIZE`), and BH saves its park-mirror positions at `0x0801F800`; the generic slave linker script limits their code to 60 KB so the images stay below it. A true 64 KB chip cannot work for the slaves either. [Repo: `diskio.c`, `compile_time_defines.h`, `*.ld`]
+- **C2 and BH expose that pen drive over USB** (label `BACCABLE C2` / `BACCABLE BH`, file `Version.txt`, formatted automatically on first boot; USB is brought up at power-on). C1 does not start USB at boot (only when the sniffer or ELM327 is enabled). **Use power-only USB-C cables for all boards** so the car's head unit never sees a storage device; keep a data cable for flashing only. [Repo: `main.c`, `functions_Common.c`]
+- **PA14 is both the serial pin and SWCLK**, so SWD debugging is not possible once the firmware runs; flashing uses USB-DFU (BOOT0), which is unaffected. [Repo]
+- **Clock:** `SystemClock_Config()` uses the internal HSI48 directly (no PLL, no crystal), also for USB. [Repo: `functions_Common.c`]
+- **Error indication:** an unrecoverable init error makes the **red LED blink forever** at a fixed rate (halfPeriod 500 ms = serial init, 750 ms = USART1 init on C1, 1000/1500/2000/2500 ms = USB clock, system clock, oscillator, DMA); useful for diagnosing a board that does nothing. [Repo: `Error_Handler()` callers]
+
+## 8g. CAN IDs each board reads (use these to check the buses during the sniff step S2)
+
+From the `case` labels in `processingStandardMessage.c` (11-bit IDs). Frames guarded for one flavor only are listed under that board; the rest are handled by all flavors:
+- **C1 bus (500 kbit/s):** 0x101, 0x107, 0x192, 0x1F7, 0x2EF (gear), 0x412 (accelerator pedal), 0x41A, 0x41E, 0x420, 0x4B1, 0x4B2, 0x545, 0x5A5, 0x5A8 (TCM), 0x5AE, plus 0x4AF.
+- **BH bus (125 kbit/s):** 0x090 (radio text on the cluster), 0x256 (DNA selector), 0x25A, 0x2EE, 0x354, 0x356, 0x3E6, 0x3E8, 0x46C (drive style), 0x5A0, 0x5A6, 0x5A8, 0x5AC.
+- **C2 bus (500 kbit/s):** 0x0FA, 0x1F5, 0x1FC, 0x3E7 (PDC beeping), 0x4AF, 0x4B4, 0x54A (PDC button/LED), 0x5B0.
+- Common to all: 0x0FC, 0x116, 0x1EF, 0x1F0, 0x226, 0x2ED, 0x2FA (steering-wheel button handling), 0x358, 0x384.
+If a bus is silent in the S2 sniff, the cable or pair is wrong: these IDs are what the firmware waits for. [Repo — read from the source, not yet seen on a car]
 
 ---
 
