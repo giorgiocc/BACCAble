@@ -210,6 +210,7 @@ Twist each pair, keep short, tape-mark H wires. H/L swapped = warning lights at 
 | Pin 6 ↔ 14 (C1) | ≈ 60 Ω |
 | Pin 3 ↔ 11 (BH) | low value (exact value unverified) |
 | Pin 12 ↔ 13 (C2, only if building C2) | ≈ 60 Ω |
+**Status (user confirmed): the owner's bypass cable passes all buses.** Keep the passive test as a wiring sanity check.
 Pin 16 ↔ 4 ≈ 12 V is not required for USB-powered builds.
 
 **H8. Box.** Mount on standoffs, strain-relief with glands, keep USB-C, terminals and pads reachable. Away from pedals, steering column, knee-airbag path, heat and HVAC flaps. Label boards at both ends.
@@ -218,7 +219,8 @@ Pin 16 ↔ 4 ≈ 12 V is not required for USB-powered builds.
 - [ ] Boards read STM32F072CBT6, 128 KB
 - [ ] R1/R2 removed on installed boards
 - [ ] CK + GND harness verified
-- [ ] H7 table recorded (C1 + BH pass; C2 if used)
+- [ ] Bypass cable passes all buses (confirmed by owner)
+- [ ] BOOT0 (and optional RES) push buttons fitted, USB-C ports reachable
 - [ ] Car USB 5 V present when doors unlock/key near, absent when car sleeps
 
 **H10. In-car install.** Car off; OBD harness into the bypass port first with boards **unpowered**; re-measure each pair through the harness ≈ 60 Ω; connect power last. Do **not** power boards on the car with unknown firmware.
@@ -255,6 +257,40 @@ Build commands (BACCAble, GCC): from `firmware/ledsStripController`, copy `Core/
 
 ---
 
+## 8b. Programming button, reset button and status LEDs
+
+### Programming (DFU) button — add one per board
+- The dedicated BACCAble PCB has a **programming button** next to each USB port. Update procedure (manual §1.11): **hold the button, plug in USB, release when the green LED is lit**; the board shows up as "STM32 Bootloader". [Repo]
+- A bare UCAN has **no button** — only the BOOT0 and 3V3 pads on P2 (pads 5 and 6, adjacent; verify on the silkscreen). So **solder a small momentary push button (or a 2-pin header + jumper) across BOOT0 ↔ 3V3, one per board**, and bring it to the box wall. Hold it while the board powers up → DFU. [Schem][GiUCAN]
+- The firmware has **no software jump to the bootloader** (no bootloader/DFU code in `Core/`), so a button or jumper is the *only* way to reflash. [Repo: code search]
+- Optional second button: **RES pad ↔ GND** (reset). Holding BOOT0 and tapping RESET enters DFU without unplugging USB. [Infer]
+- Mechanical: keep each board's **USB-C port reachable** (short USB-C extension or panel-mount port), because the boards are powered from the car USB and you must move the cable to the PC to flash. After flashing, release the button and replug normally.
+- Troubleshooting from the manual: weak LED / flaky detection → shorter or better USB cable; try another PC port or a slow USB hub; rotate the USB-C plug 180°. [Repo]
+
+### Status LEDs — already on the UCAN
+- The firmware drives two LEDs: **red = PA0**, **blue = PA1** (`onboardLed.h`). UCAN uses the same pins for its TX/RX LEDs (GiUCAN defaults: LED_RX = PA0, LED_TX = PA1) and the build defaults to `UCAN_BOARD_LED_INVERSION`, so the **UCAN's onboard LEDs work as-is**. The green **3V3** LED is the power indicator (the "green LED" in the manual). So you already have 3 status LEDs per board; extra external LEDs are not needed. [Repo][GiUCAN][Infer]
+- What the code does (each LED pulse is 25 ms, `LED_DURATION`): [Repo: code]
+  | LED | Meaning (from the code) |
+  |---|---|
+  | **Blue** short pulses | activity: CAN bus enabled, CAN messages processed, inter-board UART traffic sent/received, a setting saved to flash successfully, wake-up from low-consume. **Blue flashes twice at start-up when the immobilizer function is active** (manual) |
+  | **Red** pulse | something needs attention: CAN configuration/disable, UART error, a setting could **not** be saved to flash, or **main-loop iteration took > 2 ms** (the author's debug check — continuous red = the loop is overloaded) |
+  | **Red blinks 8×** | flash page erase failed while saving settings |
+  | **Red blinks 9×** | flash write failed while saving settings |
+  | **Green (3V3)** | board powered |
+- Blue-only flicker on a running car is normal; steady/frequent red is a fault to investigate.
+
+---
+
+## 8c. How the firmware is organised (read from the source)
+- **One codebase, flavor chosen at compile time** (`C1baccable`, `C2baccable`, `BHbaccable`, `ACT_AS_CANABLE`) in `compile_time_defines.h`; one image per board. [Repo]
+- **Start-up (`main.c`):** clocks → LEDs → `can_init()` → (C1) `C1baccableInitCheck()` (loads saved settings from flash, starts low-consume if enabled) → `uart_init()` (inter-chip serial on USART2/PA14) → (BH/C2) `storage_init()` → USB device init **only on first power-up, not after a reset** (avoids hanging from condensation) → C1 and C2 open CAN at **500 kbit/s** → (BH) `BHbaccableInitCheck()`.
+- **Main loop:** `onboardLed_process()` → `can_process()` (receive → per-ID handlers `processingMessage0x…c` / `processingStandardMessage.c` / `processingExtendedMessage.c`) → the flavor's periodic function (e.g. `C1baccablePeriodicCheck()`, which runs `lowConsume_process()` unless disabled) → UART queue to the other chips.
+- **Master/slave:** C1 sends commands to BH/C2 over the single-wire UART (`uart.c` command codes like `C2cmdFunct…`, `BHcmdFunct…`); the setup menu on the dashboard (C1) enables functions, and the choice is stored in the last flash pages (`0x0801E800–0x0801FFFF`, `saveOnflash()`).
+- **Sniffer/ELM327** are compiled into the normal firmware and stay off until enabled in the SETUP menu; they take over USB and the inter-chip line while in use. [Repo]
+- Not yet read in detail: the per-function CAN message contents, and BH's CAN bit-rate setup (`BHbaccableInitCheck`).
+
+---
+
 ## 9. Risks and stop conditions
 | Risk | Rule |
 |---|---|
@@ -271,7 +307,7 @@ Build commands (BACCAble, GCC): from `firmware/ledsStripController`, copy `Core/
 
 ## 10. Still uncertain
 1. Whether UCAN users remove R1/R2; R1/R2 package size.
-2. Whether your bypass cable passes C2 and BH (H7).
+2. ~~Whether the bypass cable passes C2 and BH~~ — confirmed by the owner.
 3. Three-board UCAN serial wiring is inferred from the dedicated PCB, not documented for UCAN.
 4. Whether the optional PA13/PC13 sleep-pin change works with BACCAble.
 5. Loose-module flashing procedure (repo documents only the PCB app).
