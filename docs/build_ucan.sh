@@ -4,7 +4,7 @@
 # DO pad (PA13) -> wire C1.DO to C2.RES and BH.RES. Defaults that apply only on a blank settings flash page:
 #   gasoline engine, immobilizer OFF, Start&Stop disabler OFF.
 # Also builds C1_BENCH_ONLY.* (CAN in silent loopback with simulated frames): for testing the boards on a desk,
-# NEVER for the car.
+# NEVER for the car. SNIFFER_ActAsCanable.* is the plain SLCAN sniffer (SavvyCAN) for the spare board.
 # Everything can still be changed at run time from the dashboard SETUP menu.
 # Needs: gcc-arm-none-eabi (e.g. `apt install gcc-arm-none-eabi libnewlib-arm-none-eabi`).
 # Usage: docs/build_ucan.sh [output_dir]      Extra flags: EXTRA_CFLAGS="-DLARGE_DISPLAY" docs/build_ucan.sh
@@ -30,5 +30,6 @@ build C1 C1 "$C1_FLAGS"
 build C1_BENCH_ONLY C1 "$C1_FLAGS -DDEBUG_CAN_RX_SIMULATION"
 build C2 C2 ""
 build BH BH ""
+build SNIFFER_ActAsCanable CAN ""
 make clean >/dev/null
 echo "Images in $OUT (version ucan-$VER)"
