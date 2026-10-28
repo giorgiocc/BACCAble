@@ -1,4 +1,4 @@
-# DIY BACCAble — Full Plan, Build Steps and Firmware (v4.2)
+# DIY BACCAble — Full Plan, Build Steps and Firmware (v4.3)
 
 **Mission:** build our own BACCAble from loose boards instead of buying the author's ready-made device, and make it **behave the same as the author's device in every way except the WS281x LED strip** (not built, not wired, left disabled).
 **Car:** 2022 Alfa Romeo Giulia Sprint Q4 · 2.0 petrol · MY22 cluster · SGW with an owned bypass cable (owner confirmed it passes all three buses).
@@ -32,6 +32,12 @@ The author's device (schematic `hardware/newBaccableDedicatedPcb/BACCABLE_SCHEMA
 
 **What is not the same (honestly):** loose boards in our own box instead of the moulded OBD plug; slave transceivers not put in standby during sleep (slightly higher sleep current than the author's ≈ 15 mA); one boot button per board instead of one shared button.
 
+**The author's device we are copying** (manual §1.11): one box, three USB-C ports (one per chip: BH, C2, C1 from left to right) and one programming button.
+
+![Author's BACCAble: USB-C per bus and programming button](images/manual_programming_button_usb_ports.png)
+
+*Source: `manuals/Baccable_manual_EN.pdf`, page 16.*
+
 ---
 
 ## 2. Architecture and wiring
@@ -49,6 +55,12 @@ GND = OBD 4 and 5, +12 V = OBD 16. [Repo]
 
 The picture is drawn from the car side (pins 1–8 bottom row, 9–16 top row): trust the numbers on your plug.
 
+The author's own OBD plug pinout (what his PCB uses on each pin — we only use 3, 4, 5, 6, 11, 12, 13, 14, 16):
+
+![Author's BACCAble OBD pinout](../hardware/newBaccableDedicatedPcb/pinout.png)
+
+*Source: `hardware/newBaccableDedicatedPcb/pinout.png` (also manual page 5). CMD1–3, STS1–3 and LED CTRL are the author's extra I/O (§10); not used here.*
+
 ### 2.2 UCAN pads (read from the silkscreen in the repo's photos)
 From `hardware/system_interconnection/ShowParamsOnDashboardConnections.png` and GiUCAN's diagrams, USB-C at the bottom:
 - **CAN terminal:** CAN_L · CAN_H · GND.
@@ -56,6 +68,14 @@ From `hardware/system_interconnection/ShowParamsOnDashboardConnections.png` and 
 - **Left pad column, from the USB end up:** RX · TX · G · 3V3 (not used).
 - A **2-pin termination header** beside the CAN terminal (keep it open).
 Check these against your own boards before soldering. [Repo][GiUCAN]
+
+![UCAN pad labels, zoomed](images/ucan_pads_zoom.png)
+
+*Zoom of the author's diagram below: left board seen from the bottom (CAN_L · CAN_H · GND terminal; right column CK · DO · RES · G · B0 · 3V3, the blue serial wire on CK; left column RX · TX · G · 3V3); right board seen from the top (TX/RX LEDs, chip, termination header next to the green terminal).*
+
+![Author's two-UCAN wiring](../hardware/system_interconnection/ShowParamsOnDashboardConnections.png)
+
+*Source: `hardware/system_interconnection/ShowParamsOnDashboardConnections.png` — the author's two-board example (C1 master + BH slave, one wire on the SWCLK/CK pad, USB 5 V). Our build adds C2 on the same wire (author, issue #34), the reset wire, and the 3.3 V rail of §4.*
 
 ### 2.3 Complete wiring (the author's PCB rebuilt)
 ```
@@ -80,6 +100,12 @@ No series resistors on the serial or reset wires (the author's PCB and diagrams 
 - **All three need 128 KB of flash**: C1 is 79,004 bytes [Built]; C2 and BH keep a 64 KB FAT area and their settings in flash up to `0x0801FFFF` (§11.4). The author's own chips are labelled C8T6 (64 KB on paper, see the datasheet in `hardware/canable/`) yet run these images with a 96 KB code region and settings at `0x0801F800`, so they behave as 128 KB; the UCAN's CB chip is 128 KB on paper. **Read the flash size of every board in STM32CubeProgrammer before flashing.** [Repo][GiUCAN]
 - Other boards the README lists (MKS CANable, DykbRadio Nano, candleLight) work only with a 128 KB STM32F072; CANable-type boards need `-DDISABLE_UCAN_BOARD_LED_INVERSION` (their LEDs are active-low on PA0/PA1, see the MKS schematic in the repo). Not needed for this build. [Repo]
 
+The author's own 3D cases for the UCAN (we build our own box, but they show how he mounts the board and the 2-pin header next to the green terminal):
+
+| Two UCANs (`hardware/box/dual_fysect_ucan/preview.png`) | One UCAN (`hardware/box/single_fysect_ucan/preview.png`) |
+|---|---|
+| ![Dual UCAN case](../hardware/box/dual_fysect_ucan/preview.png) | ![Single UCAN case](../hardware/box/single_fysect_ucan/preview.png) |
+
 ---
 
 ## 4. Power — chosen design: Option B, identical to the author (always-on 12 V → 3.3 V rail)
@@ -93,6 +119,10 @@ OBD pins 4/5 (GND) ─────────────────── buc
 (no USB-C power leads — the USB-C ports stay free for flashing, ELM327 and the sniffer)
 ```
 This is the author's topology: his PCB has fuse **F1** → buck **U1** making **3.3 V directly** (feedback divider 69.8 kΩ / 22.1 kΩ ≈ 3.3 V) for all three chips and transceivers. Feeding the UCANs on their **3V3 pads** bypasses each UCAN's own 5 V → 3.3 V regulator, exactly like the author's single 3.3 V rail, and gives the lowest parked current. [Repo: schematic sheet 1, manual §1.2/§1.10][Infer]
+
+![Author's schematic sheet 1: OBD connector, power and programming button](images/author_schematic_sheet1_connectors_power.png)
+
+*Source: `hardware/newBaccableDedicatedPcb/BACCABLE_SCHEMATIC.pdf`, sheet 1. Top: OBD plug J1 (pin 16 = 12 V, 4/5 = GND, CAN pins). Middle: **12 V → fuse F1 → buck U1 → 3.3 V** (R1 69.8 kΩ / R2 22.1 kΩ set the output), **D2 from the 5 V (USB) net into the buck input**, green power LED D1. Right: programming button **S1** pulling **BOOT** high for all three chips (R4 10 kΩ pull-down).*
 
 ### 4.2 Parts and settings
 - **Fuse:** inline fuse holder + **1 A** fuse, as close to the OBD plug as possible.
@@ -118,6 +148,10 @@ Otherwise the board's own regulator and the buck would both drive its 3.3 V rail
 - **Option A:** pin 16 → fuse → 12→5 V buck (≥ 1 A) → power-only USB-C leads. Same source, one extra regulator stage per board (a bit more parked current); USB service is just swapping leads.
 - **Car USB:** 5 V from the console USB or the port near the cigarette lighter (manual §1.7/§2.4: switched on when you get in and when the RF hub wakes) → passive splitter → power-only USB-C leads. Boards lose power when the car sleeps, so DNA Memory and remembered states are lost; otherwise works.
 
+  ![USB-A pinout from the manual](images/manual_usb_hub_5v_pinout.png)
+
+  *Source: manual §1.7, page 10 — pin 1 = +5 V, pin 4 = GND of the car's USB-A socket (the manual's way to tap the console USB hub).*
+
 Rules for every option: **never put 12 V on a UCAN**; one common ground; C2/BH show up as USB pen drives on a data connection (§11.4), so USB-C power leads, if used, must be power-only.
 
 ---
@@ -132,11 +166,21 @@ Rules for every option: **never put 12 V on a UCAN**; one common ground; C2/BH s
 - **Slave transceivers:** on a UCAN each transceiver's standby pin is driven by its own chip (PC13 per GiUCAN), so C1 cannot reach it. While a slave is held in reset its pins are undriven — the same state GiUCAN's BH board is in during its standby on real cars — so the bus is left alone, but the transceiver may keep drawing a few mA. Measure the sleep current (§7 H11). [GiUCAN][Infer]
 - **Bench gotcha:** with no car, C1 sees no CAN frames and holds C2/BH in reset after 3.5 s. Flash and test the slaves **before** fitting the reset wire, or power C1 off, or use the `C1_BENCH_ONLY` image (§8).
 
+![Author's schematic sheet 2: the C1 chip](images/author_schematic_sheet2_C1.png)
+
+*Source: `BACCABLE_SCHEMATIC.pdf`, sheet 2 (C1). On the left of the chip: **PA0 red LED, PA1 white LED, PA4 `ChipLowConsumeCmd`** (reset of C2/BH — our DO-pad wire), **PA5 `CanLowConsumeCmd`** (standby of the C2/BH transceivers — not reproduced), PA6 STS_1, PA8 → Q10 → CMD_1, PA11 `Led_Control_Pin` (LED strip, excluded), PA11/PA12 USB-C J10, **PA14 `Serial`** (our CK wire), BOOT0 ← BOOT. Right: CAN on **PB8/PB9** to transceiver U11. Sheets 3 and 4 repeat this for C2 (blue LED, plus an unused GSM footprint) and BH (yellow LED); there `ChipLowConsumeCmd` arrives on the chip's **NRST** and `CanLowConsumeCmd` on the transceiver's **RS** pin.*
+
 ---
 
 ## 6. Termination
 
 The car buses are already terminated, so no board may add a terminator. The repo never says to desolder anything: the author's diagrams say "TERMINATION NOT INSERTED", his PCB has no terminator, and the UCAN pictures show the termination header **without a jumper**. Whether a UCAN also has fixed resistors across CAN H/L is **not documented in the repo** (that claim came from outside research). So: **measure** (H0); if a fixed value is present, removing it is consistent with the author's PCB — practise on the spare. Through the full harness every bus must read **≈ 60 Ω**. [Repo][Diagram]
+
+The author's older single-CANable diagram is where "TERMINATION NOT INSERTED" comes from (the CANable's termination jumper left open). It is a **legacy design — do not build it**: its Start&Stop resistor panel and the 1.5 kΩ resistor on PA14 are obsolete (Start&Stop is now done over CAN and PA14 is the serial wire), and its LED-strip output is out of scope.
+
+![Legacy single-CANable wiring (do not build)](../hardware/system_interconnection/SCHEMA_DI_INTERCONNESSIONE.png)
+
+*Source: `hardware/system_interconnection/SCHEMA_DI_INTERCONNESSIONE.png`.*
 
 ---
 
@@ -181,6 +225,12 @@ Checked with the preprocessor: `LOW_CONSUME` defined; `IMMOBILIZER_ENABLED`, `SM
 sudo dfu-util -d 0483:df11 -c 1 -i 0 -a 0 -s 0x08000000:leave -D C1.bin
 ```
 (the Makefile's own `flash` target, `MAKEFILE.md`) or STM32CubeProgrammer → USB → "Erasing & Programming" with the `.elf` (GiUCAN's docs). On Windows install the WinUSB driver with Zadig if CubeProgrammer/DfuSe is not installed (manual §1.11.1). Weak LED or no detection: shorter cable, another port, a slow USB hub, flip the USB-C plug (manual). The firmware has no software jump to the bootloader, so the button is the only way in. [Repo][GiUCAN]
+
+**Building in STM32CubeIDE instead** (the author's way): open `firmware/ledsStripController`, pick the build configuration from the hammer menu, and add our C1 flags to that configuration's preprocessor symbols (or use a "+ user_config" configuration with a `user_config.h`).
+
+![STM32CubeIDE build configurations](../hardware/system_interconnection/compileOptions.jpg)
+
+*Source: `hardware/system_interconnection/compileOptions.jpg` (README). The screenshot is older: today's `.cproject` has ReleaseC1/C2/BH BACCAble, each also "+ user_config", and ReleaseCANable; diesel/gasoline is now a menu setting (or `-DIS_GASOLINE`).*
 
 ---
 
@@ -238,6 +288,12 @@ Enable ELM327 in SETUP, connect a data USB cable to **C1**, then the OBD side. I
 
 ### 11.10 Functions that need more than the boards
 ESC/TC and the race screen need race mode enabled by **proxy alignment** (manual §2.19, which also explains keeping the pedal maps); ACC pad needs ACC hardware + proxy; HAS pad needs MY20+ hardware + proxy; park mirror needs mirror encoders; DNA Memory needs a monostable DNA selector on BH **and** always-on power (owner's car: selector not monostable → not available); DPF/regen alert is diesel-only; Remote start and Pedal booster are "do not activate". [Repo]
+
+**Route** (manual §2.9) lets an OBD app read native CAN frames through C1: a UDS request to `0x18DABAF1` with `22 xz yyyyyyyy` makes C1 answer on `0x18DAF1BA` with 5 bytes of the requested frame:
+
+![Route handshake](../hardware/system_interconnection/route.png)
+
+*Source: `hardware/system_interconnection/route.png`.*
 
 ### 11.11 Things to know in the code
 - Gasoline parameter "OVER RPM: sec" has reply ID `0xDA18F110` instead of `0x18DAF110` (probable typo, that page may not update) — left unchanged.
