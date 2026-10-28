@@ -42,7 +42,7 @@ Three chips, one per CAN bus; one firmware build per chip (**C1, C2, BH**) plus 
 
 | Chip | Role | OBD-II pins | Speed | Functions |
 |---|---|---|---|---|
-| **C1** | Master / gateway | **6 (H) / 14 (L)** | 500 kbit/s | Start&Stop disabler, immobilizer, shift lights, LED strip, dashboard menu, ACC/HAS pads, 4WD disabler, ELM327, sniffer |
+| **C1** | Master / gateway | **6 (H) / 14 (L)** | 500 kbit/s | Start&Stop disabler, immobilizer, shift lights, dashboard menu, ACC/HAS pads, 4WD disabler, ELM327, sniffer |
 | **BH** | Slave | **3 (H) / 11 (L)** | **125 kbit/s** | dashboard parameters, odometer blink |
 | **C2** *(optional)* | Slave | **12 (H) / 13 (L)** | 500 kbit/s | ESC/TC, DYNO, front-brake override |
 
@@ -90,7 +90,7 @@ Matches the manual, GiUCAN and the BACCAble diagram. [Diagram] Pins 1–8 are th
 |---|---|---|
 | **A. USB-powered, 2 UCAN** | `ShowParamsOnDashboardConnections.png`; GiUCAN `docs/images/schema_usb.png` | CK↔CK wire + CAN pairs + USB 5 V. **Recommended for you.** |
 | **B. OBD-powered, 2 UCAN, with sleep** | GiUCAN `docs/images/schema_obd2.png`, docs | As A, plus C1 **DO pad → BH RES pad**, plus a 12 V→5 V DC-DC from OBD pin 16 and 4/5 feeding USB-C plugs. C1 holds BH in reset and silences the transceivers when the car sleeps (≈7 mA at 12 V, per the author). |
-| **C. Old single-CANable design** | `hardware/system_interconnection/SCHEMA_DI_INTERCONNESSIONE.png` | One CANable, 12 V→5 V regulator into the board's `+5V` terminal, LED strip control on PA11 (USB D−), and a **hardware Start&Stop bypass panel** (520 Ω / 2 kΩ / 1.5 kΩ / 7 kΩ + switch) on the car's 12-pin switch-panel connector, with a 1.5 kΩ resistor from PA14. Notes: ECU impedance before pin 5 = 910 Ω, pin 9 = 99 Ω; 470 Ω instead of 1.5 kΩ disables the parking acoustic signal. |
+| **C. Old single-CANable design** | `hardware/system_interconnection/SCHEMA_DI_INTERCONNESSIONE.png` | One CANable, 12 V→5 V regulator into the board's `+5V` terminal, an LED-strip output (not used in this plan), and a **hardware Start&Stop bypass panel** (520 Ω / 2 kΩ / 1.5 kΩ / 7 kΩ + switch) on the car's 12-pin switch-panel connector, with a 1.5 kΩ resistor from PA14. Notes: ECU impedance before pin 5 = 910 Ω, pin 9 = 99 Ω; 470 Ω instead of 1.5 kΩ disables the parking acoustic signal. |
 
 **Variant C is the legacy design — do not build it.** Current firmware disables Start&Stop by CAN message (`SMART_DISABLE_START_STOP`), and **PA14 is now the inter-board serial pin, so never hang a resistor on it.** The "+12 V" in that drawing comes from the switch-panel connector, not OBD pin 16 (switched/always-on is not stated). [Diagram][Infer]
 
@@ -121,7 +121,6 @@ Treat any "C8T6"-labelled board as unproven. [Repo][GiUCAN]
 - P1 screw terminal: **1 = CAN_L, 2 = CAN_H, 3 = GND** [Schem]. P2 pads include **CK (PA14)**, **DO (PA13/SWDIO)**, **RES (reset)**, BOOT0, 3V3, GND — verify against the silkscreen. [Schem][GiUCAN]
 - DFU: short **BOOT0 to 3V3** while powering up (GiUCAN: "BO and 3V3"). [GiUCAN]
 - Power only via USB-C. R1+R2 = 59 Ω + 59 Ω hard-wired across CAN H/L; JP1 adds a further 120 Ω. [Schem]
-- PA11 (LED-strip data in firmware) = USB D− via R11. [Schem][Repo]
 
 ### 4.4 Clock
 BACCAble builds with the **internal 48 MHz oscillator** (`INTERNAL_OSCILLATOR`, HSI48). UCAN's 8 MHz crystal is not needed; GiUCAN uses it by default but its BACCAble flavor builds with `DISABLE_EXTERNAL_OSCILLATOR`. Stock BACCAble images should run on UCAN as-is. [Repo][GiUCAN]
@@ -173,7 +172,7 @@ Closed (you own a bypass). Remaining check: that **your** cable passes all buses
 Multimeter (continuity, 10 A); temperature-controlled iron + flux + wick + tweezers + loupe (for R1/R2); 120 Ω resistors ×4 (bench CAN test); 5 V 2 A USB supply; 2 short USB-C data cables for DFU.
 
 ### 6.3 Optional
-12 V→5 V DC-DC + fuse tap + 1–2 A fuse (variant B only). LED-strip parts (Appendix A).
+12 V→5 V DC-DC + fuse tap + 1–2 A fuse (variant B only).
 
 ### 6.4 Do not buy
 MKS CANable V2.0, candleLightFD, DykbRadio Nano (unverified), any board without a readable MCU marking, a desktop powered USB hub, 3D-printed case files.
@@ -231,13 +230,13 @@ Pin 16 ↔ 4 ≈ 12 V is not required for USB-powered builds.
 
 | Step | Action | Gate |
 |---|---|---|
-| **S0** | Install STM32CubeProgrammer; decide LED strip yes/no | hardware gate passed |
+| **S0** | Install STM32CubeProgrammer | hardware gate passed |
 | **S1** | Flash **ActAsCanable** (or GiUCAN SLCAN) on the SPARE; prove DFU flashing | spare works |
 | **S2** | Sniff in silent mode (`M1`) on the car: C1 at 500 kbit/s, BH at 125 kbit/s (C2 at 500 kbit/s) | traffic on every bus |
 | **S3 (recommended)** | Bench-prove the wiring with **GiUCAN C1CAN + BHCAN** (build with `build.sh`, flash from `dist/`): after a few seconds the SNS LED shows Start&Stop disabled; hold cruise RES ~2 s for the dashboard items | CK wiring + bypass proven |
 | **S4** | Flash BACCAble V.3.8.x+ **C1, BH (and C2)** images; for C1 use a custom build with **`DISABLE_LOW_CONSUME`** (§4.5) | each board reports its flavor |
 | **S5** | First start (manual §2.1): hold RES/DISTANCE ~2 s → SETUP menu. Select **GASOLINE**, leave **My23 IPC off** | menu opens |
-| **S6** | Enable one at a time, ignition cycle + fault check after each: **Start&Stop disabler → immobilizer (optional) → dashboard parameters (petrol list) → shift lights → LED strip (if installed) → convenience (windows, park mirror, QV flap, seat-belt/odometer) → proxy-alignment features (ACC/HAS pads, race mask)** | no new faults |
+| **S6** | Enable one at a time, ignition cycle + fault check after each: **Start&Stop disabler → immobilizer (optional) → dashboard parameters (petrol list) → shift lights → convenience (windows, park mirror, QV flap, seat-belt/odometer) → proxy-alignment features (ACC/HAS pads, race mask)** | no new faults |
 | **S7** | **High-risk, last, stationary/closed course only:** 4WD disabler (C1); with C2: ESC/TC, DYNO, front-brake override. Prove rollback first (menu-disable, unplug, ignition cycle, Clear Faults) | rollback proven |
 
 Build commands (BACCAble, GCC): from `firmware/ledsStripController`, copy `Core/Inc/user_config.h.sample` → `user_config.h` and add `-DINCLUDE_USER_CONFIG_H`; flavors via `-DRELEASE_FLAVOR=C1_FLAVOR -DC1_FLAVOR=1` (likewise `C2_FLAVOR`, `BH_FLAVOR`). Example C1: `CFLAGS='-DINCLUDE_USER_CONFIG_H -DIS_GASOLINE -DRELEASE_FLAVOR=C1_FLAVOR -DC1_FLAVOR=1' make clean all` with `#define DISABLE_LOW_CONSUME` in `user_config.h`. Flashing: STM32CubeProgrammer in USB-DFU mode with the `.elf` (the repo's flashing app is documented for the dedicated PCB; loose-module flashing is not documented by the repo). [Repo][Unv]
@@ -248,7 +247,7 @@ Build commands (BACCAble, GCC): from `firmware/ledsStripController`, copy `Core/
 | Feature | Chip | Notes |
 |---|---|---|
 | Start&Stop disabler (2.3), Immobilizer (2.4) | C1 | switched USB 5 V |
-| LED strip (2.5), Shift (2.6) | C1 | Appendix A |
+| Shift lights (2.6) | C1 | – |
 | Dashboard parameters (2.8), Route (2.9) | C1 + BH | serial link |
 | 4WD disabler (2.15) | C1 | – |
 | ESC/TC (2.10), DYNO (2.11), brake override (2.16) | **C2** (+C1 menu) | 3rd board |
@@ -315,8 +314,8 @@ Build commands (BACCAble, GCC): from `firmware/ledsStripController`, copy `Core/
 
 ---
 
-## Appendix A — LED strip (optional)
-Driven by **C1 PA11 (TIM1_CH4)** = USB D− via R11 on UCAN. Parts: WS2811 IP65 strip (check 5/12 V and length), 74AHCT125 level shifter, 30 AWG wire, inline fuse; 12→5 V buck only for 5 V strips. Steps: C1 on a power-only USB cable so D− is free; thin wire to the MCU side of R11; level shifter to strip DIN; strip on a fused supply (never a USB port); common ground. [Infer]
+## Appendix A — LED strip: out of scope
+The WS281x LED-strip function is **not part of this plan** (no strip, level shifter or PA11 wiring). Leave it disabled in the SETUP menu.
 
 ## Appendix B — UCAN vs dedicated PCB
 | | UCAN boards | Dedicated PCB |
