@@ -237,14 +237,14 @@ Pin 16 ↔ 4 ≈ 12 V is not required for USB-powered builds.
 | **S2** | Sniff in silent mode (`M1`) on the car: C1 at 500 kbit/s, BH at 125 kbit/s (C2 at 500 kbit/s) | traffic on every bus |
 | **S3 (recommended)** | Bench-prove the wiring with **GiUCAN C1CAN + BHCAN** (build with `build.sh`, flash from `dist/`): after a few seconds the SNS LED shows Start&Stop disabled; hold cruise RES ~2 s for the dashboard items | CK wiring + bypass proven |
 | **S4** | Flash BACCAble V.3.8.x+ **C1, BH (and C2)** images; for C1 use a custom build with **`DISABLE_LOW_CONSUME`** (§4.5) | each board reports its flavor |
-| **S5** | First start (manual §2.1): hold RES/DISTANCE ~2 s → SETUP menu. Select **GASOLINE**, leave **My23 IPC off** | menu opens |
+| **S5** | First start (manual §2.1): hold RES/DISTANCE ~2 s → SETUP menu. Select **GASOLINE**, leave **My23 IPC off**. Check the defaults in §8e (immobilizer, seat-belt write) | menu opens |
 | **S6** | Enable one at a time, ignition cycle + fault check after each: **Start&Stop disabler → immobilizer (optional) → dashboard parameters (petrol list) → shift lights → convenience (windows, park mirror, QV flap, seat-belt/odometer) → proxy-alignment features (ACC/HAS pads, race mask)** | no new faults |
 | **S7** | **High-risk, last, stationary/closed course only:** 4WD disabler (C1); with C2: ESC/TC, DYNO, front-brake override. Prove rollback first (menu-disable, unplug, ignition cycle, Clear Faults) | rollback proven |
 
 **Build commands — tested.** Toolchain: `gcc-arm-none-eabi` 13.2 (Ubuntu `apt install gcc-arm-none-eabi libnewlib-arm-none-eabi`; any recent ARM GNU toolchain works). From `firmware/ledsStripController`:
 ```bash
-# C1 master, gasoline defaults, sleep disabled (loose UCANs)
-CFLAGS="-DIS_GASOLINE -DDISABLE_LOW_CONSUME -DRELEASE_FLAVOR=C1_FLAVOR -DC1_FLAVOR=1" make clean all
+# C1 master: gasoline defaults, sleep disabled (loose UCANs), immobilizer OFF by default (you don't use it; also built and verified)
+CFLAGS="-DIS_GASOLINE -DDISABLE_LOW_CONSUME -DDISABLE_IMMOBILIZER -DRELEASE_FLAVOR=C1_FLAVOR -DC1_FLAVOR=1" make clean all
 # slaves (BH on OBD 3/11, C2 on OBD 12/13)
 CFLAGS="-DRELEASE_FLAVOR=BH_FLAVOR -DBH_FLAVOR=1" make clean all
 CFLAGS="-DRELEASE_FLAVOR=C2_FLAVOR -DC2_FLAVOR=1" make clean all
@@ -335,6 +335,26 @@ Everything below was read directly from `manuals/Baccable_manual_EN.pdf` (v4.9),
 - **SGW:** "if the vehicle has an SGW, the OBD pins cannot be used — use an SGW bypass cable, or tap the CAN wires upstream of the SGW" (manual §1.8, with four tapping examples on the body computer). Reports from other users confirm that a car with an SGW but no bypass can show wrong values (e.g. oil pressure 0.00 bar). [Repo manual][upstream issue #41]
 - **Compatibility:** the author reports one user on a MY23; MY22 is not reported either way. [upstream issue #5]
 - **Menu basics:** hold RES (or DISTANCE) ~2 s with the engine running and cruise control off; use SETUP MENU → select functions → SAVE & EXIT; the menu hides 40 s after the engine stops. [Repo manual §2.1]
+
+---
+
+## 8e. What a freshly flashed board does (defaults, from `readFromFlash()` and `compile_time_defines.h`)
+
+On a blank flash page every setting falls back to its compile-time default. With the stock release (no `user_config.h`) and no extra flags:
+
+| Setting | Fresh-board default | Notes |
+|---|---|---|
+| **Immobilizer** | **ON** | blocks RF-hub connections (ignition dead, horn alarm, ~10 s). Build with `-DDISABLE_IMMOBILIZER` to start OFF, or toggle at run time (cruise speed-up held 30–40 s, engine running, cruise off, gear in neutral; dashboard blinks 5–6× = off, 3× = on). `-DPERMANENTLY_DISABLE_IMMO` removes it for good. Use OFF before any ELM327/AlfaOBD/MultiECUScan session that touches the RF hub. [Repo] |
+| **Start&Stop disabler** | **ON** | acts only after 10 s from board start and with the engine running > 5 s; does nothing if the car already has S&S off. [Repo] |
+| **Clear Faults** | **ON** | adds the menu item. |
+| **Engine type** | **DIESEL** unless built with `-DIS_GASOLINE` | can also be changed in the SETUP menu (saved). |
+| **Seat-belt alarm** | "enabled" | **no "leave untouched" option:** about 2 s after the engine starts, on every board power-up, C1 opens an extended session with the instrument cluster (`0x18DA60F1`) and sends IO-control `2F 55A0 03 xx` — `01` to enable the chime (default) or `00` to disable it (if the setting is deselected). The status is never read first. Harmless in a stock car, but it is a write to the cluster at every start. [Repo: `functions_C1baccable.c`, `processingExtendedMessage.c`] |
+| LED strip, shift lights, MY23, route, DYNO, ACC pad, front-brake forcer, **4WD disabler**, ESC/TC, remote start, read faults, regen alert, pedal booster, odometer-blink hide, race mask, park mirror, ACC autostart, windows, HAS pad, exhaust flap, front park mute, sniffer, ELM327, DNA Memory | **OFF** | enable one at a time in SETUP. |
+
+Other behaviour confirmed in the code:
+- **Settings are saved by SAVE & EXIT** into the last flash page (33 values); a failed erase/write is signalled by the red LED blinking 8×/9×. The "shown parameters" selection and best 0–100 / 100–200 km/h times are stored in two other flash pages.
+- **Dashboard menu** is updated every 500 ms; the menu hides ~39 s after the engine stops.
+- **ELM327 and sniffer** use the same USB port, are mutually exclusive, and when ELM327 runs C1 stops its own bus traffic and dashboard refresh. [Repo]
 
 ---
 
