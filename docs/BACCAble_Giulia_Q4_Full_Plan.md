@@ -387,6 +387,16 @@ If a bus is silent in the S2 sniff, the cable or pair is wrong: these IDs are wh
 
 ---
 
+## 8i. ELM327 mode — why the second and third board matter (from `elm327.c`, `elmlink.h`, manual §2.32)
+
+- **What it is:** with ELM327 enabled (SETUP item 30, then SAVE & EXIT), C1's USB port behaves like an ELM327 adapter (ISO 15765-4) for MultiECUScan, AlfaOBD and similar tools. The code includes the programmable parameters MultiECUScan uses to choose bus speed and a raw mode (`ATCAF0`) for AlfaOBD. [Repo]
+- **One USB port, three networks:** when the ECU being addressed is not on C1's own bus, C1 forwards the frame over the single-wire serial line (USART2, 38400 baud) to **C2 or BH**, which transmits it on their bus and return the answers. So the bridge reaches **C2 and BH only if those boards are fitted**; with the two-board build you reach C1 and BH. The design explicitly handles long UDS writes ("7F xx 78 response pending"), such as the **proxy alignment** that ESC/TC race mode, the ACC pad and the HAS pad require. [Repo]
+- **Line discipline:** while the bridge runs, C1 stops its own dashboard refresh and UDS requests and the master never transmits until the slave says it is done (END block), to keep the single wire in sync. [Repo]
+- **How to use it with loose boards (inference — the manual describes the PCB):** connect a USB **data** cable from the PC to **C1**, and only then connect the OBD side, as the manual says; 10 s after the cable is removed the board returns to normal. Do **not** let two 5 V sources feed the same board: **unplug C1's car-USB power lead while the PC powers it**, and keep C2/BH on the car USB (all grounds are common through the OBD ground). Leave the function disabled when not in use: the manual warns it can interfere with the immobilizer in the first seconds after power-up. [Repo manual][Infer]
+- **Immobilizer interaction:** with the immobilizer function ON, any diagnostic session that connects to the RF hub triggers the theft response (§8e), so keep it OFF (our default) before MultiECUScan/AlfaOBD sessions. [Repo]
+
+---
+
 ## 9. Risks and stop conditions
 | Risk | Rule |
 |---|---|
@@ -411,7 +421,8 @@ If a bus is silent in the S2 sniff, the cable or pair is wrong: these IDs are wh
 5. Loose-module flashing procedure (repo documents only the PCB app).
 6. Whether the car's USB ports follow the RF-hub wake for your 2022 car (matters only if you later enable the immobilizer).
 7. The prebuilt images have not run on a UCAN: first flash and boot behaviour (LED pattern, `Version.txt` on C2/BH) is unconfirmed.
-8. Files not read word for word: `elm327.c`, `elmlink.c`, `vuMeter.c`, most per-message handlers.
+8. Files not read word for word: most of `elm327.c`, `elmlink.c` (headers and top read), `vuMeter.c`, the per-message handlers other than `0x2FA`.
+9. Powering C1 from a PC for ELM327 use while C2/BH stay on car USB (§8i) is my inference, not a documented procedure.
 
 ---
 
