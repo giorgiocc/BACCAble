@@ -20,8 +20,11 @@ Dashboard version string: `BACCABLE ucan-<git short hash>`. Full plan: `docs/BAC
 * a board that ran BACCAble before keeps its saved settings: use a full chip erase when flashing
 * C2 and BH are the author's stock images
 
+## Power (chosen design)
+OBD pin 16 → 1 A fuse → 12→3.3 V buck → 3V3 + G pads of each board through a 2-pin plug (author's topology). **Unplug a board's 3V3 plug before connecting USB to it.**
+
 ## Flashing (USB DFU)
-Hold the B0 button (B0 shorted to 3V3) while plugging a data USB-C cable; the chip appears as `0483:df11`. Then flash the `.elf` with STM32CubeProgrammer, or the `.bin` with
+Unplug the board's 3V3 plug, then hold the B0 button (B0 shorted to 3V3) while plugging a data USB-C cable; the chip appears as `0483:df11`. Then flash the `.elf` with STM32CubeProgrammer, or the `.bin` with
 `sudo dfu-util -d 0483:df11 -c 1 -i 0 -a 0 -s 0x08000000:leave -D C1.bin` (the command the repo's Makefile uses).
 Check first that every chip reports **128 KB** of flash. Flash C2 and BH before fitting the reset wire, or C1 will hold them in reset on the bench.
 
