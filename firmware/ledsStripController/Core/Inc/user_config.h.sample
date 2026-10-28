@@ -20,6 +20,7 @@
 	// #define DISABLE_UCAN_BOARD_LED_INVERSION	// if uncommented it uses onboard leds configuration for canable board (default value is used for ucan board and baccable custom board).
 	// #define DISABLE_CLEAR_FAULTS_ENABLED		// if uncommented it disables the clear faults functionality.  It can disabled inside baccable SETUP menu.
 	// #define DISABLE_LOW_CONSUME				// if uncommented it disables low consume functionality
+	// #define UCAN_LOW_CONSUME_PINS			// if uncommented (loose fysetc ucan boards) the reset line towards C2 and BH leaves from the DO pad (PA13) instead of PA4, which has no pad on the ucan. Wire C1 DO pad to the RES pads of C2 and BH.
 	// #define DISABLE_IMMOBILIZER 				// if uncommented it disables immobilizer functionality. It can be enabled with button press, according to manual
 	// #define PERMANENTLY_DISABLE_IMMO			// if uncommented it permanently disables immobilizer functionality
 	// #define DISABLE_THE_FUNCTION_SMART_DISABLE_START_STOP	//if uncommented it disables the start&stop functionality (active by default). It can disabled inside baccable SETUP menu.

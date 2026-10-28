@@ -4,7 +4,11 @@
 
 	#include "globalVariables.h"
 
-	#define CHIP_LOW_CONSUME_Pin GPIO_PIN_4
+	#ifdef UCAN_LOW_CONSUME_PINS //loose fysetc ucan boards 28/10/2026 - PA4 has no pad on the ucan: the reset line towards the RES pads of C2 and BH leaves from the DO pad (PA13, SWDIO), as in GiUCAN
+		#define CHIP_LOW_CONSUME_Pin GPIO_PIN_13
+	#else
+		#define CHIP_LOW_CONSUME_Pin GPIO_PIN_4
+	#endif
 	#define CHIP_LOW_CONSUME_Port GPIOA
 	#define CHIP_LOW_CONSUME CHIP_LOW_CONSUME_Port , CHIP_LOW_CONSUME_Pin
 
