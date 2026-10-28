@@ -19,7 +19,7 @@ Evidence tags: **[Repo]** stated by BACCAble repo/manual v4.9 · **[GiUCAN]** fr
 5. **Use FYSETC UCAN V1.0 (STM32F072CBT6, 128 KB flash).** GiUCAN's linker script for it is 64 K flash + 64 K "EEPROM" at 0x08010000 (= 128 KB). The BACCAble C1 image is 78.6 KB (built here), so a true 64 KB F072C8 will not fit; C2 and BH also use flash up to `0x0801FFFF` (§8f). The author's own PCB uses F072C8T6 chips and runs the same images, so those parts behave as 128 KB — still read the flash size in CubeProgrammer before flashing. [GiUCAN][Repo][Schem]
 6. **Power each board over USB-C, 5 V.** UCAN has no 12 V input. Two supported sources, both confirmed by the author for the immobilizer: car USB 5 V (powers a CANable directly) or a 12 V→5 V DC-DC feeding the USB-C inputs (the author's own board runs on both). See §5. [Repo: issue #34][GiUCAN][Schem]
 7. **Settings for your car:** GASOLINE in the setup menu, "My23 IPC" off. Both are runtime menu options. [Repo]
-8. **Termination:** the car buses are already terminated, so the module must add none. On UCAN, R1+R2 (59 Ω + 59 Ω) are hard-wired across CAN H/L, so measure and, per the schematic, remove them. GiUCAN's docs don't mention this; ask the Telegram group. [Schem][Unv]
+8. **Termination:** the car buses are already terminated, so a module must add none. In this repo the author's diagrams say "TERMINATION NOT INSERTED" (the jumper left open) and the author's own PCB has no terminating resistor at all; the UCAN pictures in the BACCAble and GiUCAN diagrams show the 2-pin termination header beside the CAN terminal with **no jumper fitted**. Nothing in the three repos says to desolder anything. The earlier claim that the UCAN has two fixed 59 Ω resistors (R1/R2) comes from outside this repo and is **not verifiable here**: measure the bare board (§7 H0/H1) and only then decide. [Repo][Diagram][Unv]
 9. **Immobilizer and Start&Stop disabler are OFF by default in our build** (owner's choice); both can still be switched on later in the SETUP menu. The immobilizer needs power that wakes with the RF hub (car USB 5 V or 12 V OBD); with it off, any 5 V source that is up while driving works. [Repo]
 
 ---
@@ -116,12 +116,13 @@ Treat any "C8T6"-labelled board as unproven. [Repo][GiUCAN]
 | **FYSETC UCAN V1.0** | STM32F072**CB**T6, SN65HVD230 | ✅ buy (used by GiUCAN and the author's cases) |
 | MKS CANable V1.0 | STM32F072C8T6 | ⚠️ only if chip proven 128 KB |
 | MKS CANable V2.0 / candleLightFD | STM32G4 / G0 | ❌ wrong family |
-| DykbRadio Nano | unverified | ❓ |
+| DykbRadio Nano | listed as compatible in the README ("important that the chip is an STM32F072"); the author even has a case for it (`hardware/box/canableDykbRadioNanoOnly`); flash size not stated | ⚠️ only if the chip is proven 128 KB |
 
 ### 4.3 UCAN V1.0 facts
-- P1 screw terminal: **1 = CAN_L, 2 = CAN_H, 3 = GND** [Schem]. P2 pads include **CK (PA14)**, **DO (PA13/SWDIO)**, **RES (reset)**, BOOT0, 3V3, GND — verify against the silkscreen. [Schem][GiUCAN]
+- CAN terminal, silkscreen read from the photos in `hardware/system_interconnection/ShowParamsOnDashboardConnections.png` and GiUCAN's diagrams: **CAN_L, CAN_H, GND** (left to right with the USB-C at the bottom). [Diagram]
+- **Pad rows** (same photos, USB-C end at the bottom): right-hand column from the USB end upwards **CK, DO, RES, G, B0, 3V3** (CK is the pad the author's blue serial wire is soldered to; **B0 and 3V3 are the two top pads, side by side**); left-hand column upwards **RX, TX, G, 3V3**. CK = PA14/SWCLK, DO = PA13/SWDIO, B0 = BOOT0 (GiUCAN: "short-circuit BO and 3V3" for DFU). Still check against your own boards. [Diagram][GiUCAN]
 - DFU: short **BOOT0 to 3V3** while powering up (GiUCAN: "BO and 3V3"). [GiUCAN]
-- Power only via USB-C. R1+R2 = 59 Ω + 59 Ω hard-wired across CAN H/L; JP1 adds a further 120 Ω. [Schem]
+- Power only via USB-C. A 2-pin termination header sits beside the CAN terminal (shown open in the author's and GiUCAN's diagrams). Whether the board also carries fixed resistors across CAN H/L is **not documented in this repo**: measure it. [Diagram][Unv]
 
 ### 4.4 Clock
 BACCAble builds with the **internal 48 MHz oscillator** (`INTERNAL_OSCILLATOR`, HSI48). UCAN's 8 MHz crystal is not needed; GiUCAN uses it by default but its BACCAble flavor builds with `DISABLE_EXTERNAL_OSCILLATOR`. Stock BACCAble images should run on UCAN as-is. [Repo][GiUCAN]
@@ -177,15 +178,15 @@ Multimeter (continuity, 10 A); temperature-controlled iron + flux + wick + tweez
 12 V→5 V DC-DC + fuse tap + 1–2 A fuse (variant B only).
 
 ### 6.4 Do not buy
-MKS CANable V2.0, candleLightFD, DykbRadio Nano (unverified), any board without a readable MCU marking, a desktop powered USB hub, 3D-printed case files.
+MKS CANable V2.0, candleLightFD, any board without a readable MCU marking, a desktop powered USB hub, 3D-printed case files.
 
 ---
 
 ## 7. Build — Phase H (hardware, no firmware)
 
-**H0. Receive and inspect.** Read each MCU marking (**STM32F072CBT6**). Label C1 / BH / (C2) / SPARE. Read-only DFU check: BOOT0↔3V3, plug in USB-C, STM32CubeProgrammer → USB → Connect, read device ID and **flash size (expect 128 KB)**; do not erase/write. 64 KB → return it. Bare board CAN_H↔CAN_L ≈ **118 Ω**.
+**H0. Receive and inspect.** Read each MCU marking (**STM32F072CBT6**). Label C1 / BH / (C2) / SPARE. Read-only DFU check: BOOT0↔3V3, plug in USB-C, STM32CubeProgrammer → USB → Connect, read device ID and **flash size (expect 128 KB)**; do not erase/write. 64 KB → return it. With the board **unpowered and the termination header open**, measure CAN_H↔CAN_L: **open circuit = nothing fitted (good)**; a value near 120 Ω (or 60 Ω) = fixed resistors present (see H1).
 
-**H1. Remove termination.** Practise on the SPARE: find R1/R2 on "UCAN V1.0 Component Position.pdf" (FYSETC/UCAN `Hardware/`), flux, lift each resistor, clean. Verify H↔L is open; leave JP1 open; re-check DFU still works. Ask `t.me/baccable` whether UCAN users do this. [Schem][Unv]
+**H1. Termination.** Keep the 2-pin termination header **open** (no jumper), as in the author's and GiUCAN's diagrams. If H0 showed a fixed resistance across CAN H/L, removing those resistors is consistent with the author's own PCB (no termination at all) but is **not documented in the repo**: practise on the SPARE first and ask `t.me/baccable`. After any change verify H↔L reads open and DFU still works. [Diagram][Unv]
 
 **H2. Serial tap.** Solder a pin on each board's **CK pad (PA14)** and a GND pin. One short harness (≤ ~30 cm): C1.CK ↔ BH.CK (↔ C2.CK), plus common GND. **No series resistor** (the repo diagram shows a bare wire). Check no shorts.
 
@@ -218,7 +219,7 @@ Pin 16 ↔ 4 ≈ 12 V is not required for USB-powered builds.
 
 **H9. Pre-install checklist**
 - [ ] Boards read STM32F072CBT6, 128 KB
-- [ ] R1/R2 removed on installed boards
+- [ ] Termination header open and no fixed resistance across CAN H/L on installed boards
 - [ ] CK + GND harness verified
 - [ ] Bypass cable passes all buses (confirmed by owner)
 - [ ] BOOT0 (and optional RES) push buttons fitted, USB-C ports reachable
@@ -249,7 +250,7 @@ CFLAGS="-DIS_GASOLINE -DDISABLE_LOW_CONSUME -DDISABLE_IMMOBILIZER -DDISABLE_THE_
 CFLAGS="-DRELEASE_FLAVOR=BH_FLAVOR -DBH_FLAVOR=1" make clean all
 CFLAGS="-DRELEASE_FLAVOR=C2_FLAVOR -DC2_FLAVOR=1" make clean all
 ```
-Output: `build/baccable-*.elf`, `.bin`, `.hex`. **Built and verified:** C1 = **78,624 bytes** (needs > 64 KB flash; fits the 96 KB C1 linker region), C2 = 37,532, BH = 36,800. Checked with the preprocessor that these flags leave `IMMOBILIZER_ENABLED`, `SMART_DISABLE_START_STOP`, `IS_DIESEL` and `LOW_CONSUME` undefined. C1 also compiles with `-DDEBUG_CAN_RX_SIMULATION` (bench build, not for the car). The Makefile picks the C1 linker script automatically when the flags contain `C1_FLAVOR`. The release workflows build the same three flavors, and the fork's "Build Beta Version" workflow accepts the same flags in its `CFLAGS` input, so GitHub can build them for you. **These defaults apply only when the settings flash page is blank:** a board that already ran BACCAble keeps its saved settings, so do a full chip erase when flashing (or change the items in the SETUP menu). Flashing: STM32CubeProgrammer in USB-DFU mode with the `.elf` (or `.bin` at `0x08000000`); the repo's own flashing app is documented for the dedicated PCB only. [Repo][built]
+Output: `build/baccable-*.elf`, `.bin`, `.hex`. **Built and verified:** C1 = **78,624 bytes** (needs > 64 KB flash; fits the 96 KB C1 linker region), C2 = 37,532, BH = 36,800. Checked with the preprocessor that these flags leave `IMMOBILIZER_ENABLED`, `SMART_DISABLE_START_STOP`, `IS_DIESEL` and `LOW_CONSUME` undefined. C1 also compiles with `-DDEBUG_CAN_RX_SIMULATION` (bench build, not for the car). The Makefile picks the C1 linker script automatically when the flags contain `C1_FLAVOR`. The release workflows build the same three flavors, and the fork's "Build Beta Version" workflow accepts the same flags in its `CFLAGS` input, so GitHub can build them for you. **These defaults apply only when the settings flash page is blank:** a board that already ran BACCAble keeps its saved settings, so do a full chip erase when flashing (or change the items in the SETUP menu). Flashing (documented in the repo for loose boards): with BOOT held to 3V3 the chip shows up as USB device `0483:df11`; the Makefile's own `flash` target does `sudo dfu-util -d 0483:df11 -c 1 -i 0 -a 0 -s 0x08000000:leave -D build/baccable-<ver>.bin` (`firmware/ledsStripController/MAKEFILE.md`: "plug in your CANable with the BOOT jumper enabled … make flash"). STM32CubeProgrammer (USB, "Erasing & Programming") with the `.elf`, as GiUCAN's docs describe, does the same; on Windows the manual (§1.11.1) says to install the WinUSB driver with Zadig if CubeProgrammer/DfuSe is not installed. [Repo][GiUCAN][built]
 
 **Excluded:** REMOTE START and PEDAL BOOSTER ("under development, do not activate" per manual v4.9). **Not for petrol:** DPF/regeneration alert. [Repo]
 
@@ -270,7 +271,7 @@ Output: `build/baccable-*.elf`, `.bin`, `.hex`. **Built and verified:** C1 = **7
 
 ### Programming (DFU) button — add one per board
 - The dedicated BACCAble PCB has a **programming button** next to each USB port. Update procedure (manual §1.11): **hold the button, plug in USB, release when the green LED is lit**; the board shows up as "STM32 Bootloader". [Repo]
-- A bare UCAN has **no button** — only the BOOT0 and 3V3 pads on P2 (pads 5 and 6, adjacent; verify on the silkscreen). So **solder a small momentary push button (or a 2-pin header + jumper) across BOOT0 ↔ 3V3, one per board**, and bring it to the box wall. Hold it while the board powers up → DFU. [Schem][GiUCAN]
+- A bare UCAN has **no button** — only the **B0 and 3V3 pads, the top two of the right-hand pad column** in the repo photos (adjacent; verify on your board). So **solder a small momentary push button (or a 2-pin header + jumper) across BOOT0 ↔ 3V3, one per board**, and bring it to the box wall. Hold it while the board powers up → DFU. [Schem][GiUCAN]
 - The firmware has **no software jump to the bootloader** (no bootloader/DFU code in `Core/`), so a button or jumper is the *only* way to reflash. [Repo: code search]
 - Optional second button: **RES pad ↔ GND** (reset). Holding BOOT0 and tapping RESET enters DFU without unplugging USB. [Infer]
 - Mechanical: keep each board's **USB-C port reachable** (short USB-C extension or panel-mount port), because the boards are powered from the car USB and you must move the cable to the PC to flash. After flashing, release the button and replug normally.
@@ -424,11 +425,28 @@ If a bus is silent in the S2 sniff, the cable or pair is wrong: these IDs are wh
 
 ---
 
+## 8l. Answers to the open questions that were found inside the repo
+
+| Question | Where the repo answers it |
+|---|---|
+| Which pads are CK / BOOT0 / 3V3 on a UCAN? | Photos in `hardware/system_interconnection/ShowParamsOnDashboardConnections.png` and GiUCAN's diagrams (silkscreen readable): right column **CK, DO, RES, G, B0, 3V3**, left column **RX, TX, G, 3V3** (§4.3). |
+| Is C8T6 really 64 KB? | `baccable.ioc` names the chip `STM32F072C8T6` / "C(8-B)Tx", the datasheet in `hardware/canable/` covers both the x8 (64 KB) and xB (128 KB) parts, but the author's own `STM32F072C8TX_FLASH*.ld` scripts allow 96 KB of code and the firmware stores settings at `0x0801F800`: his C8T6 parts therefore behave as 128 KB. Read the size on yours anyway. |
+| How do I flash a loose board? | `MAKEFILE.md` + the Makefile `flash` target (dfu-util, BOOT jumper) and manual §1.11; GiUCAN's docs (CubeProgrammer). |
+| Must the termination be removed on the UCAN? | The repo never says to desolder anything: its diagrams show the termination jumper **not inserted** and the author's PCB has no termination. The fixed-resistor claim is not in the repo (§4.3). |
+| Does the third board connect the same way? | Author statement (issue #34) + schematic: one shared serial net on PA14 (§3.3, §8d). |
+| Does the car USB wake with the RF hub? | Manual §1.7 and §2.4: the console hub next to the handbrake and the USB port near the cigarette lighter come on when someone wakes the RF hub. Not stated for the armrest-front port. |
+| Which LEDs and what do they mean? | `onboardLed.c`, `globalVariables.c`; the MKS CANable V1.0 schematic (in the repo) puts LED1/LED2 on PA0/PA1 **active-low**, hence `DISABLE_UCAN_BOARD_LED_INVERSION` for CANable-type boards and the inversion default for UCAN (§8b). |
+| May I build and share it? | `LICENSE.MD`: free to use, modify and distribute **with attribution to the original author** (Copyright (c) 2025 Gaucholivido - Tr3ma); **commercial resale is prohibited**. Fine for a personal car; keep that notice with anything you share (the prebuilt README does). |
+
+Still not answerable from the repo (hardware only): the real flash size and termination of **your** boards, first boot of the prebuilt images, whether the car USB you pick behaves as described, and how the optional sleep-pin change behaves.
+
+---
+
 ## 9. Risks and stop conditions
 | Risk | Rule |
 |---|---|
 | 64 KB flash board | return; never flash |
-| Termination left on | stop; each bus must read ≈ 60 Ω through the harness |
+| Extra termination on a bus | stop; each bus must read ≈ 60 Ω through the harness (the car already has two terminators) |
 | H/L swapped | warning lights → unplug immediately |
 | Parked drain | switched USB only; no always-on feed without sleep wiring |
 | Resistor on PA14 | never — it is the serial wire |
@@ -441,11 +459,11 @@ If a bus is silent in the S2 sniff, the cable or pair is wrong: these IDs are wh
 ---
 
 ## 10. Still uncertain
-1. R1/R2 package size on your UCANs. (The author's own PCB has no termination across CANH/CANL, which supports removing them; no UCAN user report found.)
+1. Whether your UCANs carry fixed resistors across CAN H/L (not documented in the repo; one multimeter reading answers it).
 2. ~~Whether the bypass cable passes C2 and BH~~ — confirmed by the owner.
 3. Exact CK-to-CK wire length/layout for three UCANs (the author's PCB shares one `Serial` net on PA14 across all three chips and he confirms a single wire; no drawing for loose boards).
 4. Whether the optional PA13/PC13 sleep-pin change works with BACCAble.
-5. Loose-module flashing procedure (repo documents only the PCB app).
+5. ~~Loose-module flashing procedure~~ — documented in the repo (`make flash` / dfu-util, §8 build paragraph); only the first real flash is untried.
 6. Whether the car's USB ports follow the RF-hub wake for your 2022 car (matters only if you later enable the immobilizer).
 7. The prebuilt images have not run on a UCAN: first flash and boot behaviour (LED pattern, `Version.txt` on C2/BH) is unconfirmed.
 8. Not read line by line: the body of `elm327.c` and `elmlink.c` (headers, structure and the AT-command set were read), `vuMeter.c` (LED strip, out of scope) and the middle of `processingStandardMessage.c`. Everything else in `Core/Src` and `Core/Inc` that matters for the hardware and the menu was read.
