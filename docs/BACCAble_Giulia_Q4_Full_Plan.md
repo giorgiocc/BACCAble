@@ -19,7 +19,7 @@ The author's device (schematic `hardware/newBaccableDedicatedPcb/BACCABLE_SCHEMA
 | Firmware | `baccableC1/C2/BH` images from this repo | Same source; C1 built with our flags (§8), C2/BH unchanged | ✅ |
 | Serial link between chips | one `Serial` net on PA14 of all three chips (USART2, 38400 baud, half-duplex, open-drain) | one wire joining the **CK pads** (PA14) of the three UCANs | ✅ |
 | Sleep ("low consume") | C1 **PA4** holds C2/BH in reset; C1 **PA5** puts the C2/BH transceivers in standby; C1 keeps listening and wakes them on CAN activity | C1 **DO pad (PA13)** → **RES pads** of C2 and BH, firmware flag `UCAN_LOW_CONSUME_PINS` (§5) | ✅ chips; ⚠️ slave transceivers are not put in standby (§5) |
-| Power | 12 V from OBD pin 16 → fuse → buck (4.5–35 V in); ≈ 15 mA asleep, < 30 mA running | 12 V from OBD pin 16 → fuse → **automotive 12 → 5 V buck** → USB-C of each UCAN (§4) | ✅ (consumption to be measured) |
+| Power | 12 V from OBD pin 16 → fuse F1 → buck U1 (4.5–35 V in) → **3.3 V straight to the chips**; USB 5 V can also feed the buck input through diode D2; ≈ 15 mA asleep, < 30 mA running | **Option A (recommended):** pin 16 → fuse → 12→5 V buck → USB-C of each UCAN (the UCAN's own 3.3 V regulator does the last step). **Option B (author-identical):** pin 16 → fuse → **12→3.3 V buck → 3V3 pads** of the three UCANs (§4.1) | ✅ same chain; A adds one regulator stage per board |
 | Programming button | one button pulling BOOT0 of all three chips | one push button **B0 ↔ 3V3** per UCAN | ✅ |
 | USB port per chip (flash, sniffer, ELM327, pen drive) | J10/J20/J30 USB-C | each UCAN's own USB-C | ✅ |
 | Status LEDs | green power + red (PA0) + white/blue/yellow (PA1) per chip | UCAN power LED + its two LEDs on PA0/PA1 (`UCAN_BOARD_LED_INVERSION` is the build default) | ✅ |
@@ -106,6 +106,18 @@ Rules: **never put 12 V on a UCAN**; all boards share one ground; use power-only
 
 ---
 
+### 4.1 Why our power chain looks different, and how to make it identical
+
+The **source and the protection are the same** as the author's: OBD pin 16 → fuse → switching regulator. The difference is only *where the 3.3 V is made*:
+- **Author's PCB:** one buck (U1) makes **3.3 V directly** (feedback divider 69.8 kΩ / 22.1 kΩ ≈ 3.3 V) for all three chips and transceivers. Its input range 4.5–35 V lets the same buck also run from **USB 5 V through diode D2**, which is how the device runs on a PC USB cable during flashing without the two sources fighting. [Repo: schematic sheet 1; manual §1.10] *(D2's exact orientation is my reading of the drawing.)* [Infer]
+- **A UCAN** has its own 5 V → 3.3 V regulator behind the USB-C port and no 12 V input, so the natural feed is 5 V into USB-C (Option A). The extra regulator stage burns a little power, which is one reason our parked current will be a bit above the author's ≈ 15 mA. [Repo][Infer]
+
+**Option B — identical to the author:** a **12 → 3.3 V automotive buck** (≥ 30 V input rating, ≥ 0.5 A, low no-load current) on fused pin 16, its 3.3 V output wired to the **3V3 pad** and its ground to a **G pad** of each of the three UCANs; no USB-C power leads. This bypasses the UCAN regulators exactly like the author's single 3.3 V rail, and should give the lowest parked current.
+- **Rule for Option B:** the UCAN has no diode like the author's D2, so **never plug a USB cable into a board while it is fed on its 3V3 pad** — first disconnect that board's 3V3 wire (a small 2-pin plug per board makes this easy), then use USB for flashing/ELM327/sniffer. Otherwise the board's own regulator and the buck would both drive the 3.3 V rail. [Infer]
+- Set the buck to **3.30 V** (3.2–3.4 V) and check it before connecting any board: the chips and CAN transceivers do not tolerate more than 3.6 V. [Repo: STM32F072 datasheet in `hardware/canable/`][Infer]
+
+**Which to choose:** Option A is simpler and safer to service (USB leads simply swap); Option B is the author's exact topology and the lower-drain one. Both use only the OBD port. With car-USB power (the alternative above) neither matters.
+
 ## 5. Sleep (low consume) on UCAN boards — our one firmware change
 
 **Author's design** (`lowConsume.c`, schematic): C1 never sleeps; after **3.5 s without CAN frames** on its bus it pulls **PA4** low (open-drain) to hold C2 and BH in reset, drives **PA5** to put their transceivers in standby, pauses the serial line and flashes its blue LED; when frames come back it releases both, restarts the serial line, re-sends every function setting to the slaves (≈ 3.5 s later) and arms DNA Memory. Sleep is blocked while a sniffer/ELM327/pen-drive USB session is active. [Repo]
@@ -136,7 +148,7 @@ The car buses are already terminated, so no board may add a terminator. The repo
 | **H3** | **Serial wire:** C1.CK ↔ C2.CK ↔ BH.CK. | continuity CK-CK-CK, no short to G/3V3 |
 | **H4** | **Reset wire:** C1.DO ↔ C2.RES and C1.DO ↔ BH.RES. *(Leave unplugged until the slaves are flashed — §5 bench gotcha.)* | continuity, no short |
 | **H5** | **CAN harness** to each terminal (P1: 1 = CAN_L, 2 = CAN_H, 3 = GND): C1 → 6/14, C2 → 12/13, BH → 3/11; terminal GND → OBD 4/5. Twist pairs, mark every H wire. | H/L not swapped (swapped = warning lights, manual §1.5) |
-| **H6** | **Power harness** (always-on option, §4): first measure **pin 16 ↔ pin 4 ≈ 12 V** on the bypass cable's port (no 12 V → use the car-USB option). Then OBD 16 → fuse 1 A → buck → three power-only USB-C leads; buck GND → OBD 4/5. Bench-check the buck output before connecting boards. | 12 V present on pin 16; buck out 5.0 V ± 0.25 V |
+| **H6** | **Power harness** (always-on option, §4): first measure **pin 16 ↔ pin 4 ≈ 12 V** on the bypass cable's port (no 12 V → use the car-USB option). Option A: OBD 16 → fuse 1 A → 12→5 V buck → three power-only USB-C leads. Option B (§4.1): OBD 16 → fuse 1 A → 12→3.3 V buck → 3V3 + G pads of each board via a small plug. Buck GND → OBD 4/5. Bench-check the buck output before connecting boards. | 12 V on pin 16; buck out 5.0 V ± 0.25 V (A) or 3.30 V ± 0.1 V (B) |
 | **H7** | **Bench power test:** each board alone on 5 V: power LED on, 3V3 pad ≈ 3.3 V. Then all three on the harness. | no short, no hot parts |
 | **H8** | **Bypass cable check** (car asleep ≥ 10 min, boards unplugged): 6↔14, 12↔13 ≈ 60 Ω; 3↔11 low value; 16↔4 ≈ 12 V; 4/5↔chassis continuity. | all present (owner already confirmed the buses) |
 | **H9** | **Box:** standoffs, glands, strain relief; USB-C ports and boot buttons reachable; away from pedals, steering column, knee-airbag path, heat and HVAC flaps. Label boards at both ends. | nothing loose |
@@ -260,7 +272,7 @@ ESC/TC and the race screen need race mode enabled by **proxy alignment** (manual
 | Board with 64 KB flash | do not use it |
 | Extra termination on a bus | each bus must read ≈ 60 Ω through the harness |
 | H/L swapped | warning lights → unplug at once |
-| 12 V on a UCAN / two 5 V sources on one board | never |
+| 12 V on a UCAN / two 5 V sources on one board / USB plugged into a board fed on its 3V3 pad (Option B) | never |
 | Reset wire fitted while flashing slaves on the bench | C1 will hold them in reset — fit it after S2, or use `C1_BENCH_ONLY` |
 | Parked drain with always-on power | measure in H11; if it does not drop after the car sleeps, check the reset wire and the sleep LED |
 | Immobilizer turned on later | it reacts to any diagnostic session on the RF hub; turn it off before MultiECUScan/AlfaOBD work |
