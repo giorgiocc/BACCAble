@@ -237,7 +237,7 @@ Pin 16 ↔ 4 ≈ 12 V is not required for USB-powered builds.
 | **S2** | Sniff in silent mode (`M1`) on the car: C1 at 500 kbit/s, BH at 125 kbit/s (C2 at 500 kbit/s) | traffic on every bus |
 | **S3 (optional)** | Bench-prove the wiring with **GiUCAN C1CAN + BHCAN** (build with `build.sh`, flash from `dist/`): note GiUCAN disables Start&Stop by default after ~20 s — add `#define DISABLE_SNS_AUTO_OFF` to its `inc/user_config.h` (and build with `-DINCLUDE_USER_CONFIG_H`, see its `build.sh`) so it stays off, as you want; hold cruise RES ~2 s for the dashboard items | CK wiring + bypass proven |
 | **S4** | Flash the **C1, BH (and C2)** images from `firmware/ucan_prebuilt/` (or build them with `docs/build_ucan.sh`; C1 is built with `DISABLE_LOW_CONSUME`, immobilizer OFF, Start&Stop disabler OFF — §4.5, §8e). Use **Full chip erase** so no old settings survive. Hold BOOT0 while powering each board | each board starts (blue LED pulses; C1 menu shows the version `ucan-…`) |
-| **S5** | First start (manual §2.1): hold RES/DISTANCE ~2 s → SETUP menu. Select **GASOLINE**, leave **My23 IPC off**. Check the defaults in §8e (immobilizer, seat-belt write) | menu opens |
+| **S5** | First start (manual §2.1): engine running, cruise control off → hold RES/DISTANCE ~2 s → main menu → **SETUP MENU** (§8h). Our build is already gasoline: check that the item **"Diesel Params" shows O (deselected)**, and that **"My23 IPC" is deselected**. Check the defaults in §8e (immobilizer, seat-belt write) | menu opens |
 | **S6** | Enable one at a time, ignition cycle + fault check after each: **dashboard parameters (petrol list; Start&Stop disabler and immobilizer stay off unless you choose to enable them) → shift lights → convenience (windows, park mirror, QV flap, seat-belt/odometer) → proxy-alignment features (ACC/HAS pads, race mask)** | no new faults |
 | **S7** | **High-risk, last, stationary/closed course only:** 4WD disabler (C1); with C2: ESC/TC, DYNO, front-brake override. Prove rollback first (menu-disable, unplug, ignition cycle, Clear Faults) | rollback proven |
 
@@ -344,7 +344,7 @@ On a blank flash page every setting falls back to its compile-time default. With
 
 | Setting | Fresh-board default | Notes |
 |---|---|---|
-| **Immobilizer** | **ON** in the stock release; **OFF in our build** (`-DDISABLE_IMMOBILIZER`) | blocks RF-hub connections (ignition dead, horn alarm, ~10 s). Build with `-DDISABLE_IMMOBILIZER` to start OFF, or toggle at run time (cruise speed-up held 30–40 s, engine running, cruise off, gear in neutral; dashboard blinks 5–6× = off, 3× = on). `-DPERMANENTLY_DISABLE_IMMO` removes it for good. Use OFF before any ELM327/AlfaOBD/MultiECUScan session that touches the RF hub. [Repo] |
+| **Immobilizer** | **ON** in the stock release; **OFF in our build** (`-DDISABLE_IMMOBILIZER`) | blocks RF-hub connections (ignition dead, horn alarm, ~10 s). Build with `-DDISABLE_IMMOBILIZER` to start OFF, or toggle at run time — **it is not in the SETUP menu**: engine running (> 400 rpm), cruise control and ACC off, gear in neutral (or gear unknown with the car steady 2 s), hold the cruise **speed-up** button; the code toggles after ≈ 20 s (620 message cycles; the manual says 30–40 s, so hold until the dashboard blinks: 6 half-cycles = 3 blinks = now ON, 12 = 6 blinks = now OFF), and the choice is saved to flash at once. `-DPERMANENTLY_DISABLE_IMMO` removes it for good. Use OFF before any ELM327/AlfaOBD/MultiECUScan session that touches the RF hub. [Repo] |
 | **Start&Stop disabler** | **ON** in the stock release; **OFF in our build** (`-DDISABLE_THE_FUNCTION_SMART_DISABLE_START_STOP`) | when enabled it acts only after 10 s from board start and with the engine running > 5 s; does nothing if the car already has S&S off. [Repo] |
 | **Clear Faults** | **ON** | adds the menu item. |
 | **Engine type** | **DIESEL** unless built with `-DIS_GASOLINE` | can also be changed in the SETUP menu (saved). |
@@ -374,6 +374,16 @@ From the `case` labels in `processingStandardMessage.c` (11-bit IDs). Frames gua
 - **C2 bus (500 kbit/s):** 0x0FA, 0x1F5, 0x1FC, 0x3E7 (PDC beeping), 0x4AF, 0x4B4, 0x54A (PDC button/LED), 0x5B0.
 - Common to all: 0x0FC, 0x116, 0x1EF, 0x1F0, 0x226, 0x2ED, 0x2FA (steering-wheel button handling), 0x358, 0x384.
 If a bus is silent in the S2 sniff, the cable or pair is wrong: these IDs are what the firmware waits for. [Repo — read from the source, not yet seen on a car]
+
+---
+
+## 8h. Dashboard menu map (from `processingMessage0x000002FA.c` and the manual)
+
+- **How it is driven:** the C1 board reads the steering-wheel buttons from CAN ID `0x2FA` on the C1 bus. The menu works **only with cruise control and ACC both off** (`cruiseControlDisabled && ACC_status==0`). Hold **RES** (or **DISTANCE**) for ≈ 2 s (about 50 message cycles) to show/hide it; a short press selects. **Speed-down** = next item, **speed-up** = previous item; a firm press jumps 10 items. Build with `-DHIDE_DASHBOARD_MENU` to remove the menu permanently. [Repo]
+- **Main menu (index → item):** 0 version · 1 Show Params · 2 Read Faults · 3 Clear Faults · 4 Immobilizer (shows ON/OFF) · 5 Dyno · 6 ESC/TC · 7 Front Brake · 8 4WD · 9 **SETUP MENU** · 10 PARAMS SETUP MENU · 11 HAS · 12 Exhaust Flap · 13 "Save Log to filesystem" (writes only a test file `hello.txt` on C2/BH — a stub, do not use) · 14 Reset statistics · 15 Max Hold. Items for functions that are disabled are skipped automatically. [Repo]
+- **SETUP MENU (page → item):** 0 SAVE & EXIT · 1 Start&Stop · 2 Launch Torque (25 Nm steps, 25–600) · 3 LED controller · 4 Shift indicator · 5 Shift RPM (1500–6000, +250) · 6 My23 IPC · 7 Regen alert · 8 Seat-belt alarm · 9 Route messages · 10 ESC/TC · 11 Dyno · 12 ACC virtual pad · 13 Brakes override · 14 4WD disabler · 15 Clear faults · 16 Read faults · 17 Remote start · 18 **Diesel params** (selected = diesel; deselect for gasoline) · 19 Odometer blink · 20 Pedal booster · 21 Pedal power · 22 Park mirror · 23 ACC autostart · 24 Close windows · 25 Open windows · 26 HAS pad · 27 Exhaust flap · 28 Front park mute · 29 Sniffer · 30 ELM327 · 31 DNA memory. **There is no Immobilizer entry** (see §8e). [Repo]
+- **Saving:** SAVE & EXIT writes to flash only if something differs from what is stored; sniffer/ELM327 changes take effect (USB bring-up) only at SAVE & EXIT. PARAMS SETUP MENU is saved separately (it hides/shows individual dashboard parameters). [Repo]
+- **Safety interlocks in the menu code:** DYNO, 4WD disable and front-brake actions run only when the car has been steady for ≥ 1 s (otherwise the dashboard shows "STOP THE CAR"); the front brake also needs speed 0 and DYNO enabled first ("ENABLE DYNO"). [Repo]
 
 ---
 
