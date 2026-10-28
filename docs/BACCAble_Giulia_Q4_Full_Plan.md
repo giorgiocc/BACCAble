@@ -164,7 +164,7 @@ sudo dfu-util -d 0483:df11 -c 1 -i 0 -a 0 -s 0x08000000:leave -D C1.bin
 | **S2** | Read and flash all boards: `C1`→C1 board, `C2`→C2, `BH`→BH (full chip erase). Reset wire **not** fitted yet. | each starts; C2/BH show their USB drive label |
 | **S3** | **Bench serial test:** flash `C1_BENCH_ONLY` on C1, fit the CK wire, power all three. | after ~3 s the blue LEDs of C2 and BH pulse about once a second (C1 polling them) |
 | **S4** | **Bench sleep test:** flash the real `C1`, fit the reset wire, power all three with no car. | ~4 s after power-up the status LEDs of C2 and BH stop (held in reset; their power LEDs stay on) and C1's blue LED flashes once: the reset wire works. **Bus-safety check:** while they are held in reset, measure DC volts between CAN_H and CAN_L on each slave's terminal (nothing else connected): **≈ 0 V = recessive, safe**; ≈ 1.5–3 V = the slave would hold its bus dominant — do not install, report it (§5) |
-| **S5** | **Car, silent sniff (optional but recommended):** flash `SNIFFER_ActAsCanable` on the spare and use SavvyCAN in silent mode (`M1`) on each bus (500 k C1/C2, 125 k BH); the IDs in §11.5 should appear. Then install the three boards (H10) and power them. | no warning lights; on unlock the boards wake |
+| **S5** | **Car, silent sniff (optional but recommended):** flash `SNIFFER_ActAsCanable` on the spare and use SavvyCAN in silent mode (`M1`) on each bus (500 k C1/C2, 125 k BH); the IDs in §11.5 should appear — on the BH bus look specifically for `0x256` and `0x46C`, which DNA Memory needs (§11.12). Then install the three boards (H10) and power them. | no warning lights; on unlock the boards wake |
 | **S6** | **First start:** engine running, cruise control and ACC off → hold **RES** (or DISTANCE) ~2 s → version `BACCABLE ucan-…` on the cluster. With our defaults there is **no** double blue blink and no cluster flash at power-up (those mean "immobilizer active"). Open **SETUP MENU** (§11.7): check **Diesel Params = O** (gasoline), **My23 IPC = O**, Start&Stop = O. | menu works |
 | **S7** | Enable functions **one at a time**, SAVE & EXIT, ignition cycle, check for faults after each: dashboard parameters → shift → seat-belt/odometer → windows, park mirror, park mute → proxy-alignment features (ACC pad, HAS pad, race mask) → DNA Memory (needs §4 always-on power). | no new faults |
 | **S8** | **Last, stationary / closed course only:** 4WD disabler (C1), ESC/TC, DYNO, front-brake override (C2). Prove the way back first: disable in the menu, ignition cycle, Clear Faults. | rollback works |
@@ -216,6 +216,28 @@ ESC/TC and the race screen need race mode enabled by **proxy alignment** (manual
 - Dormant "pump force" test code (ECM security access) exists but its only start line is commented out, so it never runs; re-check if you merge newer upstream code.
 - `user_config.h.sample` calls READ FAULTS experimental while the manual documents it.
 - Licence (`LICENSE.MD`): use, modify and share with attribution to Gaucholivido - Tr3ma; **commercial resale prohibited**. [Repo]
+
+---
+
+### 11.12 DNA Memory — how it works and what it needs (`functions_C1baccable.c`, `functions_BHbaccable.c`, `lowConsume.c`, manual §2.34)
+**How it works**
+1. **C1 remembers** the drive style from frame `0x384` on the C1 bus while the engine runs (> 400 rpm); when the engine stops the memory is frozen. It is kept only in **RAM** (`dnaMemoryStyle`, starts as "none").
+2. **The car sleeps:** C1's bus goes quiet for > 3.5 s, so C1 enters low consume.
+3. **The car wakes:** frames come back, C1 leaves low consume and sets `dnaMemoryWakeUp` — this is the *only* place the restore is armed.
+4. **First engine start after that:** 2 s after the engine is running, if the current style differs from the memorized one, C1 sends BH one serial command ("set A/N/D/R").
+5. **BH moves the selector:** on the BH bus it re-sends the DNA selector's own frame `0x256` with "up" (0x40) or "down" (0x20) pressed, one step per frame; D→R is a 2 s long press. It reads the current style from `0x46C` and the rpm from `0x3E6` (both BH bus). 1 s after the sequence it checks the style and repeats once if needed. It aborts if you touch the selector or the engine stops.
+6. Afterwards nothing more until the next sleep/wake; Start&Stop engine stops do not trigger it.
+
+**What it needs**
+| Need | Why | Our build |
+|---|---|---|
+| **C1 and BH boards** with the serial wire | C1 decides, BH presses | ✅ |
+| **Continuous power through the parked period** | the memorized style is in RAM; losing power erases it | ✅ with §4 always-on 12 V power; ❌ with car-USB power |
+| **Low consume enabled on C1** | the wake from low consume is what arms the restore | ✅ (`UCAN_LOW_CONSUME_PINS`; a build with `DISABLE_LOW_CONSUME` never restores) |
+| Reset wire | **not** needed for DNA Memory (it only lowers the sleep current; BH just keeps running without it) | fitted anyway |
+| **A monostable DNA selector that sends `0x256` on the BH bus** | its frames are the trigger for every press; with another selector type BH sees no `0x256` and does nothing (code comment cites such a car) | **check in S5:** sniff the BH bus at 125 kbit/s and look for `0x256` (every ≈ 250 ms) and `0x46C` |
+| "DNA Memory" selected in SETUP + SAVE & EXIT | off by default | enable in S7 |
+| One drive first | right after installing nothing is memorized yet | first restore happens on the drive after the next sleep |
 
 ---
 
