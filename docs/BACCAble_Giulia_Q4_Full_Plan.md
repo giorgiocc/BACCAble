@@ -167,6 +167,7 @@ Rules for every option: **never put 12 V on a UCAN**; one common ground; C2/BH s
 ### 5.1 Reset line (author's PA4)
 **Fix in this fork:** new compile flag **`UCAN_LOW_CONSUME_PINS`** in `Core/Inc/lowConsume.h` moves the reset line to **PA13 = the DO pad** (the pin GiUCAN uses for exactly this, wired to the other board's RES pad). Default builds are unchanged. Verified in the C1 image's disassembly: PA13 open-drain output. [Repo][GiUCAN][Built]
 - PA13 is SWDIO: SWD debugging of C1 is no longer possible; USB-DFU flashing is unaffected. At C1 power-up and during C1 flashing PA13 floats high, so the slaves run. [Infer]
+
 ### 5.2 Standby line (author's PA5) — no firmware change needed
 - The firmware **already drives PA5 exactly as the author's**: push-pull output, **low = slave transceivers active** (set at start-up and on every wake), **high = standby** (set when C1 goes to sleep). Our flag only moved the reset line; PA5 is untouched. [Repo: `lowConsume.c`]
 - On the author's PCB PA5 runs to the **RS pin (pin 8)** of the C2 and BH transceivers (schematic sheets 3/4, `CanLowConsumeCmd`, with a 10 kΩ pull-down). On a UCAN the transceiver's standby/silent pin (**pin 8, "S"/"RS"**) is wired to that board's own **PC13** (GiUCAN calls it `CAN_S`, "can silent pin"); the BACCAble C2/BH firmware **never drives PC13**, so an external line can control it without a conflict. [Repo][GiUCAN]
@@ -180,7 +181,7 @@ Rules for every option: **never put 12 V on a UCAN**; one common ground; C2/BH s
 
 ![Author's schematic sheet 2: the C1 chip](images/author_schematic_sheet2_C1.png)
 
-*Source: `BACCABLE_SCHEMATIC.pdf`, sheet 2 (C1). On the left of the chip: **PA0 red LED, PA1 white LED, PA4 `ChipLowConsumeCmd`** (reset of C2/BH — our DO-pad wire), **PA5 `CanLowConsumeCmd`** (standby of the C2/BH transceivers — not reproduced), PA6 STS_1, PA8 → Q10 → CMD_1, PA11 `Led_Control_Pin` (LED strip, excluded), PA11/PA12 USB-C J10, **PA14 `Serial`** (our CK wire), BOOT0 ← BOOT. Right: CAN on **PB8/PB9** to transceiver U11. Sheets 3 and 4 repeat this for C2 (blue LED, plus an unused GSM footprint) and BH (yellow LED); there `ChipLowConsumeCmd` arrives on the chip's **NRST** and `CanLowConsumeCmd` on the transceiver's **RS** pin.*
+*Source: `BACCABLE_SCHEMATIC.pdf`, sheet 2 (C1). On the left of the chip: **PA0 red LED, PA1 white LED, PA4 `ChipLowConsumeCmd`** (reset of C2/BH — our DO-pad wire), **PA5 `CanLowConsumeCmd`** (standby of the C2/BH transceivers — our fine wire from chip pin 15, §5.2), PA6 STS_1, PA8 → Q10 → CMD_1, PA11 `Led_Control_Pin` (LED strip, excluded), PA11/PA12 USB-C J10, **PA14 `Serial`** (our CK wire), BOOT0 ← BOOT. Right: CAN on **PB8/PB9** to transceiver U11. Sheets 3 and 4 repeat this for C2 (blue LED, plus an unused GSM footprint) and BH (yellow LED); there `ChipLowConsumeCmd` arrives on the chip's **NRST** and `CanLowConsumeCmd` on the transceiver's **RS** pin.*
 
 ---
 
