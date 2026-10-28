@@ -1,10 +1,10 @@
-# BACCAble DIY — Research, Hardware Plan & Step-by-Step Build (v2)
+# BACCAble DIY — Research, Hardware Plan & Step-by-Step Build (v3)
 
 **Car:** 2022 Alfa Romeo Giulia Sprint Q4 · 2.0 petrol · MY22 cluster
 **Goal:** BACCAble function set on loose FYSETC UCAN boards (one per CAN bus)
 **SGW:** bypass cable already owned · **Case:** own box · **Shopping:** buy on eBay/Amazon
-**Status:** research + hardware plan. **Nothing is flashed or installed yet.**
-**v2 changes:** added the cross-check against the repos linked in the BACCAble README (canable-fw, GiUCAN, Alfaromeo-Giulia-Stelvio-PIDs), the repo's wiring diagrams and the Giulia DLC pinout. The build is now **2 boards minimum (C1 + BH), a 3rd (C2) optional**. Out of scope by request: macOS-specific flashing, idle-current measurement, 4WD-disabler logic analysis.
+**Status:** research + hardware plan + tested firmware build. **Nothing is flashed or installed yet; the prebuilt images are untested on hardware.**
+**v3 changes (this version):** firmware read through and built (§8c–8g, build section), fresh-board defaults (§8e) with **immobilizer and Start&Stop disabler OFF by default**, flash/USB behaviour of each board (§8f), CAN IDs per bus (§8g), programming/reset buttons and LEDs (§8b), build script and prebuilt images in `firmware/ucan_prebuilt/`. **v2 changes:** added the cross-check against the repos linked in the BACCAble README (canable-fw, GiUCAN, Alfaromeo-Giulia-Stelvio-PIDs), the repo's wiring diagrams and the Giulia DLC pinout. The build is now **2 boards minimum (C1 + BH), a 3rd (C2) optional**. Out of scope by request: macOS-specific flashing, idle-current measurement, 4WD-disabler logic analysis.
 
 Evidence tags: **[Repo]** stated by BACCAble repo/manual v4.9 · **[GiUCAN]** from github.com/anegrin/GiUCAN · **[Schem]** read from a schematic · **[Diagram]** read from a diagram image · **[Infer]** my inference, verify · **[Unv]** not verified.
 
@@ -16,7 +16,7 @@ Evidence tags: **[Repo]** stated by BACCAble repo/manual v4.9 · **[GiUCAN]** fr
 2. **UCAN is a supported board.** The author ships cases `hardware/box/dual_fysect_ucan` and `single_fysect_ucan`, `UCAN_BOARD_LED_INVERSION` is on by default, and the author's own diagram (`ShowParamsOnDashboardConnections.png`) shows two UCANs as master (C1) + slave (BH) with the note that any STM32F072 board is equivalent. [Repo][Diagram]
 3. **GiUCAN proves the UCAN approach on real cars.** It is a cut-down BACCAble written *only* for FYSETC UCAN (C1 + BH), derived from canable-fw. [GiUCAN]
 4. **Minimum build = 2 boards:** C1 (master, OBD 6/14) + BH (slave, OBD 3/11), joined by one wire between their **CK pads**. **C2 (OBD 12/13) is only needed for ESC/TC, DYNO and front-brake override.** Everything else, including the 4WD disabler (runs on C1), works with two boards. [Repo][Diagram]
-5. **Use FYSETC UCAN V1.0 (STM32F072CBT6, 128 KB flash).** GiUCAN's linker script for it is 64 K flash + 64 K "EEPROM" at 0x08010000 (= 128 KB). The BACCAble C1 image is ~73.6 KB, so a true 64 KB F072C8 will not fit. [GiUCAN][Repo][Schem]
+5. **Use FYSETC UCAN V1.0 (STM32F072CBT6, 128 KB flash).** GiUCAN's linker script for it is 64 K flash + 64 K "EEPROM" at 0x08010000 (= 128 KB). The BACCAble C1 image is 78.6 KB (built here), so a true 64 KB F072C8 will not fit; C2 and BH also use flash up to `0x0801FFFF` (§8f). The author's own PCB uses F072C8T6 chips and runs the same images, so those parts behave as 128 KB — still read the flash size in CubeProgrammer before flashing. [GiUCAN][Repo][Schem]
 6. **Power each board over USB-C, 5 V.** UCAN has no 12 V input. Two supported sources, both confirmed by the author for the immobilizer: car USB 5 V (powers a CANable directly) or a 12 V→5 V DC-DC feeding the USB-C inputs (the author's own board runs on both). See §5. [Repo: issue #34][GiUCAN][Schem]
 7. **Settings for your car:** GASOLINE in the setup menu, "My23 IPC" off. Both are runtime menu options. [Repo]
 8. **Termination:** the car buses are already terminated, so the module must add none. On UCAN, R1+R2 (59 Ω + 59 Ω) are hard-wired across CAN H/L, so measure and, per the schematic, remove them. GiUCAN's docs don't mention this; ask the Telegram group. [Schem][Unv]
@@ -102,7 +102,7 @@ The author confirmed (BACCAble issue #34, 7 Dec 2025) that the two-UCAN diagram 
 ### 4.1 Flash size
 | Evidence | Finding |
 |---|---|
-| Release ELFs (V.3.8.2, measured) | C1 = 73.6 KB, C2 = 35.8 KB, BH = 34.2 KB, ActAsCanable = 24.9 KB |
+| Release ELFs (V.3.8.2, measured) | C1 = 73.6 KB, C2 = 35.8 KB, BH = 34.2 KB, ActAsCanable = 24.9 KB (our current builds: C1 78.6 KB, C2 37.5 KB, BH 36.8 KB) |
 | `STM32F072C8TX_FLASH_C1.ld` | C1 code region 96 KB |
 | `globalVariables.h` | settings in last pages `0x0801E800–0x0801FFFF` (top of a 128 KB bank) |
 | Makefile | `-DSTM32F072xB` (128 KB variant) |
@@ -163,7 +163,7 @@ Closed (you own a bypass). Remaining check: that **your** cable passes all buses
 | 1 | "FYSETC UCAN USB to CAN adapter STM32F072" | **2 for the minimum build, 3 with C2, +1 spare** (you already bought them) | Photos show "UCAN V1.0", USB-C, green 3-pin terminal; MCU must read **STM32F072CBT6** |
 | 2 | "OBD2 16 pin male plug to open end cable" / breakout | 1 | all pins wired (needs 3, 4, 5, 6, 11, 14, 16; add 12, 13 for C2) |
 | 3 | "Twisted pair cable 22AWG" | ~3 m | |
-| 4 | "USB-C charge-only cable" or data-blocker | 2–3 | power-only so the head unit isn't shown unknown devices [Infer] |
+| 4 | "USB-C charge-only cable" or data-blocker | 2–3 | power-only: **C2 and BH enumerate as a USB pen drive** (§8f), so the car's head unit must never see them [Repo] |
 | 5 | "USB 1 to 3 splitter power only" (passive) | 1 | |
 | 6 | 2.54 mm pin headers + jumper caps | 1 / 5 | CK, GND, BOOT0 pads; DFU jumper |
 | 7 | Dupont wires, 24 AWG silicone wire, ferrules | 1 each | |
@@ -235,8 +235,8 @@ Pin 16 ↔ 4 ≈ 12 V is not required for USB-powered builds.
 | **S0** | Install STM32CubeProgrammer | hardware gate passed |
 | **S1** | Flash **ActAsCanable** (or GiUCAN SLCAN) on the SPARE; prove DFU flashing | spare works |
 | **S2** | Sniff in silent mode (`M1`) on the car: C1 at 500 kbit/s, BH at 125 kbit/s (C2 at 500 kbit/s) | traffic on every bus |
-| **S3 (recommended)** | Bench-prove the wiring with **GiUCAN C1CAN + BHCAN** (build with `build.sh`, flash from `dist/`): note GiUCAN disables Start&Stop by default after ~20 s — add `#define DISABLE_SNS_AUTO_OFF` to its `inc/user_config.h` (and build with `-DINCLUDE_USER_CONFIG_H`, see its `build.sh`) so it stays off, as you want; hold cruise RES ~2 s for the dashboard items | CK wiring + bypass proven |
-| **S4** | Flash BACCAble V.3.8.x+ **C1, BH (and C2)** images; for C1 use a custom build with **`DISABLE_LOW_CONSUME`** (§4.5) | each board reports its flavor |
+| **S3 (optional)** | Bench-prove the wiring with **GiUCAN C1CAN + BHCAN** (build with `build.sh`, flash from `dist/`): note GiUCAN disables Start&Stop by default after ~20 s — add `#define DISABLE_SNS_AUTO_OFF` to its `inc/user_config.h` (and build with `-DINCLUDE_USER_CONFIG_H`, see its `build.sh`) so it stays off, as you want; hold cruise RES ~2 s for the dashboard items | CK wiring + bypass proven |
+| **S4** | Flash the **C1, BH (and C2)** images from `firmware/ucan_prebuilt/` (or build them with `docs/build_ucan.sh`; C1 is built with `DISABLE_LOW_CONSUME`, immobilizer OFF, Start&Stop disabler OFF — §4.5, §8e). Use **Full chip erase** so no old settings survive. Hold BOOT0 while powering each board | each board starts (blue LED pulses; C1 menu shows the version `ucan-…`) |
 | **S5** | First start (manual §2.1): hold RES/DISTANCE ~2 s → SETUP menu. Select **GASOLINE**, leave **My23 IPC off**. Check the defaults in §8e (immobilizer, seat-belt write) | menu opens |
 | **S6** | Enable one at a time, ignition cycle + fault check after each: **dashboard parameters (petrol list; Start&Stop disabler and immobilizer stay off unless you choose to enable them) → shift lights → convenience (windows, park mirror, QV flap, seat-belt/odometer) → proxy-alignment features (ACC/HAS pads, race mask)** | no new faults |
 | **S7** | **High-risk, last, stationary/closed course only:** 4WD disabler (C1); with C2: ESC/TC, DYNO, front-brake override. Prove rollback first (menu-disable, unplug, ignition cycle, Clear Faults) | rollback proven |
@@ -256,7 +256,7 @@ Output: `build/baccable-*.elf`, `.bin`, `.hex`. **Built and verified:** C1 = **7
 ### Feature → chip → hardware
 | Feature | Chip | Notes |
 |---|---|---|
-| Start&Stop disabler (2.3), Immobilizer (2.4) | C1 | switched USB 5 V |
+| Start&Stop disabler (2.3), Immobilizer (2.4) | C1 | switched USB 5 V; **OFF by default in our build** |
 | Shift lights (2.6) | C1 | – |
 | Dashboard parameters (2.8), Route (2.9) | C1 + BH | serial link |
 | 4WD disabler (2.15) | C1 | – |
@@ -292,11 +292,11 @@ Output: `build/baccable-*.elf`, `.bin`, `.hex`. **Built and verified:** C1 = **7
 
 ## 8c. How the firmware is organised (read from the source)
 - **One codebase, flavor chosen at compile time** (`C1baccable`, `C2baccable`, `BHbaccable`, `ACT_AS_CANABLE`) in `compile_time_defines.h`; one image per board. [Repo]
-- **Start-up (`main.c`):** clocks → LEDs → `can_init()` → (C1) `C1baccableInitCheck()` (loads saved settings from flash, starts low-consume if enabled) → `uart_init()` (inter-chip serial on USART2/PA14) → (BH/C2) `storage_init()` → USB device init **only on first power-up, not after a reset** (avoids hanging from condensation) → C1 and C2 open CAN at **500 kbit/s** → (BH) `BHbaccableInitCheck()`.
+- **Start-up (`main.c`):** clocks → LEDs → `can_init()` → (C1) `C1baccableInitCheck()` (loads saved settings from flash, starts low-consume if enabled) → `uart_init()` (inter-chip serial on USART2/PA14) → (BH/C2) `storage_init()` → (C2/BH/sniffer builds) USB device init **only on first power-up, not after a reset** (avoids hanging from condensation) → C1 and C2 open CAN at **500 kbit/s** → (BH) `BHbaccableInitCheck()`.
 - **Main loop:** `onboardLed_process()` → `can_process()` (receive → per-ID handlers `processingMessage0x…c` / `processingStandardMessage.c` / `processingExtendedMessage.c`) → the flavor's periodic function (e.g. `C1baccablePeriodicCheck()`, which runs `lowConsume_process()` unless disabled) → UART queue to the other chips.
 - **Master/slave:** C1 sends commands to BH/C2 over the single-wire UART (`uart.c` command codes like `C2cmdFunct…`, `BHcmdFunct…`); the setup menu on the dashboard (C1) enables functions, and the choice is stored in the last flash pages (`0x0801E800–0x0801FFFF`, `saveOnflash()`).
 - **Sniffer/ELM327** are compiled into the normal firmware and stay off until enabled in the SETUP menu; they take over USB and the inter-chip line while in use. [Repo]
-- Not yet read in detail: the per-function CAN message contents, and BH's CAN bit-rate setup (`BHbaccableInitCheck`).
+- BH opens CAN at 125 kbit/s in `BHbaccableInitCheck()` (read). Not yet read in detail: the per-function CAN message contents.
 
 ---
 
@@ -317,7 +317,7 @@ Everything below was read directly from `manuals/Baccable_manual_EN.pdf` (v4.9),
 
 ### B. Firmware facts that matter for the build
 - **Clock:** the CAN timing (prescaler 12, 1+4+3 time quanta = 500 kbit/s; prescaler 48 = 125 kbit/s) assumes a **48 MHz** peripheral clock, i.e. the internal HSI48. The Makefile sets `INTERNAL_OSCILLATOR` by default, so the UCAN's crystal is not needed. [Repo: `can.c`, Makefile]
-- **Start-up order:** clocks → LEDs → CAN init → C1 reads its settings from flash → UART init → USB only on demand (not at boot for the BACCAble flavors) → C1 and C2 open CAN at 500 kbit/s; **BH opens CAN at 125 kbit/s** and loads the park-mirror positions from flash. The CAN receive filter accepts every frame. [Repo: `main.c`, `functions_BHbaccable.c`]
+- **Start-up order:** clocks → LEDs → CAN init → C1 reads its settings from flash → UART init → USB: **C1 only on demand** (sniffer/ELM327), while **C2 and BH start their pen-drive USB at power-on** (§8f) → C1 and C2 open CAN at 500 kbit/s; **BH opens CAN at 125 kbit/s** and loads the park-mirror positions from flash. The CAN receive filter accepts every frame. [Repo: `main.c`, `functions_BHbaccable.c`]
 - **Single-wire protocol (`uart.c`, `uart.h`):** fixed-length frames, first byte = destination (C1=0x01, C2=0x02, BH string=0x03, BH status=0x08, BH=0x0A, C2+BH=0x0B, C1+BH=0x0C, C1+C2=0x0D). Rules: **only C1 starts a conversation** — every ≈250 ms it sends one queued message; **C2 and BH may answer only within ≈200 ms after a message addressed to them**; for messages sent to both slaves only C2 answers, so they never collide. After a 2 s start-up quiet period C1 asks C2 for status about every 1.0 s and BH about every 1.26 s. Receivers re-synchronise on the start byte, and the transmitter switches its own receiver off while sending. [Repo]
 - **Consequence for the two-board build:** C1 never waits for a reply, so **C1 + BH works without C2**; messages meant for C2 (ESC/TC toggle, dyno, brake) are simply not answered. [Repo: `uart.c`]
 - **Settings are pushed to the slaves once** about 3.5 s after C1 boots (and after every wake-up from sleep): ESC/TC state, pedal-booster state, odometer blink, race mask, park mirror, etc. [Repo: `functions_C1baccable.c`]
@@ -386,6 +386,8 @@ If a bus is silent in the S2 sniff, the cable or pair is wrong: these IDs are wh
 | Parked drain | switched USB only; no always-on feed without sleep wiring |
 | Resistor on PA14 | never — it is the serial wire |
 | Immobilizer + `DAC7F1` tire PIDs | do not read those PIDs with the immobilizer active |
+| Seat-belt cluster write at every start | accepted default (writes "enable"); no setting leaves it untouched (§8e) |
+| Prebuilt images untested | verify DFU flashing on the SPARE first; sniff before any function is enabled |
 | Safety functions (DYNO, 4WD disable, brake override) | last; stationary/closed course; the repo is *"educational and research"* and prohibits use on public roads |
 | Warranty/insurance/inspection | your responsibility |
 
@@ -397,7 +399,9 @@ If a bus is silent in the S2 sniff, the cable or pair is wrong: these IDs are wh
 3. Exact CK-to-CK wire length/layout for three UCANs (the author's PCB shares one `Serial` net on PA14 across all three chips and he confirms a single wire; no drawing for loose boards).
 4. Whether the optional PA13/PC13 sleep-pin change works with BACCAble.
 5. Loose-module flashing procedure (repo documents only the PCB app).
-6. Whether the car's USB ports follow the RF-hub wake for your 2022 car.
+6. Whether the car's USB ports follow the RF-hub wake for your 2022 car (matters only if you later enable the immobilizer).
+7. The prebuilt images have not run on a UCAN: first flash and boot behaviour (LED pattern, `Version.txt` on C2/BH) is unconfirmed.
+8. Files not read word for word: `elm327.c`, `elmlink.c`, `vuMeter.c`, most per-message handlers.
 
 ---
 
