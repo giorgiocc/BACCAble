@@ -1,0 +1,318 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="1190" viewBox="0 0 2000 1190">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="30" y="42" font-family="DejaVu Sans, Arial, sans-serif" font-size="26" fill="#111827" text-anchor="start" font-weight="bold">DIY BACCAble — complete wiring, three FYSETC UCAN boards (C1 + C2 + BH)</text>
+<text x="30" y="70" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#64748b" text-anchor="start" font-weight="normal">Logical drawing (not to scale). Pads are named by their silkscreen label; check each one with the meter (plan §2.2).</text>
+<rect x="30" y="92" width="270" height="840" rx="6" fill="#f8fafc" stroke="#334155" stroke-width="2"/>
+<text x="165" y="1072" font-family="DejaVu Sans, Arial, sans-serif" font-size="1" fill="#111827" text-anchor="start" font-weight="normal"></text>
+<circle cx="272" cy="120" r="9" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="48" y="126" font-family="DejaVu Sans, Arial, sans-serif" font-size="17" fill="#64748b" text-anchor="start" font-weight="normal"> 1</text>
+<text x="84" y="126" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#64748b" text-anchor="start" font-weight="normal">CMD_1  — empty</text>
+<circle cx="272" cy="172" r="9" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="48" y="178" font-family="DejaVu Sans, Arial, sans-serif" font-size="17" fill="#64748b" text-anchor="start" font-weight="normal"> 2</text>
+<text x="84" y="178" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#64748b" text-anchor="start" font-weight="normal">CMD_3  — empty</text>
+<circle cx="272" cy="224" r="9" fill="#111827" stroke="#334155" stroke-width="2"/>
+<text x="48" y="230" font-family="DejaVu Sans, Arial, sans-serif" font-size="17" fill="#111827" text-anchor="start" font-weight="bold"> 3</text>
+<text x="84" y="230" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">BH CAN_H</text>
+<circle cx="272" cy="276" r="9" fill="#111827" stroke="#334155" stroke-width="2"/>
+<text x="48" y="282" font-family="DejaVu Sans, Arial, sans-serif" font-size="17" fill="#111827" text-anchor="start" font-weight="bold"> 4</text>
+<text x="84" y="282" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">GND (chassis)</text>
+<circle cx="272" cy="328" r="9" fill="#111827" stroke="#334155" stroke-width="2"/>
+<text x="48" y="334" font-family="DejaVu Sans, Arial, sans-serif" font-size="17" fill="#111827" text-anchor="start" font-weight="bold"> 5</text>
+<text x="84" y="334" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">GND (signal)</text>
+<circle cx="272" cy="380" r="9" fill="#111827" stroke="#334155" stroke-width="2"/>
+<text x="48" y="386" font-family="DejaVu Sans, Arial, sans-serif" font-size="17" fill="#111827" text-anchor="start" font-weight="bold"> 6</text>
+<text x="84" y="386" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">C1 CAN_H</text>
+<circle cx="272" cy="432" r="9" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="48" y="438" font-family="DejaVu Sans, Arial, sans-serif" font-size="17" fill="#64748b" text-anchor="start" font-weight="normal"> 7</text>
+<text x="84" y="438" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#64748b" text-anchor="start" font-weight="normal">STS_3  — empty</text>
+<circle cx="272" cy="484" r="9" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="48" y="490" font-family="DejaVu Sans, Arial, sans-serif" font-size="17" fill="#64748b" text-anchor="start" font-weight="normal"> 8</text>
+<text x="84" y="490" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#64748b" text-anchor="start" font-weight="normal">LED strip  — empty</text>
+<circle cx="272" cy="536" r="9" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="48" y="542" font-family="DejaVu Sans, Arial, sans-serif" font-size="17" fill="#64748b" text-anchor="start" font-weight="normal"> 9</text>
+<text x="84" y="542" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#64748b" text-anchor="start" font-weight="normal">STS_1  — empty</text>
+<circle cx="272" cy="588" r="9" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="48" y="594" font-family="DejaVu Sans, Arial, sans-serif" font-size="17" fill="#64748b" text-anchor="start" font-weight="normal">10</text>
+<text x="84" y="594" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#64748b" text-anchor="start" font-weight="normal">STS_2  — empty</text>
+<circle cx="272" cy="640" r="9" fill="#111827" stroke="#334155" stroke-width="2"/>
+<text x="48" y="646" font-family="DejaVu Sans, Arial, sans-serif" font-size="17" fill="#111827" text-anchor="start" font-weight="bold">11</text>
+<text x="84" y="646" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">BH CAN_L</text>
+<circle cx="272" cy="692" r="9" fill="#111827" stroke="#334155" stroke-width="2"/>
+<text x="48" y="698" font-family="DejaVu Sans, Arial, sans-serif" font-size="17" fill="#111827" text-anchor="start" font-weight="bold">12</text>
+<text x="84" y="698" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">C2 CAN_H</text>
+<circle cx="272" cy="744" r="9" fill="#111827" stroke="#334155" stroke-width="2"/>
+<text x="48" y="750" font-family="DejaVu Sans, Arial, sans-serif" font-size="17" fill="#111827" text-anchor="start" font-weight="bold">13</text>
+<text x="84" y="750" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">C2 CAN_L</text>
+<circle cx="272" cy="796" r="9" fill="#111827" stroke="#334155" stroke-width="2"/>
+<text x="48" y="802" font-family="DejaVu Sans, Arial, sans-serif" font-size="17" fill="#111827" text-anchor="start" font-weight="bold">14</text>
+<text x="84" y="802" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">C1 CAN_L</text>
+<circle cx="272" cy="848" r="9" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="48" y="854" font-family="DejaVu Sans, Arial, sans-serif" font-size="17" fill="#64748b" text-anchor="start" font-weight="normal">15</text>
+<text x="84" y="854" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#64748b" text-anchor="start" font-weight="normal">CMD_2  — empty</text>
+<circle cx="272" cy="900" r="9" fill="#111827" stroke="#334155" stroke-width="2"/>
+<text x="48" y="906" font-family="DejaVu Sans, Arial, sans-serif" font-size="17" fill="#111827" text-anchor="start" font-weight="bold">16</text>
+<text x="84" y="906" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">+12 V always on</text>
+<text x="165" y="1070" font-family="DejaVu Sans, Arial, sans-serif" font-size="18" fill="#111827" text-anchor="middle" font-weight="bold">OBD male plug</text>
+<text x="165" y="1092" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#64748b" text-anchor="middle" font-weight="normal">into the SGW bypass port</text>
+<rect x="880" y="108" width="600" height="262" rx="10" fill="#f1f5f9" stroke="#334155" stroke-width="2.5"/>
+<text x="1180" y="138" font-family="DejaVu Sans, Arial, sans-serif" font-size="20" fill="#111827" text-anchor="middle" font-weight="bold">C1  —  FYSETC UCAN</text>
+<text x="1180" y="160" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#64748b" text-anchor="middle" font-weight="normal">master · 500 kbit/s · OBD 6/14</text>
+<rect x="872" y="172" width="92" height="112" rx="4" fill="#bbf7d0" stroke="#15803d" stroke-width="2"/>
+<circle cx="880" cy="192" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="892" y="197" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="start" font-weight="normal">CAN_L</text>
+<circle cx="880" cy="228" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="892" y="233" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="start" font-weight="normal">CAN_H</text>
+<circle cx="880" cy="264" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="892" y="269" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="start" font-weight="normal">GND</text>
+<text x="918" y="298" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="middle" font-weight="normal">P1</text>
+<circle cx="880" cy="322" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="892" y="327" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="start" font-weight="normal">P3 3V3</text>
+<circle cx="880" cy="350" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="892" y="355" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="start" font-weight="normal">P3 G</text>
+<rect x="990" y="178" width="150" height="58" rx="4" fill="#fff" stroke="#dc2626" stroke-width="2" stroke-dasharray="5,4"/>
+<text x="1065" y="200" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#dc2626" text-anchor="middle" font-weight="bold">R1 + R2 (2×59 Ω)</text>
+<text x="1065" y="222" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#dc2626" text-anchor="middle" font-weight="bold">REMOVE</text>
+<text x="990" y="256" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="start" font-weight="normal">JP1: open (no jumper)</text>
+<text x="990" y="276" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#dc2626" text-anchor="start" font-weight="normal">R4: remove if fitted</text>
+<rect x="1160" y="178" width="110" height="70" rx="4" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1215" y="204" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="middle" font-weight="bold">U1</text>
+<text x="1215" y="224" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="middle" font-weight="normal">SN65HVD230</text>
+<rect x="1160" y="266" width="110" height="70" rx="4" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1215" y="294" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="middle" font-weight="bold">U3</text>
+<text x="1215" y="314" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="middle" font-weight="normal">STM32F072CB</text>
+<circle cx="1000" cy="314" r="8" fill="#ef4444" stroke="#334155" stroke-width="1.5"/>
+<text x="1000" y="340" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#111827" text-anchor="middle" font-weight="normal">LD1 RX</text>
+<circle cx="1058" cy="314" r="8" fill="#3b82f6" stroke="#334155" stroke-width="1.5"/>
+<text x="1058" y="340" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#111827" text-anchor="middle" font-weight="normal">LD2 TX</text>
+<circle cx="1116" cy="314" r="8" fill="#22c55e" stroke="#334155" stroke-width="1.5"/>
+<text x="1116" y="340" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#111827" text-anchor="middle" font-weight="normal">LD3 3V3</text>
+<text x="1058" y="360" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#64748b" text-anchor="middle" font-weight="normal">LEDs: no wiring, keep visible</text>
+<circle cx="1420" cy="184" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1404" y="189" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="end" font-weight="normal">CK</text>
+<circle cx="1420" cy="214" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1404" y="219" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="end" font-weight="normal">DO</text>
+<circle cx="1420" cy="244" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1404" y="249" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="end" font-weight="normal">RES</text>
+<circle cx="1420" cy="274" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1404" y="279" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="end" font-weight="normal">G</text>
+<circle cx="1420" cy="304" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1404" y="309" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="end" font-weight="normal">B0</text>
+<circle cx="1420" cy="334" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1404" y="339" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="end" font-weight="normal">3V3</text>
+<text x="1420" y="172" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="middle" font-weight="normal">P2</text>
+<polyline points="1426,304 1460,304 1460,312" fill="none" stroke="#0f766e" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1426,334 1460,334 1460,326" fill="none" stroke="#0f766e" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1450,313 1470,325" fill="none" stroke="#0f766e" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="1484" y="324" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#0f766e" text-anchor="start" font-weight="bold">BOOT</text>
+<rect x="1300" y="304" width="74" height="30" rx="8" fill="#e2e8f0" stroke="#334155" stroke-width="2"/>
+<text x="1337" y="324" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#111827" text-anchor="middle" font-weight="normal">USB-C</text>
+<text x="1337" y="350" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#64748b" text-anchor="middle" font-weight="normal">free</text>
+<rect x="880" y="418" width="600" height="262" rx="10" fill="#f1f5f9" stroke="#334155" stroke-width="2.5"/>
+<text x="1180" y="448" font-family="DejaVu Sans, Arial, sans-serif" font-size="20" fill="#111827" text-anchor="middle" font-weight="bold">C2  —  FYSETC UCAN</text>
+<text x="1180" y="470" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#64748b" text-anchor="middle" font-weight="normal">slave · 500 kbit/s · OBD 12/13</text>
+<rect x="872" y="482" width="92" height="112" rx="4" fill="#bbf7d0" stroke="#15803d" stroke-width="2"/>
+<circle cx="880" cy="502" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="892" y="507" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="start" font-weight="normal">CAN_L</text>
+<circle cx="880" cy="538" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="892" y="543" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="start" font-weight="normal">CAN_H</text>
+<circle cx="880" cy="574" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="892" y="579" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="start" font-weight="normal">GND</text>
+<text x="918" y="608" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="middle" font-weight="normal">P1</text>
+<circle cx="880" cy="632" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="892" y="637" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="start" font-weight="normal">P3 3V3</text>
+<circle cx="880" cy="660" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="892" y="665" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="start" font-weight="normal">P3 G</text>
+<rect x="990" y="488" width="150" height="58" rx="4" fill="#fff" stroke="#dc2626" stroke-width="2" stroke-dasharray="5,4"/>
+<text x="1065" y="510" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#dc2626" text-anchor="middle" font-weight="bold">R1 + R2 (2×59 Ω)</text>
+<text x="1065" y="532" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#dc2626" text-anchor="middle" font-weight="bold">REMOVE</text>
+<text x="990" y="566" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="start" font-weight="normal">JP1: open (no jumper)</text>
+<text x="990" y="586" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#dc2626" text-anchor="start" font-weight="normal">R4: remove if fitted</text>
+<rect x="1160" y="488" width="110" height="70" rx="4" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1215" y="514" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="middle" font-weight="bold">U1</text>
+<text x="1215" y="534" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="middle" font-weight="normal">SN65HVD230</text>
+<rect x="1160" y="576" width="110" height="70" rx="4" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1215" y="604" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="middle" font-weight="bold">U3</text>
+<text x="1215" y="624" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="middle" font-weight="normal">STM32F072CB</text>
+<circle cx="1000" cy="624" r="8" fill="#ef4444" stroke="#334155" stroke-width="1.5"/>
+<text x="1000" y="650" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#111827" text-anchor="middle" font-weight="normal">LD1 RX</text>
+<circle cx="1058" cy="624" r="8" fill="#3b82f6" stroke="#334155" stroke-width="1.5"/>
+<text x="1058" y="650" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#111827" text-anchor="middle" font-weight="normal">LD2 TX</text>
+<circle cx="1116" cy="624" r="8" fill="#22c55e" stroke="#334155" stroke-width="1.5"/>
+<text x="1116" y="650" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#111827" text-anchor="middle" font-weight="normal">LD3 3V3</text>
+<text x="1058" y="670" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#64748b" text-anchor="middle" font-weight="normal">LEDs: no wiring, keep visible</text>
+<circle cx="1420" cy="494" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1404" y="499" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="end" font-weight="normal">CK</text>
+<circle cx="1420" cy="524" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1404" y="529" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="end" font-weight="normal">DO</text>
+<circle cx="1420" cy="554" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1404" y="559" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="end" font-weight="normal">RES</text>
+<circle cx="1420" cy="584" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1404" y="589" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="end" font-weight="normal">G</text>
+<circle cx="1420" cy="614" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1404" y="619" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="end" font-weight="normal">B0</text>
+<circle cx="1420" cy="644" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1404" y="649" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="end" font-weight="normal">3V3</text>
+<text x="1420" y="482" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="middle" font-weight="normal">P2</text>
+<polyline points="1426,614 1460,614 1460,622" fill="none" stroke="#0f766e" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1426,644 1460,644 1460,636" fill="none" stroke="#0f766e" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1450,623 1470,635" fill="none" stroke="#0f766e" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="1484" y="634" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#0f766e" text-anchor="start" font-weight="bold">BOOT</text>
+<rect x="1300" y="614" width="74" height="30" rx="8" fill="#e2e8f0" stroke="#334155" stroke-width="2"/>
+<text x="1337" y="634" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#111827" text-anchor="middle" font-weight="normal">USB-C</text>
+<text x="1337" y="660" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#64748b" text-anchor="middle" font-weight="normal">free</text>
+<rect x="880" y="728" width="600" height="262" rx="10" fill="#f1f5f9" stroke="#334155" stroke-width="2.5"/>
+<text x="1180" y="758" font-family="DejaVu Sans, Arial, sans-serif" font-size="20" fill="#111827" text-anchor="middle" font-weight="bold">BH  —  FYSETC UCAN</text>
+<text x="1180" y="780" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#64748b" text-anchor="middle" font-weight="normal">slave · 125 kbit/s · OBD 3/11</text>
+<rect x="872" y="792" width="92" height="112" rx="4" fill="#bbf7d0" stroke="#15803d" stroke-width="2"/>
+<circle cx="880" cy="812" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="892" y="817" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="start" font-weight="normal">CAN_L</text>
+<circle cx="880" cy="848" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="892" y="853" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="start" font-weight="normal">CAN_H</text>
+<circle cx="880" cy="884" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="892" y="889" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="start" font-weight="normal">GND</text>
+<text x="918" y="918" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="middle" font-weight="normal">P1</text>
+<circle cx="880" cy="942" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="892" y="947" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="start" font-weight="normal">P3 3V3</text>
+<circle cx="880" cy="970" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="892" y="975" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="start" font-weight="normal">P3 G</text>
+<rect x="990" y="798" width="150" height="58" rx="4" fill="#fff" stroke="#dc2626" stroke-width="2" stroke-dasharray="5,4"/>
+<text x="1065" y="820" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#dc2626" text-anchor="middle" font-weight="bold">R1 + R2 (2×59 Ω)</text>
+<text x="1065" y="842" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#dc2626" text-anchor="middle" font-weight="bold">REMOVE</text>
+<text x="990" y="876" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="start" font-weight="normal">JP1: open (no jumper)</text>
+<text x="990" y="896" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#dc2626" text-anchor="start" font-weight="normal">R4: remove if fitted</text>
+<rect x="1160" y="798" width="110" height="70" rx="4" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1215" y="824" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="middle" font-weight="bold">U1</text>
+<text x="1215" y="844" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="middle" font-weight="normal">SN65HVD230</text>
+<rect x="1160" y="886" width="110" height="70" rx="4" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1215" y="914" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="middle" font-weight="bold">U3</text>
+<text x="1215" y="934" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="middle" font-weight="normal">STM32F072CB</text>
+<circle cx="1000" cy="934" r="8" fill="#ef4444" stroke="#334155" stroke-width="1.5"/>
+<text x="1000" y="960" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#111827" text-anchor="middle" font-weight="normal">LD1 RX</text>
+<circle cx="1058" cy="934" r="8" fill="#3b82f6" stroke="#334155" stroke-width="1.5"/>
+<text x="1058" y="960" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#111827" text-anchor="middle" font-weight="normal">LD2 TX</text>
+<circle cx="1116" cy="934" r="8" fill="#22c55e" stroke="#334155" stroke-width="1.5"/>
+<text x="1116" y="960" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#111827" text-anchor="middle" font-weight="normal">LD3 3V3</text>
+<text x="1058" y="980" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#64748b" text-anchor="middle" font-weight="normal">LEDs: no wiring, keep visible</text>
+<circle cx="1420" cy="804" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1404" y="809" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="end" font-weight="normal">CK</text>
+<circle cx="1420" cy="834" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1404" y="839" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="end" font-weight="normal">DO</text>
+<circle cx="1420" cy="864" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1404" y="869" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="end" font-weight="normal">RES</text>
+<circle cx="1420" cy="894" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1404" y="899" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="end" font-weight="normal">G</text>
+<circle cx="1420" cy="924" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1404" y="929" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="end" font-weight="normal">B0</text>
+<circle cx="1420" cy="954" r="6" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="1404" y="959" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="end" font-weight="normal">3V3</text>
+<text x="1420" y="792" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="middle" font-weight="normal">P2</text>
+<polyline points="1426,924 1460,924 1460,932" fill="none" stroke="#0f766e" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1426,954 1460,954 1460,946" fill="none" stroke="#0f766e" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1450,933 1470,945" fill="none" stroke="#0f766e" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="1484" y="944" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#0f766e" text-anchor="start" font-weight="bold">BOOT</text>
+<rect x="1300" y="924" width="74" height="30" rx="8" fill="#e2e8f0" stroke="#334155" stroke-width="2"/>
+<text x="1337" y="944" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#111827" text-anchor="middle" font-weight="normal">USB-C</text>
+<text x="1337" y="970" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#64748b" text-anchor="middle" font-weight="normal">free</text>
+<polyline points="281,380 470,380 470,228 874,228" fill="none" stroke="#d97706" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="281,796 490,796 490,192 874,192" fill="none" stroke="#15803d" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="281,692 540,692 540,538 874,538" fill="none" stroke="#d97706" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="281,744 560,744 560,502 874,502" fill="none" stroke="#15803d" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="281,224 610,224 610,848 874,848" fill="none" stroke="#d97706" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="281,640 630,640 630,812 874,812" fill="none" stroke="#15803d" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="846" y="182" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="middle" font-weight="normal">W1 / W2</text>
+<text x="846" y="492" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="middle" font-weight="normal">W3 / W4</text>
+<text x="846" y="802" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="middle" font-weight="normal">W5 / W6</text>
+<polyline points="281,276 330,276 330,328 281,328" fill="none" stroke="#111827" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="330,302 700,302" fill="none" stroke="#111827" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="330" cy="302" r="5" fill="#111827"/>
+<circle cx="360" cy="302" r="10" fill="#fff" stroke="#111827" stroke-width="3"/>
+<text x="372" y="286" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="start" font-weight="bold">star W7</text>
+<polyline points="700,264 874,264" fill="none" stroke="#111827" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="700" cy="264" r="5" fill="#111827"/>
+<polyline points="700,574 874,574" fill="none" stroke="#111827" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="700" cy="574" r="5" fill="#111827"/>
+<polyline points="700,884 874,884" fill="none" stroke="#111827" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="700" cy="884" r="5" fill="#111827"/>
+<text x="846" y="284" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="middle" font-weight="normal">W8–W10</text>
+<polyline points="281,900 330,900 330,1010 372,1010" fill="none" stroke="#dc2626" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="372" y="996" width="70" height="28" rx="6" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+<text x="407" y="1015" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#dc2626" text-anchor="middle" font-weight="bold">1 A</text>
+<text x="407" y="988" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#dc2626" text-anchor="middle" font-weight="normal">fuse (W11)</text>
+<polyline points="442,1010 500,1010" fill="none" stroke="#dc2626" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="500" y="960" width="170" height="130" rx="8" fill="#fff7ed" stroke="#334155" stroke-width="2"/>
+<text x="585" y="990" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="middle" font-weight="bold">12 → 3.3 V buck</text>
+<text x="585" y="1010" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="middle" font-weight="normal">set 3.30 V before</text>
+<text x="585" y="1026" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="middle" font-weight="normal">connecting boards</text>
+<text x="508" y="993" font-family="DejaVu Sans, Arial, sans-serif" font-size="1" fill="#111827" text-anchor="start" font-weight="normal"></text>
+<text x="506" y="1055" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#111827" text-anchor="start" font-weight="normal">IN+</text>
+<text x="506" y="1080" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#111827" text-anchor="start" font-weight="normal">IN−</text>
+<text x="664" y="1055" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#111827" text-anchor="end" font-weight="normal">OUT+</text>
+<text x="664" y="1080" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#111827" text-anchor="end" font-weight="normal">OUT−</text>
+<polyline points="500,1010 490,1010 490,1050 500,1050" fill="none" stroke="#dc2626" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="500,1076 480,1076 480,1120 700,1120 700,302" fill="none" stroke="#111827" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="700" cy="302" r="5" fill="#111827"/>
+<text x="590" y="1140" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="middle" font-weight="normal">W12: buck IN− to the ground star</text>
+<polyline points="670,1050 760,1050 760,322" fill="none" stroke="#e11d48" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="670,1076 800,1076 800,350" fill="none" stroke="#111827" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="9,5"/>
+<polyline points="760,322 874,322" fill="none" stroke="#e11d48" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="800,350 874,350" fill="none" stroke="#111827" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="9,5"/>
+<circle cx="760" cy="322" r="5" fill="#e11d48"/>
+<circle cx="800" cy="350" r="5" fill="#111827"/>
+<rect x="836" y="310" width="26" height="52" rx="4" fill="#fff" stroke="#334155" stroke-width="2"/>
+<polyline points="760,632 874,632" fill="none" stroke="#e11d48" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="800,660 874,660" fill="none" stroke="#111827" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="9,5"/>
+<circle cx="760" cy="632" r="5" fill="#e11d48"/>
+<circle cx="800" cy="660" r="5" fill="#111827"/>
+<rect x="836" y="620" width="26" height="52" rx="4" fill="#fff" stroke="#334155" stroke-width="2"/>
+<polyline points="760,942 874,942" fill="none" stroke="#e11d48" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="800,970 874,970" fill="none" stroke="#111827" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="9,5"/>
+<circle cx="760" cy="942" r="5" fill="#e11d48"/>
+<circle cx="800" cy="970" r="5" fill="#111827"/>
+<rect x="836" y="930" width="26" height="52" rx="4" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="830" y="1165" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal">W13 3.3 V / W14 G — one polarised 2-pin plug per board</text>
+<polyline points="1426,184 1560,184" fill="none" stroke="#2563eb" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1560" cy="184" r="5" fill="#2563eb"/>
+<polyline points="1426,494 1560,494" fill="none" stroke="#2563eb" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1560" cy="494" r="5" fill="#2563eb"/>
+<polyline points="1426,804 1560,804" fill="none" stroke="#2563eb" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1560" cy="804" r="5" fill="#2563eb"/>
+<polyline points="1560,184 1560,804" fill="none" stroke="#2563eb" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1426,214 1610,214 1610,864" fill="none" stroke="#ea580c" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1426,554 1610,554" fill="none" stroke="#ea580c" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1610" cy="554" r="5" fill="#ea580c"/>
+<polyline points="1426,864 1610,864" fill="none" stroke="#ea580c" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1610" cy="864" r="5" fill="#ea580c"/>
+<circle cx="1270" cy="301" r="6" fill="#fff" stroke="#7c3aed" stroke-width="2.5"/>
+<text x="1278" y="291" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#7c3aed" text-anchor="start" font-weight="normal">chip pin 15 (PA5)</text>
+<polyline points="1276,301 1285,301 1285,364 1660,364" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1270" cy="518" r="6" fill="#fff" stroke="#7c3aed" stroke-width="2.5"/>
+<text x="1278" y="508" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#7c3aed" text-anchor="start" font-weight="normal">U1 pin 8 (RS)</text>
+<polyline points="1276,518 1285,518 1285,674 1660,674" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1270" cy="828" r="6" fill="#fff" stroke="#7c3aed" stroke-width="2.5"/>
+<text x="1278" y="818" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#7c3aed" text-anchor="start" font-weight="normal">U1 pin 8 (RS)</text>
+<polyline points="1276,828 1285,828 1285,984 1660,984" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1660,364 1660,984" fill="none" stroke="#7c3aed" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1660" cy="674" r="5" fill="#7c3aed"/>
+<circle cx="1660" cy="984" r="5" fill="#7c3aed"/>
+<text x="1560" y="100" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#2563eb" text-anchor="middle" font-weight="bold">W15</text>
+<text x="1610" y="100" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#ea580c" text-anchor="middle" font-weight="bold">W16</text>
+<text x="1660" y="100" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#7c3aed" text-anchor="middle" font-weight="bold">W17</text>
+<rect x="1700" y="120" width="290" height="186" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="2"/>
+<text x="1715" y="142" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">Legend</text>
+<polyline points="1715,160 1749,160" fill="none" stroke="#d97706" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="1759" y="165" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#111827" text-anchor="start" font-weight="normal">CAN_H (twisted with CAN_L)</text>
+<polyline points="1715,178 1749,178" fill="none" stroke="#15803d" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="1759" y="183" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#111827" text-anchor="start" font-weight="normal">CAN_L</text>
+<polyline points="1715,196 1749,196" fill="none" stroke="#111827" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="1759" y="201" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#111827" text-anchor="start" font-weight="normal">ground</text>
+<polyline points="1715,214 1749,214" fill="none" stroke="#dc2626" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="1759" y="219" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#111827" text-anchor="start" font-weight="normal">+12 V (fused)</text>
+<polyline points="1715,232 1749,232" fill="none" stroke="#e11d48" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="1759" y="237" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#111827" text-anchor="start" font-weight="normal">+3.3 V rail</text>
+<polyline points="1715,250 1749,250" fill="none" stroke="#2563eb" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="1759" y="255" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#111827" text-anchor="start" font-weight="normal">serial PA14 (CK)</text>
+<polyline points="1715,268 1749,268" fill="none" stroke="#ea580c" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="1759" y="273" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#111827" text-anchor="start" font-weight="normal">reset: C1 DO → RES</text>
+<polyline points="1715,286 1749,286" fill="none" stroke="#7c3aed" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="1759" y="291" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#111827" text-anchor="start" font-weight="normal">standby: C1 PA5 → U1 pin 8</text>
+</svg>

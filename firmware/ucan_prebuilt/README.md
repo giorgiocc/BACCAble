@@ -26,7 +26,7 @@ Dashboard version string: `BACCABLE ucan-<git short hash>`. Full plan: `docs/BAC
 * full wire list, OBD pin table and pad map: plan §2.2–2.3
 
 ## Power (chosen design)
-OBD pin 16 → 1 A fuse → 12→3.3 V buck → P3-1 3V3 + P3-4 G pads of each board through a 2-pin plug (author's topology). **Unplug a board's 3V3 plug before connecting USB to it.**
+OBD pin 16 → 1 A fuse → 12→3.3 V buck → P3 3V3 + P3 G pads of each board through a 2-pin plug (author's topology). **Unplug a board's 3V3 plug before connecting USB to it.**
 
 ## Flashing (USB DFU)
 Unplug the board's 3V3 plug, then hold the B0 button (B0 shorted to 3V3) while plugging a data USB-C cable; the chip appears as `0483:df11`. Then flash the `.elf` with STM32CubeProgrammer, or the `.bin` with

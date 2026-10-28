@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="30" y="40" font-family="DejaVu Sans, Arial, sans-serif" font-size="22" fill="#111827" text-anchor="start" font-weight="bold">Sleep (low consume) — what C1 does on the two lines (lowConsume.c)</text>
+<polyline points="300,70 300,470" fill="none" stroke="#e2e8f0" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="4,4"/>
+<text x="304" y="86" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal">car awake</text>
+<polyline points="520,70 520,470" fill="none" stroke="#e2e8f0" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="4,4"/>
+<text x="524" y="86" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal">last CAN frame</text>
+<polyline points="690,70 690,470" fill="none" stroke="#e2e8f0" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="4,4"/>
+<text x="694" y="86" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal">+3.5 s: sleep</text>
+<polyline points="930,70 930,470" fill="none" stroke="#e2e8f0" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="4,4"/>
+<text x="934" y="86" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal">frames again: wake</text>
+<text x="30" y="144" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">CAN frames on the C1 bus</text>
+<text x="30" y="164" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal">top: activity</text>
+<text x="30" y="180" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal">bottom: quiet</text>
+<polyline points="300,130 520,130 520,170 930,170 930,130 1160,130" fill="none" stroke="#111827" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="30" y="234" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">C1 DO → C2/BH RES (reset)</text>
+<text x="30" y="254" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal">top: high = slaves run</text>
+<text x="30" y="270" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal">bottom: low = held in reset</text>
+<polyline points="300,220 690,220 690,260 930,260 930,220 1160,220" fill="none" stroke="#ea580c" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="30" y="324" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">C1 PA5 → U1 pin 8 (standby)</text>
+<text x="30" y="344" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal">top: high = standby</text>
+<text x="30" y="360" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal">bottom: low = transceiver active</text>
+<polyline points="300,350 690,350 690,310 930,310 930,350 1160,350" fill="none" stroke="#7c3aed" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="30" y="414" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">C2 / BH chips</text>
+<text x="30" y="434" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal">top: running</text>
+<text x="30" y="450" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal">bottom: in reset</text>
+<polyline points="300,400 690,400 690,440 930,440 930,400 1160,400" fill="none" stroke="#2563eb" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="30" y="505" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="start" font-weight="normal">After the wake C1 restarts the serial line and ≈ 3.5 s later sends every setting to C2/BH again. Sleep is blocked while a USB sniffer / ELM327 / pen-drive session is open.</text>
+</svg>

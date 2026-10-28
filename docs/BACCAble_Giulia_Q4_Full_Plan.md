@@ -1,4 +1,4 @@
-# DIY BACCAble — Full Plan, Build Steps and Firmware (v4.6)
+# DIY BACCAble — Full Plan, Build Steps and Firmware (v4.7)
 
 **Mission:** build our own BACCAble from loose boards instead of buying the author's ready-made device, and make it **behave the same as the author's device in every way except the WS281x LED strip** (not built, not wired, left disabled).
 **Build:** the **full BACCAble — three UCAN boards, C1 + C2 + BH**, one per CAN bus, exactly like the three chips on the author's PCB. This is **not** the two-board (C1 + BH) minimalist/test setup: every board, wire and step below is for three boards, and wherever a repo picture shows only one or two UCANs it is used only as a pad/label/mounting reference.
@@ -27,9 +27,9 @@ The author's device (schematic `hardware/newBaccableDedicatedPcb/BACCABLE_SCHEMA
 | No CAN termination | none on the PCB | each UCAN's fixed 118 Ω terminator (**R1 + R2, 2 × 59 Ω**) **removed**, termination header JP1 left **open** (§6) | ✅ |
 | OBD plug through the SGW bypass | the PCB is the OBD plug | OBD male breakout harness into the bypass port | ✅ |
 | LED-strip output (PA11) | OBD pin 8 | **not built** (mission) | ➖ excluded |
-| Aftermarket exhaust-valve remote outputs (C1 PA8 = Q10, PA7 = Q11) | transistors on the PCB, OBD pins 1/2/15 | optional: two transistors on fine wires to the C1 chip (§10) — only if you fit aftermarket valves with a radio remote | ⚪ optional |
+| Aftermarket exhaust-valve remote output | C1 **PA8** → R15 4.64 kΩ → NPN **Q10** → R16 1 kΩ → `CMD_1` = **OBD pin 1** (the firmware also pulses **PA7** for "close", but the schematic draws no transistor on PA7) | optional: copy Q10 on a fine wire to C1 chip pin 29 (and, for "close", a second one on pin 17) (§10) — only if you fit aftermarket valves with a radio remote | ⚪ optional |
 | Pedal-booster serial (C1 USART1 on PB6) | cable to "schizzaForte" | optional fine-wire on C1 pin 42 (§10); the manual says the pedal booster is "under development, do not activate" | ⚪ optional |
-| STS inputs, GSM footprint | on the PCB | **not used by the firmware** (no code reads them) | — nothing to copy |
+| STS inputs, C2/BH output transistors, GSM footprint | STS_1–3 on PA6 of each chip; Q20 (C2 PA8 → `CMD_2`, OBD 15) and Q30 (BH PA8 → `CMD_3`, OBD 2); GSM module on C2 | **not used by the firmware** (no code reads PA6; only C1's code drives PA7/PA8; no GSM code) | — nothing to copy |
 
 **What is not the same (honestly):** loose boards in our own box instead of the moulded OBD plug; the reset line leaves from PA13 instead of PA4 (same signal, a pad instead of a chip pin); one boot button per board instead of one shared button; each UCAN keeps its own power LED and regulator (bypassed by the 3.3 V rail).
 
@@ -68,13 +68,13 @@ The repo only shows the UCAN in pictures, so this map comes from the board maker
 | Ref | What it is | What we do with it |
 |---|---|---|
 | **U3** | STM32F072**CB**T6 (128 KB), the chip | runs C1 / C2 / BH firmware (the 8 MHz crystal X1 is unused: the firmware runs on the internal 48 MHz clock) |
-| **U1** | **SN65HVD230** CAN transceiver (the bus driver), powered from 3.3 V (R22 0 Ω). **Pin 8 (RS)** is the net `CAN_S` = chip **pin 2 (PC13)**, with **R4 10 kΩ to 3.3 V** and **R18 10 kΩ to GND** next to it. The author has only a **10 kΩ to GND** on every RS pin (R17 on C1, a pull-down on C2/BH) | **remove R4** if it is fitted (H0/H1), leaving R18 = the author's 10 kΩ pull-down |
+| **U1** | **SN65HVD230** CAN transceiver (the bus driver), powered from 3.3 V (R22 0 Ω). **Pin 8 (RS)** is the net `CAN_S` = chip **pin 2 (PC13)**, with **R4 10 kΩ to 3.3 V** and **R18 10 kΩ to GND** next to it. The author has only pull-downs: **R17 10 kΩ** on C1's RS pin, and **one R27 10 kΩ** on the shared `CanLowConsumeCmd` net of C2/BH | **remove R4** if it is fitted (H0/H1), leaving R18 = the author's 10 kΩ pull-down |
 | **P1** | green 3-way screw terminal: **1 = CAN_L, 2 = CAN_H, 3 = GND** | the car bus |
 | **R1, R2** | **59 Ω + 59 Ω in series across CAN_H–CAN_L** (split terminator, ≈ 118 Ω; the middle goes to C4 4.7 nF to GND). **Always connected; the header does not switch it** | **remove both** on C1, C2 and BH (§6) |
 | **JP1 + R3** | 2-pin header + 120 Ω: adds a **second** terminator when a jumper is fitted | keep **open** |
 | TVS1, C5, C6 | CAN-line surge protection and filter | keep |
-| **P2** | 6-pad row: **1 CK** = SWCLK = **PA14** (chip pin 37, R14 **4.7 kΩ pull-up**) · **2 DO** = SWDIO = **PA13** (chip pin 34) · **3 RES** = NRST (chip pin 7, R9 **10 kΩ pull-up** + C10 100 nF) · **4 G** · **5 B0** = BOOT0 (chip pin 44, R8 **10 kΩ pull-down**) · **6 3V3** | serial, reset, boot button |
-| **P3** | 4-pad row: **1 3V3** · 2 CAN_TX (PB9) · 3 CAN_RX (PB8) · **4 GND** | **1 and 4 = our 3.3 V power input**; 2 and 3 unused |
+| **P2** | 6-pad row, printed in this order from the USB end: **1 CK** = SWCLK = **PA14** (chip pin 37, R14 **4.7 kΩ pull-up**) · **2 DO** = SWDIO = **PA13** (chip pin 34) · **3 RES** = NRST (chip pin 7, R9 **10 kΩ pull-up** + C10 100 nF) · **4 G** · **5 B0** = BOOT0 (chip pin 44, R8 **10 kΩ pull-down**) · **6 3V3** | serial, reset, boot button |
+| **P3** | 4-pad row, printed **RX · TX · G · 3V3** from the USB end (RX = CAN_RX PB8, TX = CAN_TX PB9; the schematic numbers them 3V3 = 1, TX = 2, RX = 3, GND = 4) | **G and 3V3 = our 3.3 V power input** (two adjacent pads, a 2-pin plug fits); RX and TX unused |
 | **LD1 "RX"** | LED on **PA0** (chip pin 10) through R6 2.2 kΩ = the firmware's **"red"** LED | status (§2.3.5) |
 | **LD2 "TX"** | LED on **PA1** (chip pin 11) through R13 2.2 kΩ = the firmware's **"blue"** LED | status (§2.3.5) |
 | **LD3 "3V3"** | power LED on the 3.3 V rail through R19 2.2 kΩ | power indicator (= the author's green D1) |
@@ -95,15 +95,23 @@ The C1 / C2 / BH firmware never touches **PC13** (no GPIOC code in the fork), so
 | 3V3 (P2 and P3) | chip pin 24 or 48 (VDD) |
 | U1 pin 8 | chip pin 2 (PC13), and one end of R18 |
 
+![UCAN board: what to change](images/ucan_board_prep.png)
+
+*Drawn for this plan after FYSETC's component-position drawing: parts to remove (R1, R2, R4 if fitted), JP1 open, transceiver pin numbers, LED and pad positions. Confirm with the meter.*
+
 ![UCAN pad labels, zoomed](images/ucan_pads_zoom.png)
 
-*Zoom of the author's diagram below: left board seen from the bottom (CAN_L · CAN_H · GND terminal; the P2 row CK · DO · RES · G · B0 · 3V3 with the blue serial wire on CK; the P3 row); right board seen from the top (RX/TX LEDs, chip, termination header JP1 next to the green terminal). The left-column labels in that drawing are hard to read: use the P3 order above and the continuity table.*
+*Zoom of the author's diagram below: left board seen from the bottom (CAN_L · CAN_H · GND terminal; the P2 row CK · DO · RES · G · B0 · 3V3 with the blue serial wire on CK; the P3 row); right board seen from the top (RX/TX LEDs, chip, termination header JP1 next to the green terminal). The left column reads RX · TX · G · 3V3 from the USB end (the "R" is cut off).*
 
 ![Author's UCAN pad and serial-wire reference](../hardware/system_interconnection/ShowParamsOnDashboardConnections.png)
 
 *Source: `hardware/system_interconnection/ShowParamsOnDashboardConnections.png`. **Use it only as a pad reference** (where CK, DO, RES, G, B0, 3V3 are and how the serial wire lands on CK). The picture is the author's reduced test drawing with just C1 and BH on USB 5 V. **It is not our build.** Our build is the three-board drawing in §2.3: C2 joins the same CK wire (author, issue #34), plus the reset wire, the standby wire and the 3.3 V rail of §4.*
 
 ### 2.3 Complete wiring — three boards, every wire (the author's PCB rebuilt)
+
+![Complete wiring of the three-UCAN BACCAble](images/wiring_full_3ucan.png)
+
+*Drawn for this plan (`docs/images/src/make_diagrams.py`): every wire W1–W17 of §2.3.3 and the boot buttons; logical, not to scale.*
 
 #### 2.3.1 Layout
 Left to right like the author's three USB-C ports (BH, C2, C1). Each signal wire lands on C2's pad and carries on to BH.
@@ -125,6 +133,9 @@ Left to right like the author's three USB-C ports (BH, C2, C1). Each signal wire
 ```
 
 #### 2.3.2 OBD male plug — all 16 pins
+
+![OBD male plug: pins to populate](images/obd_plug_pins.png)
+
 Pin names are from the author's plug (`pinout.png`, schematic sheet 1 J1). Only populate the pins marked as wired; leave the others empty, or cut and insulate them on a pre-wired plug.
 
 | OBD pin | Author's signal | Our build |
@@ -156,17 +167,17 @@ Pin names are from the author's plug (`pinout.png`, schematic sheet 1 J1). Only 
 | W8 / W9 / W10 | ground star | C1 / C2 / BH **P1-3 (GND)** | 22–24 AWG, twisted in with that board's pair | CAN reference; it is the board's only ground when it runs from USB with its 3V3 plug removed |
 | W11 | OBD 16 | **inline fuse 1 A** (at the plug) → buck IN+ | 22 AWG | |
 | W12 | ground star | buck IN− | 22 AWG | |
-| W13 | buck OUT+ (3.3 V) | three 2-pin plugs, pin 1 → **P3-1 (3V3)** of C1, C2, BH | 22–24 AWG | set the buck to 3.30 V **before** connecting (§4.2) |
-| W14 | buck OUT− | three 2-pin plugs, pin 2 → **P3-4 (G)** of C1, C2, BH | 22–24 AWG | polarised plugs; never reversible |
+| W13 | buck OUT+ (3.3 V) | three 2-pin plugs, pin 1 → **P3 3V3** of C1, C2, BH | 22–24 AWG | set the buck to 3.30 V **before** connecting (§4.2) |
+| W14 | buck OUT− | three 2-pin plugs, pin 2 → **P3 G** of C1, C2, BH | 22–24 AWG | polarised plugs; never reversible |
 | W15 | C1 **CK** | C2 **CK** → BH **CK** | 26 AWG | the author's `Serial` net (PA14) |
 | W16 | C1 **DO** | C2 **RES** → BH **RES** | 26 AWG | the author's `ChipLowConsumeCmd` (fit after S2, §5.3) |
 | W17 | C1 chip **pin 15 (PA5)** | **U1 pin 8** of C2 → U1 pin 8 of BH | 30 AWG wire-wrap / enamelled | the author's `CanLowConsumeCmd`; glue the wire down near the chip (strain relief) |
-| W18 / W19 / W20 | C1 / C2 / BH **B0** | a push button to the same board's **P2-6 (3V3)** | 26 AWG | boot button (§2.3.4) |
+| W18 / W19 / W20 | C1 / C2 / BH **B0** | a push button to the same board's **P2 3V3** | 26 AWG | boot button (§2.3.4) |
 
 **Nothing else is connected.** These stay unconnected:
 - C1 RES, C1's own U1 pin 8.
-- C2/BH DO, all P2-4 G pads (ground already arrives through P3-4).
-- P3-2/P3-3 on every board.
+- C2/BH DO, all P2 G pads (ground already arrives through P3 G).
+- P3 RX/TX on every board.
 - JP1 on every board (open).
 - The three USB-C ports (free).
 - OBD pins 1, 2, 7, 8, 9, 10, 15.
@@ -177,11 +188,11 @@ Pin names are from the author's plug (`pinout.png`, schematic sheet 1 J1). Only 
 | P1-1 CAN_L | OBD 14 | OBD 13 | OBD 11 |
 | P1-2 CAN_H | OBD 6 | OBD 12 | OBD 3 |
 | P1-3 GND | ground star | ground star | ground star |
-| P2-1 CK | W15 | W15 | W15 |
-| P2-2 DO | **W16 out** | — | — |
-| P2-3 RES | — | **W16 in** | **W16 in** |
-| P2-5 B0 / P2-6 3V3 | button | button | button |
-| P3-1 3V3 / P3-4 G | 3.3 V plug | 3.3 V plug | 3.3 V plug |
+| P2 CK | W15 | W15 | W15 |
+| P2 DO | **W16 out** | — | — |
+| P2 RES | — | **W16 in** | **W16 in** |
+| P2 B0 / P2 3V3 | button | button | button |
+| P3 3V3 / P3 G | 3.3 V plug | 3.3 V plug | 3.3 V plug |
 | chip pin 15 (PA5) | **W17 out** | — | — |
 | U1 pin 8 | — | **W17 in** | **W17 in** |
 | R1 + R2 (59 Ω ×2) | **removed** | **removed** | **removed** |
@@ -191,7 +202,7 @@ Pin names are from the author's plug (`pinout.png`, schematic sheet 1 J1). Only 
 **No extra resistors are needed anywhere.** The pull-ups and pull-downs on the author's PCB are already on each UCAN:
 - **Serial line:** R14 4.7 kΩ pull-up on every board; three in parallel ≈ 1.6 kΩ, fine for the 38400-baud open-drain line.
 - **Reset line:** R9 10 kΩ + 100 nF on each slave's RES.
-- **Standby line:** R18 10 kΩ pull-down on each slave's transceiver pin 8 (with R4 removed), the same as the author's 10 kΩ pull-down on RS.
+- **Standby line:** R18 10 kΩ pull-down on each slave's transceiver pin 8 (with R4 removed). The author has one 10 kΩ (R27) on the shared net; ours is two in parallel (≈ 5 kΩ), which only adds ≈ 0.3 mA on PA5 while asleep — same behaviour.
 - **Boot button:** R8 10 kΩ BOOT0 pull-down, the same as the author's R4.
 
 There are no series resistors on the serial, reset or standby wires, as on the author's PCB. [Repo][FYSETC]
@@ -222,9 +233,11 @@ Each UCAN already has the author's three status lights:
 
 **Do this instead:** a clear lid, or a 3 mm hole / light pipe over **LD1, LD2 and LD3 of each board** (nine windows, grouped per board and labelled BH / C2 / C1). [Repo][FYSETC]
 
+![Box layout](images/box_layout.png)
+
 #### 2.3.6 Wiring rules
 - **Power all three boards together.** Don't run the build with one board's 3V3 plug removed and no USB in it: the running boards' pull-ups on CK/RES and the standby wire would feed it weakly through its pins. During a USB session the board runs from the PC, which is fine (§4.3).
-- **Two ground paths per board** (P3-4 through the power plug, and P1-3 through the CAN cable) are intended. They are the same net on the board and meet only at the ground star.
+- **Two ground paths per board** (P3 G through the power plug, and P1-3 through the CAN cable) are intended. They are the same net on the board and meet only at the ground star.
 - **Never 12 V on any UCAN pad.** OBD 16 goes only to the fuse and buck.
 - **Mark** every CAN_H wire and every board (C1 / C2 / BH) at both ends of every cable.
 
@@ -233,8 +246,8 @@ Each UCAN already has the author's three status lights:
                          OBD male plug (into the SGW bypass port)
   pin 6 ─ C1.CAN_H    pin 12 ─ C2.CAN_H    pin 3  ─ BH.CAN_H
   pin 14 ─ C1.CAN_L   pin 13 ─ C2.CAN_L    pin 11 ─ BH.CAN_L
-  pins 4+5 ─ ground star ─ C1/C2/BH P1-3 GND, buck IN−/OUT−, P3-4 G pads (via the plugs)
-  pin 16 (+12 V) ─ fuse 1 A ─ 12→3.3 V buck ─ 2-pin plugs ─ P3-1 3V3 of C1, C2, BH
+  pins 4+5 ─ ground star ─ C1/C2/BH P1-3 GND, buck IN−/OUT−, P3 G pads (via the plugs)
+  pin 16 (+12 V) ─ fuse 1 A ─ 12→3.3 V buck ─ 2-pin plugs ─ P3 3V3 of C1, C2, BH
 
   Serial (author's "Serial" net):     C1.CK ──── C2.CK ──── BH.CK                       (W15)
   Sleep reset (author's PA4 line):    C1.DO ──┬─ C2.RES
@@ -266,11 +279,14 @@ The author's own 3D cases for the UCAN. **Mounting reference only:** they hold o
 ### 4.1 The chain
 Only the car's OBD port is used, through your SGW bypass cable: **pin 16 = +12 V** (the pin the author's device is powered from, manual §1.2; the manual's immobilizer section relies on it being live with the car off) and **pins 4/5 = ground**. No other wire in the car is tapped.
 ```
-OBD pin 16 (+12 V) ─ inline fuse 1 A ─ 12→3.3 V buck IN+ ; OUT 3.3 V ─┬─ 2-pin plug ─ C1: P3-1 3V3 + P3-4 G
-OBD pins 4/5 (GND) ─ ground star ───── buck IN− / OUT−               ├─ 2-pin plug ─ C2: P3-1 3V3 + P3-4 G
-                                                                      └─ 2-pin plug ─ BH: P3-1 3V3 + P3-4 G
+OBD pin 16 (+12 V) ─ inline fuse 1 A ─ 12→3.3 V buck IN+ ; OUT 3.3 V ─┬─ 2-pin plug ─ C1: P3 3V3 + P3 G
+OBD pins 4/5 (GND) ─ ground star ───── buck IN− / OUT−               ├─ 2-pin plug ─ C2: P3 3V3 + P3 G
+                                                                      └─ 2-pin plug ─ BH: P3 3V3 + P3 G
 (no USB-C power leads — the USB-C ports stay free for flashing, ELM327 and the sniffer)
 ```
+
+![Power chain](images/power_chain.png)
+
 This is the author's topology: his PCB has fuse **F1** → buck **U1** making **3.3 V directly** (feedback divider 69.8 kΩ / 22.1 kΩ ≈ 3.3 V) for all three chips and transceivers. Feeding the UCANs on their **3V3 pads** bypasses each UCAN's own 5 V → 3.3 V regulator (U2, AP2112K), exactly like the author's single 3.3 V rail, and gives the lowest parked current. [Repo: schematic sheet 1, manual §1.2/§1.10][Infer]
 
 ![Author's schematic sheet 1: OBD connector, power and programming button](images/author_schematic_sheet1_connectors_power.png)
@@ -313,18 +329,20 @@ Rules for every option: **never put 12 V on a UCAN**; one common ground; C2/BH s
 
 **Author's design** (`lowConsume.c`, schematic): C1 never sleeps; after **3.5 s without CAN frames** on its bus it pulls **PA4** low (open-drain) to hold C2 and BH in reset, drives **PA5** to put their transceivers in standby, pauses the serial line and flashes its blue LED; when frames come back it releases both, restarts the serial line, re-sends every function setting to the slaves (≈ 3.5 s later) and arms DNA Memory. Sleep is blocked while a sniffer/ELM327/pen-drive USB session is active. [Repo]
 
+![Sleep lines timing](images/sleep_lines.png)
+
 **Problem on a UCAN:** PA4 and PA5 have no pads. Solved line by line below.
 
 ### 5.1 Reset line (author's PA4)
 **Fix in this fork:** new compile flag **`UCAN_LOW_CONSUME_PINS`** in `Core/Inc/lowConsume.h` moves the reset line to **PA13 = the DO pad** (the pin GiUCAN uses for exactly this, wired to the other board's RES pad). Default builds are unchanged. Verified in the C1 image's disassembly: PA13 open-drain output. [Repo][GiUCAN][Built]
-- PA13 is SWDIO: SWD debugging of C1 is no longer possible; USB-DFU flashing is unaffected. At C1 power-up and during C1 flashing PA13 floats high, so the slaves run. [Infer]
+- PA13 is SWDIO: SWD debugging of C1 is no longer possible; USB-DFU flashing is unaffected. At C1 power-up and during C1 flashing PA13 is not driven, and each slave's own RES pull-up (R9 10 kΩ) keeps the line high, so the slaves run. [FYSETC][Infer]
 
 ### 5.2 Standby line (author's PA5) — no firmware change needed
 - The firmware **already drives PA5 exactly as the author's**: push-pull output, **low = slave transceivers active** (set at start-up and on every wake), **high = standby** (set when C1 goes to sleep). Our flag only moved the reset line; PA5 is untouched. [Repo: `lowConsume.c`]
-- On the author's PCB PA5 runs to the **RS pin (pin 8)** of the C2 and BH transceivers (schematic sheets 3/4, `CanLowConsumeCmd`, with a 10 kΩ pull-down). On a UCAN the transceiver's standby/silent pin (**pin 8, "S"/"RS"**) is wired to that board's own **PC13** (GiUCAN calls it `CAN_S`, "can silent pin"); the BACCAble C2/BH firmware **never drives PC13**, so an external line can control it without a conflict. [Repo][GiUCAN]
+- On the author's PCB PA5 runs to the **RS pin (pin 8)** of the C2 and BH transceivers (schematic sheets 3/4, `CanLowConsumeCmd`, one 10 kΩ pull-down R27 drawn on the C2 sheet). On a UCAN the transceiver's standby/silent pin (**pin 8, "S"/"RS"**) is wired to that board's own **PC13** (GiUCAN calls it `CAN_S`, "can silent pin"); the BACCAble C2/BH firmware **never drives PC13**, so an external line can control it without a conflict. [Repo][GiUCAN]
 - **Wiring:** one thin wire (30 AWG wire-wrap or enamelled) from **C1's chip pin 15 = PA5** (LQFP48 numbering from the MKS CANable schematic in the repo: PA4 = 14, PA5 = 15) to **pin 8 of the CAN transceiver** (the 8-pin chip next to the green terminal) on **C2** and on **BH**. Pin 15 is on the 0.5 mm-pitch side of the chip: use flux, a fine tip, and check with a loupe that pins 14/16 are not bridged.
 - **Before soldering, identify pin 8 on your boards:** pin 1 is marked by the dot; pin 8 is the pin beside pin 1 on the opposite row. Confirm with the multimeter: **continuity between transceiver pin 8 and the board's chip pin 2 (PC13)**. If there is no continuity, stop and re-check (the board differs from GiUCAN's). [Infer]
-- **Result:** during sleep the slaves are held in reset **and** their transceivers are in standby/silent mode — the author's exact behaviour and the lowest sleep current. At start-up, before C1's firmware sets PA5, the line is held low by each slave's own **R18 10 kΩ to GND** (R4 removed in H1, §2.2), so the transceivers stay active, exactly as with the author's 10 kΩ pull-down. Even if R4 were left in, the line would sit at about half the supply, still below the SN65HVD230's standby threshold (≈ 0.75 × 3.3 V). Load on PA5: ≈ 0.33 mA per slave, well within the pin's rating. [FYSETC][Infer]
+- **Result:** during sleep the slaves are held in reset **and** their transceivers are in standby/silent mode — the author's exact behaviour and the lowest sleep current. At start-up, before C1's firmware sets PA5, the line is held low by each slave's own **R18 10 kΩ to GND** (R4 removed in H1, §2.2), so the transceivers stay active, as with the author's R27 pull-down. Even if R4 were left in, the line would sit at about half the supply, still below the SN65HVD230's standby threshold (≈ 0.75 × 3.3 V). Load on PA5: ≈ 0.33 mA per slave, well within the pin's rating. [FYSETC][Infer]
 - *Optional, fully pin-identical variant:* also take the reset line from C1's chip **pin 14 (PA4)** instead of the DO pad and build C1 **without** `-DUCAN_LOW_CONSUME_PINS` (the author's stock pins). Same behaviour, but one more fine-pitch joint next to pin 15; the DO-pad route is the easier one.
 
 ### 5.3 Bench note
@@ -347,7 +365,7 @@ The car buses are already terminated (≈ 60 Ω each), and the author's PCB adds
 Left as delivered, each of our boards would put ≈ 118 Ω on its bus. 60 Ω ∥ 118 Ω ≈ 40 Ω on every bus, which risks bus errors and warning lights.
 
 **What to do on C1, C2 and BH:**
-1. **Remove R1 and R2.** They are the two larger resistors between the transceiver U1 and the green terminal P1 (component-position drawing, §2.2). Lift them with two irons or hot tweezers, or heat one end at a time. Practise on the spare first.
+1. **Remove R1 and R2.** They are the two larger resistors between the transceiver U1 and the green terminal P1 (component-position drawing, §2.2). Lift them with two irons or hot tweezers, or heat one end at a time. Practise on the spare first (drawing in §2.2).
 2. **Keep JP1 open** (no jumper).
 3. Leave C4, C5, C6 and TVS1 in place. With R1/R2 gone, C4 and the 0 Ω R17 have nothing to do and are harmless.
 4. **Remove R1/R2 on the spare too** if it will sniff the car buses (S5).
@@ -370,11 +388,11 @@ The author's older single-CANable diagram is where "TERMINATION NOT INSERTED" co
 |---|---|---|
 | **H0** | Inspect every board: chip marking **STM32F072CB**, transceiver **SN65HVD230** (or 230-compatible); label C1, C2, BH, SPARE. Unpowered, JP1 open: measure CAN_H↔CAN_L on P1. Identify every pad with the continuity table in §2.2. Check whether **R4** is fitted (resistor beside R18; or, powered from USB, U1 pin 8 reads ≈ 1.6 V instead of ≈ 0 V). | ≈ 118 Ω (the fixed R1 + R2); every pad beeps to the chip pin listed; R4 noted |
 | **H1** | **Remove R1 and R2** on C1, C2, BH (and the spare if it will sniff the car) — §6; practise on the spare. Keep JP1 open. **If R4 is fitted, remove it** on C1, C2, BH, so each RS pin has only R18 10 kΩ to GND, as on the author's PCB. | CAN_H↔CAN_L ≫ 1 kΩ on each board; U1 pin 8 ↔ G ≈ 10 kΩ; no solder bridges near U1/P1 |
-| **H2** | Flash check comes in S1 (needs USB). On every board: wire or header the P2 pads **CK, B0, 3V3** and the P3 pads **3V3 (P3-1), G (P3-4)**. On C1 add **DO**, on C2/BH add **RES**. Fit the boot button **B0 ↔ P2-6 3V3** on each board (W18–W20, §2.3.4). | pads clean, no bridges; button pressed = B0 beeps to 3V3 |
+| **H2** | Flash check comes in S1 (needs USB). On every board: wire or header the P2 pads **CK, B0, 3V3** and the P3 pads **3V3, G**. On C1 add **DO**, on C2/BH add **RES**. Fit the boot button **B0 ↔ P2 3V3** on each board (W18–W20, §2.3.4). | pads clean, no bridges; button pressed = B0 beeps to 3V3 |
 | **H3** | **Serial wire:** C1.CK ↔ C2.CK ↔ BH.CK. | continuity CK-CK-CK, no short to G/3V3 |
 | **H4** | **Reset wire:** C1.DO ↔ C2.RES and C1.DO ↔ BH.RES. **Standby wire (§5.2):** first check continuity *transceiver pin 8 ↔ chip pin 2* on C2 and BH, then wire C1 chip pin 15 (PA5) → transceiver pin 8 of C2 and of BH; check pins 14/16 of C1 are not bridged. *(Leave unplugged until the slaves are flashed — §5 bench gotcha.)* | continuity, no short |
 | **H5** | **OBD plug and CAN harness** (W1–W10, §2.3.2–2.3.3): populate only OBD 3, 4, 5, 6, 11, 12, 13, 14, 16; join 4 + 5 at the ground star. To each terminal (P1: 1 = CAN_L, 2 = CAN_H, 3 = GND): C1 → 6/14, C2 → 12/13, BH → 3/11, P1-3 → ground star. Twist each H/L/GND trio, mark every H wire, ≤ 30 cm. | H/L not swapped (swapped = warning lights, manual §1.5); no continuity between any CAN pin and 16 or 4/5 |
-| **H6** | **Power harness** (§4): first measure **pin 16 ↔ pin 4 ≈ 12 V** on the bypass cable's port (no 12 V → fallback car USB, §4.5). Then OBD 16 → fuse 1 A → 12→3.3 V buck → three polarised 2-pin plugs → P3-1 3V3 / P3-4 G of each board (W11–W14); buck GND → ground star. On the bench, with **no board connected**, power the buck from 12 V and set/check its output. | 12 V on pin 16; buck out **3.30 V ± 0.1 V** |
+| **H6** | **Power harness** (§4): first measure **pin 16 ↔ pin 4 ≈ 12 V** on the bypass cable's port (no 12 V → fallback car USB, §4.5). Then OBD 16 → fuse 1 A → 12→3.3 V buck → three polarised 2-pin plugs → P3 3V3 / P3 G of each board (W11–W14); buck GND → ground star. On the bench, with **no board connected**, power the buck from 12 V and set/check its output. | 12 V on pin 16; buck out **3.30 V ± 0.1 V** |
 | **H7** | **Bench power test:** connect one board's 3V3 plug (USB-C empty): power LED on, 3V3 pad 3.3 V; measure its USB-C VBUS (back-feed check, §4.3). Then all three plugs. Separately confirm each board also runs from USB alone with its 3V3 plug **removed**. | no short, no hot parts, rail stays 3.2–3.4 V |
 | **H8** | **Bypass cable check** (car asleep ≥ 10 min, boards unplugged): 6↔14, 12↔13 ≈ 60 Ω; 3↔11 low value; 16↔4 ≈ 12 V; 4/5↔chassis continuity. | all present (owner already confirmed the buses) |
 | **H9** | **Box (holds all three UCANs + buck + fuse):** standoffs, glands, strain relief; USB-C ports and boot buttons reachable; a clear lid or windows over LD1/LD2/LD3 of each board (§2.3.5); away from pedals, steering column, knee-airbag path, heat and HVAC flaps. Label boards at both ends. | nothing loose |
@@ -429,7 +447,7 @@ sudo dfu-util -d 0483:df11 -c 1 -i 0 -a 0 -s 0x08000000:leave -D C1.bin
 
 ## 10. Optional author I/O (not needed for the car functions)
 
-- **Aftermarket exhaust-valve remote** ("Exhaust Flap" with non-QV radio-remote valves; manual §2.30, upstream issue #40): the author's C1 drives two transistors from **PA8 (Q10, "open")** and **PA7 (Q11, "close")** that press the remote's buttons for ≈ 1 s. On a UCAN these pins have no pad: solder a fine wire to the C1 chip's **pin 29 (PA8)** and **pin 17 (PA7)** (LQFP48 numbering from the MKS schematic in the repo), each through a base resistor to a small NPN transistor across the remote's button. Only if you fit such valves; your 2.0 Sprint has no factory valves, so the CAN "QV" mode does not apply. [Repo][Infer]
+- **Aftermarket exhaust-valve remote** ("Exhaust Flap" with non-QV radio-remote valves; manual §2.30, upstream issue #40): the C1 firmware pulses **PA8 (`Q10mosfet`, "open")** and **PA7 (`Q11mosfet`, "close")** high for ≈ 1 s to press the remote's buttons (`functions_C1baccable.c`). The author's schematic (sheet 2) has only the PA8 stage: **PA8 → R15 4.64 kΩ → base of NPN Q10, emitter to GND, collector → R16 1 kΩ → `CMD_1` (OBD pin 1)**. On a UCAN these pins have no pad: copy that stage on a fine wire from the C1 chip's **pin 29 (PA8)**, and an identical one on **pin 17 (PA7)** if you need "close"; each collector goes across one button of the remote. Only if you fit such valves; your 2.0 Sprint has no factory valves, so the CAN "QV" mode does not apply. [Repo][Infer]
 - **Pedal booster ("schizzaForte")** on C1 **USART1, PB6 = pin 42**, half-duplex 9600 baud: manual says "under development, do not activate". Not wired. [Repo]
 - **LED strip (PA11): excluded by the mission.** Leave "Led Controller" deselected in SETUP.
 
@@ -524,4 +542,4 @@ ESC/TC and the race screen need race mode enabled by **proxy alignment** (manual
 4. Standby wire on your boards: transceiver pin 8 ↔ chip pin 2 continuity (H4) and ≈ 0 V awake / ≈ 3.3 V asleep (S4); bus recessive while asleep (S4 voltmeter check).
 
 ## Sources (all in or linked from this fork)
-FYSETC UCAN V1.0 schematic and component position (https://github.com/FYSETC/UCAN/tree/main/Hardware) · `README.md`, `LICENSE.MD`, `manuals/Baccable_manual_*.pdf` (v4.9), `hardware/newBaccableDedicatedPcb/*`, `hardware/system_interconnection/*`, `hardware/canable/*` (MKS schematics, STM32F072 datasheet), `hardware/box/*`, `firmware/ledsStripController/{Core,Makefile,MAKEFILE.md,*.ld,baccable.ioc,.cproject}`, `.github/workflows/*`, `tools/*.xlsx` · GiUCAN https://github.com/anegrin/GiUCAN · canable-fw https://github.com/normaldotcom/canable-fw · PIDs https://github.com/danardi78/Alfaromeo-Giulia-Stelvio-PIDs · upstream issue #34 (author on power and three boards).
+FYSETC UCAN V1.0 schematic and component position (https://github.com/FYSETC/UCAN/tree/main/Hardware) · diagrams drawn for this plan: `docs/images/src/make_diagrams.py` (+ `render.js` → PNG) · `README.md`, `LICENSE.MD`, `manuals/Baccable_manual_*.pdf` (v4.9), `hardware/newBaccableDedicatedPcb/*`, `hardware/system_interconnection/*`, `hardware/canable/*` (MKS schematics, STM32F072 datasheet), `hardware/box/*`, `firmware/ledsStripController/{Core,Makefile,MAKEFILE.md,*.ld,baccable.ioc,.cproject}`, `.github/workflows/*`, `tools/*.xlsx` · GiUCAN https://github.com/anegrin/GiUCAN · canable-fw https://github.com/normaldotcom/canable-fw · PIDs https://github.com/danardi78/Alfaromeo-Giulia-Stelvio-PIDs · upstream issue #34 (author on power and three boards).

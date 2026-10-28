@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="430" viewBox="0 0 1200 430">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="30" y="40" font-family="DejaVu Sans, Arial, sans-serif" font-size="22" fill="#111827" text-anchor="start" font-weight="bold">Power — Option B, the author's topology (always-on 12 V → one 3.3 V rail)</text>
+<rect x="30" y="110" width="150" height="80" rx="6" fill="#f8fafc" stroke="#334155" stroke-width="2"/>
+<text x="105" y="142" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="middle" font-weight="bold">OBD pin 16</text>
+<text x="105" y="164" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="middle" font-weight="normal">+12 V always on</text>
+<polyline points="180,150 260,150" fill="none" stroke="#dc2626" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="260" y="128" width="90" height="44" rx="8" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+<text x="305" y="156" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#dc2626" text-anchor="middle" font-weight="bold">1 A fuse</text>
+<polyline points="350,150 430,150" fill="none" stroke="#dc2626" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="430" y="90" width="220" height="150" rx="10" fill="#fff7ed" stroke="#334155" stroke-width="2"/>
+<text x="540" y="124" font-family="DejaVu Sans, Arial, sans-serif" font-size="17" fill="#111827" text-anchor="middle" font-weight="bold">12 → 3.3 V buck</text>
+<text x="540" y="150" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="middle" font-weight="normal">input ≥ 30 V rated</text>
+<text x="540" y="170" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="middle" font-weight="normal">output ≥ 0.5 A, low idle current</text>
+<text x="540" y="194" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#dc2626" text-anchor="middle" font-weight="bold">set 3.30 V with no board</text>
+<text x="540" y="212" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="middle" font-weight="normal">(3.2–3.4 V, never &gt; 3.6 V)</text>
+<polyline points="650,130 720,130 720,90 840,90" fill="none" stroke="#e11d48" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="650,180 700,180 700,116 840,116" fill="none" stroke="#111827" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="9,5"/>
+<rect x="840" y="76" width="30" height="54" rx="4" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="855" y="144" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#64748b" text-anchor="middle" font-weight="normal">plug</text>
+<polyline points="870,90 930,90" fill="none" stroke="#e11d48" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="870,116 930,116" fill="none" stroke="#111827" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="9,5"/>
+<rect x="930" y="68" width="220" height="62" rx="8" fill="#f1f5f9" stroke="#334155" stroke-width="2"/>
+<text x="945" y="95" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">C1: P3 3V3</text>
+<text x="945" y="121" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">C1: P3 G</text>
+<polyline points="650,130 720,130 720,180 840,180" fill="none" stroke="#e11d48" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="650,180 700,180 700,206 840,206" fill="none" stroke="#111827" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="9,5"/>
+<rect x="840" y="166" width="30" height="54" rx="4" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="855" y="234" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#64748b" text-anchor="middle" font-weight="normal">plug</text>
+<polyline points="870,180 930,180" fill="none" stroke="#e11d48" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="870,206 930,206" fill="none" stroke="#111827" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="9,5"/>
+<rect x="930" y="158" width="220" height="62" rx="8" fill="#f1f5f9" stroke="#334155" stroke-width="2"/>
+<text x="945" y="185" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">C2: P3 3V3</text>
+<text x="945" y="211" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">C2: P3 G</text>
+<polyline points="650,130 720,130 720,270 840,270" fill="none" stroke="#e11d48" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="650,180 700,180 700,296 840,296" fill="none" stroke="#111827" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="9,5"/>
+<rect x="840" y="256" width="30" height="54" rx="4" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="855" y="324" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#64748b" text-anchor="middle" font-weight="normal">plug</text>
+<polyline points="870,270 930,270" fill="none" stroke="#e11d48" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="870,296 930,296" fill="none" stroke="#111827" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="9,5"/>
+<rect x="930" y="248" width="220" height="62" rx="8" fill="#f1f5f9" stroke="#334155" stroke-width="2"/>
+<text x="945" y="275" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">BH: P3 3V3</text>
+<text x="945" y="301" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">BH: P3 G</text>
+<rect x="30" y="270" width="150" height="70" rx="6" fill="#f8fafc" stroke="#334155" stroke-width="2"/>
+<text x="105" y="300" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="middle" font-weight="bold">OBD pins 4 + 5</text>
+<text x="105" y="322" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="middle" font-weight="normal">ground</text>
+<polyline points="180,305 330,305" fill="none" stroke="#111827" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="340" cy="305" r="10" fill="#fff" stroke="#111827" stroke-width="3"/>
+<text x="326" y="345" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="end" font-weight="bold">ground star</text>
+<polyline points="350,305 500,305 500,240" fill="none" stroke="#111827" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="510" y="290" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal">buck IN− / OUT−</text>
+<polyline points="340,315 340,380 930,380" fill="none" stroke="#111827" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="935" y="385" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="start" font-weight="normal">and each board's P1 GND (CAN cable)</text>
+<text x="30" y="418" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#dc2626" text-anchor="start" font-weight="bold">Rule: never plug USB into a board while its 3.3 V plug is connected — unplug the plug first (no diode on a UCAN).</text>
+</svg>

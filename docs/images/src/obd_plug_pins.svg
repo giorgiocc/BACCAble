@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="560" viewBox="0 0 1100 560">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="30" y="40" font-family="DejaVu Sans, Arial, sans-serif" font-size="24" fill="#111827" text-anchor="start" font-weight="bold">OBD male plug — the pins we populate</text>
+<text x="30" y="66" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#64748b" text-anchor="start" font-weight="normal">Seen from the wire (solder) side = same layout as looking into the car's socket. Pins 1–8 on the long side. Trust the numbers moulded on your plug.</text>
+<path d="M 120 110 L 980 110 L 930 330 L 170 330 Z" fill="#f8fafc" stroke="#334155" stroke-width="3"/>
+<circle cx="220" cy="170" r="22" fill="#fff" stroke="#94a3b8" stroke-width="2"/>
+<text x="220" y="176" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#94a3b8" text-anchor="middle" font-weight="normal">1</text>
+<circle cx="314" cy="170" r="22" fill="#fff" stroke="#94a3b8" stroke-width="2"/>
+<text x="314" y="176" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#94a3b8" text-anchor="middle" font-weight="normal">2</text>
+<circle cx="408" cy="170" r="22" fill="#d97706" stroke="#0f172a" stroke-width="2"/>
+<text x="408" y="176" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#fff" text-anchor="middle" font-weight="bold">3</text>
+<text x="408" y="138" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#d97706" text-anchor="middle" font-weight="bold">BH H</text>
+<circle cx="502" cy="170" r="22" fill="#111827" stroke="#0f172a" stroke-width="2"/>
+<text x="502" y="176" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#fff" text-anchor="middle" font-weight="bold">4</text>
+<text x="502" y="138" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="middle" font-weight="bold">GND</text>
+<circle cx="596" cy="170" r="22" fill="#111827" stroke="#0f172a" stroke-width="2"/>
+<text x="596" y="176" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#fff" text-anchor="middle" font-weight="bold">5</text>
+<text x="596" y="138" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="middle" font-weight="bold">GND</text>
+<circle cx="690" cy="170" r="22" fill="#d97706" stroke="#0f172a" stroke-width="2"/>
+<text x="690" y="176" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#fff" text-anchor="middle" font-weight="bold">6</text>
+<text x="690" y="138" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#d97706" text-anchor="middle" font-weight="bold">C1 H</text>
+<circle cx="784" cy="170" r="22" fill="#fff" stroke="#94a3b8" stroke-width="2"/>
+<text x="784" y="176" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#94a3b8" text-anchor="middle" font-weight="normal">7</text>
+<circle cx="878" cy="170" r="22" fill="#fff" stroke="#94a3b8" stroke-width="2"/>
+<text x="878" y="176" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#94a3b8" text-anchor="middle" font-weight="normal">8</text>
+<circle cx="220" cy="270" r="22" fill="#fff" stroke="#94a3b8" stroke-width="2"/>
+<text x="220" y="276" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#94a3b8" text-anchor="middle" font-weight="normal">9</text>
+<circle cx="314" cy="270" r="22" fill="#fff" stroke="#94a3b8" stroke-width="2"/>
+<text x="314" y="276" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#94a3b8" text-anchor="middle" font-weight="normal">10</text>
+<circle cx="408" cy="270" r="22" fill="#15803d" stroke="#0f172a" stroke-width="2"/>
+<text x="408" y="276" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#fff" text-anchor="middle" font-weight="bold">11</text>
+<text x="408" y="316" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#15803d" text-anchor="middle" font-weight="bold">BH L</text>
+<circle cx="502" cy="270" r="22" fill="#d97706" stroke="#0f172a" stroke-width="2"/>
+<text x="502" y="276" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#fff" text-anchor="middle" font-weight="bold">12</text>
+<text x="502" y="316" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#d97706" text-anchor="middle" font-weight="bold">C2 H</text>
+<circle cx="596" cy="270" r="22" fill="#15803d" stroke="#0f172a" stroke-width="2"/>
+<text x="596" y="276" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#fff" text-anchor="middle" font-weight="bold">13</text>
+<text x="596" y="316" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#15803d" text-anchor="middle" font-weight="bold">C2 L</text>
+<circle cx="690" cy="270" r="22" fill="#15803d" stroke="#0f172a" stroke-width="2"/>
+<text x="690" y="276" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#fff" text-anchor="middle" font-weight="bold">14</text>
+<text x="690" y="316" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#15803d" text-anchor="middle" font-weight="bold">C1 L</text>
+<circle cx="784" cy="270" r="22" fill="#fff" stroke="#94a3b8" stroke-width="2"/>
+<text x="784" y="276" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#94a3b8" text-anchor="middle" font-weight="normal">15</text>
+<circle cx="878" cy="270" r="22" fill="#dc2626" stroke="#0f172a" stroke-width="2"/>
+<text x="878" y="276" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#fff" text-anchor="middle" font-weight="bold">16</text>
+<text x="878" y="316" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#dc2626" text-anchor="middle" font-weight="bold">+12 V</text>
+<text x="60" y="390" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">C1 bus 500 kbit/s</text>
+<text x="260" y="390" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">6 = CAN_H, 14 = CAN_L</text>
+<text x="520" y="390" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#64748b" text-anchor="start" font-weight="normal">→ C1 terminal (W1/W2)</text>
+<text x="60" y="416" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">C2 bus 500 kbit/s</text>
+<text x="260" y="416" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">12 = CAN_H, 13 = CAN_L</text>
+<text x="520" y="416" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#64748b" text-anchor="start" font-weight="normal">→ C2 terminal (W3/W4)</text>
+<text x="60" y="442" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">BH bus 125 kbit/s</text>
+<text x="260" y="442" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">3 = CAN_H, 11 = CAN_L</text>
+<text x="520" y="442" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#64748b" text-anchor="start" font-weight="normal">→ BH terminal (W5/W6)</text>
+<text x="60" y="468" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">Ground</text>
+<text x="260" y="468" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">4 + 5 joined</text>
+<text x="520" y="468" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#64748b" text-anchor="start" font-weight="normal">→ ground star (W7)</text>
+<text x="60" y="494" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">Power</text>
+<text x="260" y="494" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">16 = +12 V always on</text>
+<text x="520" y="494" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#64748b" text-anchor="start" font-weight="normal">→ 1 A fuse → 3.3 V buck (W11)</text>
+<text x="60" y="520" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">Empty</text>
+<text x="260" y="520" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">1, 2, 7, 8, 9, 10, 15</text>
+<text x="520" y="520" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#64748b" text-anchor="start" font-weight="normal">author's extra I/O and LED strip — not used</text>
+</svg>
