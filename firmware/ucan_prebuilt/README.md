@@ -8,6 +8,7 @@ Dashboard version string: `BACCABLE ucan-<git short hash>`. Full plan: `docs/BAC
 | `C1.elf` / `C1.bin` | C1 master | 6 (H) / 14 (L) | 500 kbit/s |
 | `C2.elf` / `C2.bin` | C2 slave | 12 (H) / 13 (L) | 500 kbit/s |
 | `BH.elf` / `BH.bin` | BH slave | 3 (H) / 11 (L) | 125 kbit/s |
+| `SNIFFER_ActAsCanable.*` | spare board: plain SLCAN sniffer for SavvyCAN (any bus; set 500 k for C1/C2, 125 k for BH) | – | – |
 | `C1_BENCH_ONLY.*` | C1, desk tests only (CAN silent loopback + simulated frames) — **never in the car** | – | – |
 
 ## C1 flags

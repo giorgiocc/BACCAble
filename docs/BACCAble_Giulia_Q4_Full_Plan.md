@@ -144,7 +144,7 @@ The car buses are already terminated, so no board may add a terminator. The repo
 | `C1` | `-DIS_GASOLINE -DUCAN_LOW_CONSUME_PINS -DDISABLE_IMMOBILIZER -DDISABLE_THE_FUNCTION_SMART_DISABLE_START_STOP` | 79,004 B |
 | `C1_BENCH_ONLY` | same + `-DDEBUG_CAN_RX_SIMULATION` (CAN in silent loopback, simulated frames; **never in the car**) | 79,080 B |
 | `C2`, `BH` | none (stock) | 37,532 B / 36,800 B |
-| `SNIFFER_ActAsCanable` | `CAN_FLAVOR` (plain SLCAN sniffer for SavvyCAN, for the spare) | ≈ 25 KB |
+| `SNIFFER_ActAsCanable` | `CAN_FLAVOR` (plain SLCAN sniffer for SavvyCAN, for the spare) | 25,644 B |
 
 Checked with the preprocessor: `LOW_CONSUME` defined; `IMMOBILIZER_ENABLED`, `SMART_DISABLE_START_STOP`, `IS_DIESEL` undefined. The defaults apply only to a board whose settings flash page is blank, so **erase the whole chip** when flashing a board that ran BACCAble before. The fork's "Build Beta Version" GitHub workflow accepts the same flags in its `CFLAGS` input. [Repo][Built]
 
