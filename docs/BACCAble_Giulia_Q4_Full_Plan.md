@@ -241,7 +241,15 @@ Pin 16 ↔ 4 ≈ 12 V is not required for USB-powered builds.
 | **S6** | Enable one at a time, ignition cycle + fault check after each: **Start&Stop disabler → immobilizer (optional) → dashboard parameters (petrol list) → shift lights → convenience (windows, park mirror, QV flap, seat-belt/odometer) → proxy-alignment features (ACC/HAS pads, race mask)** | no new faults |
 | **S7** | **High-risk, last, stationary/closed course only:** 4WD disabler (C1); with C2: ESC/TC, DYNO, front-brake override. Prove rollback first (menu-disable, unplug, ignition cycle, Clear Faults) | rollback proven |
 
-Build commands (BACCAble, GCC): from `firmware/ledsStripController`, copy `Core/Inc/user_config.h.sample` → `user_config.h` and add `-DINCLUDE_USER_CONFIG_H`; flavors via `-DRELEASE_FLAVOR=C1_FLAVOR -DC1_FLAVOR=1` (likewise `C2_FLAVOR`, `BH_FLAVOR`). Example C1: `CFLAGS='-DINCLUDE_USER_CONFIG_H -DIS_GASOLINE -DRELEASE_FLAVOR=C1_FLAVOR -DC1_FLAVOR=1' make clean all` with `#define DISABLE_LOW_CONSUME` in `user_config.h`. Flashing: STM32CubeProgrammer in USB-DFU mode with the `.elf` (the repo's flashing app is documented for the dedicated PCB; loose-module flashing is not documented by the repo). [Repo][Unv]
+**Build commands — tested.** Toolchain: `gcc-arm-none-eabi` 13.2 (Ubuntu `apt install gcc-arm-none-eabi libnewlib-arm-none-eabi`; any recent ARM GNU toolchain works). From `firmware/ledsStripController`:
+```bash
+# C1 master, gasoline defaults, sleep disabled (loose UCANs)
+CFLAGS="-DIS_GASOLINE -DDISABLE_LOW_CONSUME -DRELEASE_FLAVOR=C1_FLAVOR -DC1_FLAVOR=1" make clean all
+# slaves (BH on OBD 3/11, C2 on OBD 12/13)
+CFLAGS="-DRELEASE_FLAVOR=BH_FLAVOR -DBH_FLAVOR=1" make clean all
+CFLAGS="-DRELEASE_FLAVOR=C2_FLAVOR -DC2_FLAVOR=1" make clean all
+```
+Output is `build/baccable-*.elf`, `.bin` and `.hex`. **Built and verified in this session (all three compile and link with no errors):** C1 (gasoline, no low-consume) = **78,620 bytes** (so it needs >64 KB flash; fits the 96 KB C1 linker region), C2 = 37,524 bytes, BH = 36,796 bytes. C1 also compiles with `-DDEBUG_CAN_RX_SIMULATION` added (bench-test build, not for the car). The Makefile picks the C1 linker script automatically when the flags contain `C1_FLAVOR`. The release workflows build exactly these three flavors with just the `-DRELEASE_FLAVOR` flags, so downloading the stable `.elf` files from GitHub Releases and building your own C1 are interchangeable except for the `-DDISABLE_LOW_CONSUME`/`-DIS_GASOLINE` choices (gasoline can also be selected in the SETUP menu at run time). Flashing: STM32CubeProgrammer in USB-DFU mode with the `.elf` (or `.bin` at `0x08000000`); the repo's own flashing app is documented for the dedicated PCB only. [Repo][built]
 
 **Excluded:** REMOTE START and PEDAL BOOSTER ("under development, do not activate" per manual v4.9). **Not for petrol:** DPF/regeneration alert. [Repo]
 
