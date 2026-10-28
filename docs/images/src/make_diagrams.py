@@ -277,8 +277,23 @@ def board_prep():
     s.rect(cx, cy, 225 * k, 225 * k, fill="#111827", stroke="#94a3b8", sw=2, rx=3)
     s.text(cx + 112 * k, cy + 105 * k, "U3", 16, "#e2e8f0", anchor="middle", weight="bold")
     s.text(cx + 112 * k, cy + 130 * k, "STM32F072CB", 11, "#cbd5e1", anchor="middle")
-    s.text(cx + 112 * k, cy + 150 * k, "pin 1 at the dot,", 10, "#cbd5e1", anchor="middle")
-    s.text(cx + 112 * k, cy + 164 * k, "count anticlockwise", 10, "#cbd5e1", anchor="middle")
+    # LQFP48 pins: 12 per side, pin 1 next to the dot in the bottom-right corner (FYSETC render)
+    side = 225 * k
+    step = side / 13
+    for i in range(12):
+        t = (i + 1) * step
+        col_top = "#a78bfa" if i == 2 else "#9ca3af"          # top side right->left = pins 13..24
+        s.rect(cx + side - t - 1.5, cy - 9, 3, 9, fill=col_top, rx=1)
+        s.rect(cx + t - 1.5, cy + side, 3, 9, fill="#60a5fa" if i == 0 else "#9ca3af", rx=1)
+        s.rect(cx - 9, cy + t - 1.5, 9, 3, fill="#fb923c" if i == 9 else "#9ca3af", rx=1)
+        s.rect(cx + side, cy + side - t - 1.5, 9, 3, fill="#fde047" if i == 0 else "#9ca3af", rx=1)
+    s.circle(cx + side - 14, cy + side - 14, 5, "#e5e7eb")
+    s.text(cx + side + 14, cy + side - 8, "1", 12, "#fde047", weight="bold")
+    p15x = cx + side - 3 * step
+    s.text(p15x, cy - 16, "15 = PA5 (C1 standby wire)", 12, "#c4b5fd", anchor="middle", weight="bold")
+    s.text(cx - 14, cy + 10 * step + 4, "34 = DO", 11, "#fdba74", anchor="end", weight="bold")
+    s.text(cx + step, cy + side + 24, "37 = CK", 11, "#93c5fd", anchor="middle", weight="bold")
+    s.text(cx + 112 * k, cy + 150 * k, "dot = pin 1", 10, "#cbd5e1", anchor="middle")
     # P2 (top row) and P3 (bottom row)
     for i, lab in enumerate(["CK", "DO", "RES", "G", "B0", "3V3"]):
         x, y = P(803 + i * 90, 482)
@@ -351,7 +366,7 @@ def board_prep():
     # callouts (below the board)
     by = y1 + 40
     notes = [
-        ("1", "R1 + R2 (59 Ω each, fixed ≈118 Ω terminator): REMOVE on C1, C2, BH", C["remove"]),
+        ("1", "R1 + R2 (59 Ω each, ≈118 Ω terminator, on by default): REMOVE on C1, C2, BH when H0 reads ≈118 Ω", C["remove"]),
         ("2", "R4 (10 kΩ pull-up on U1 pin 8): REMOVE if fitted; keep R18 (10 kΩ to GND)", C["remove"]),
         ("3", "JP1: leave open (no jumper) — R3 stays, it only acts when the jumper is fitted", "#b45309"),
         ("4", "Wire P2: CK on all; DO on C1 only; RES on C2/BH; button B0 ↔ 3V3 on all", C["serial"]),

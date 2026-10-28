@@ -1,4 +1,4 @@
-# DIY BACCAble — Full Plan, Build Steps and Firmware (v4.7)
+# DIY BACCAble — Full Plan, Build Steps and Firmware (v4.8)
 
 **Mission:** build our own BACCAble from loose boards instead of buying the author's ready-made device, and make it **behave the same as the author's device in every way except the WS281x LED strip** (not built, not wired, left disabled).
 **Build:** the **full BACCAble — three UCAN boards, C1 + C2 + BH**, one per CAN bus, exactly like the three chips on the author's PCB. This is **not** the two-board (C1 + BH) minimalist/test setup: every board, wire and step below is for three boards, and wherever a repo picture shows only one or two UCANs it is used only as a pad/label/mounting reference.
@@ -63,7 +63,23 @@ The author's own OBD plug pinout (what his PCB uses on each pin — we only use 
 *Source: `hardware/newBaccableDedicatedPcb/pinout.png` (also manual page 5). CMD1–3, STS1–3 and LED CTRL are the author's extra I/O (§10); not used here.*
 
 ### 2.2 The UCAN board, part by part (board maker's schematic)
-The repo only shows the UCAN in pictures, so this map comes from the board maker's own drawings: FYSETC `UCAN V1.0 SCH.pdf` and `UCAN V1.0 Component Position.pdf` (https://github.com/FYSETC/UCAN/tree/main/Hardware). It agrees with the repo's pictures and the firmware's pin use. [FYSETC][Repo]
+**Our board is the one the author uses:** the FYSETC UCAN sold at https://www.fysetc.com/products/fysetc-ucan-board, documented in FYSETC's open-source repository https://github.com/FYSETC/UCAN. That repository holds only:
+- the README, with a top-view render;
+- `Hardware/UCAN V1.0 SCH.pdf` and `Hardware/UCAN V1.0 Component Position.pdf`;
+- a STEP model.
+
+What its README says, and how it fits the build:
+
+| FYSETC README says | Meaning for us |
+|---|---|
+| STM32F072, candleLight firmware | same chip family the BACCAble README asks for |
+| "Compatible with candleLight V1 hardware pin assignment" | LEDs on PA0/PA1 and CAN on PB8/PB9, as the BACCAble firmware expects; the BACCAble README lists candleLight among the compatible boards |
+| "3-pin screw plug terminal: CANH, CANL, GND" | the order of the README's text only: the schematic gives P1 pin 1 = CAN_L, pin 2 = CAN_H, pin 3 = GND, and the silkscreen in the repo's photo reads CAN_L · CAN_H · GND. **Go by the print on your board** |
+| "Headers to enter bootloader … and SWD interface" | the P2 row (B0, 3V3, CK = SWCLK, DO = SWDIO, RES, G) |
+| "Headers to CAN interface before transceiver" | the P3 row (RX, TX, G, 3V3): not used |
+| "Headers to enable/disable termination, **On-board termination resistors (2 x 59R) are used by default**" | **every UCAN arrives terminated**, which is what §6 removes |
+
+The board details below come from FYSETC's schematic and component-position drawing. They agree with the repo's pictures and the firmware's pin use. [FYSETC][Repo]
 
 | Ref | What it is | What we do with it |
 |---|---|---|
@@ -83,7 +99,16 @@ The repo only shows the UCAN in pictures, so this map comes from the board maker
 
 The C1 / C2 / BH firmware never touches **PC13** (no GPIOC code in the fork), so on C2 and BH the transceiver's pin 8 is free for the author's standby line. [Repo]
 
-**Identify every pad with the meter before soldering** (board unpowered, continuity/beep mode). Don't rely only on silkscreen read from photos. On the LQFP48 chip, pin 1 is at the dot; count anticlockwise, 12 pins per side. On U1 (8 pins), pin 1 is at the dot or chamfer; pin 8 is beside pin 1 on the other row, on the side facing the green terminal, closest to R4/R18.
+**Identify every pad with the meter before soldering** (board unpowered, continuity/beep mode). Don't rely only on silkscreen read from photos. On the LQFP48 chip, pin 1 is at the dot; count anticlockwise, 12 pins per side.
+
+**Where the dot is:** in FYSETC's README render (USB on the left, terminal on the right), the dot is in the chip's **bottom-right** corner. [FYSETC][Infer]
+- Pin 1 is the lowest pin of the chip's right-hand side.
+- Pins 1–12 run up the right side.
+- Pins 13–24 run right to left along the top side.
+- Pins 25–36 run down the left side.
+- Pins 37–48 run left to right along the bottom side.
+
+So **PA5 = pin 15 is the 3rd pin from the right on the top side** (PA4 = pin 14 is the 2nd). **Confirm the orientation before soldering:** pin 37 (bottom side, leftmost) must beep to **CK**, and pin 34 (left side, 3rd from the bottom) to **DO**. On U1 (8 pins), pin 1 is at the dot or chamfer; pin 8 is beside pin 1 on the other row, on the side facing the green terminal, closest to R4/R18.
 
 | Pad | Must beep to |
 |---|---|
@@ -340,7 +365,7 @@ Rules for every option: **never put 12 V on a UCAN**; one common ground; C2/BH s
 ### 5.2 Standby line (author's PA5) — no firmware change needed
 - The firmware **already drives PA5 exactly as the author's**: push-pull output, **low = slave transceivers active** (set at start-up and on every wake), **high = standby** (set when C1 goes to sleep). Our flag only moved the reset line; PA5 is untouched. [Repo: `lowConsume.c`]
 - On the author's PCB PA5 runs to the **RS pin (pin 8)** of the C2 and BH transceivers (schematic sheets 3/4, `CanLowConsumeCmd`, one 10 kΩ pull-down R27 drawn on the C2 sheet). On a UCAN the transceiver's standby/silent pin (**pin 8, "S"/"RS"**) is wired to that board's own **PC13** (GiUCAN calls it `CAN_S`, "can silent pin"); the BACCAble C2/BH firmware **never drives PC13**, so an external line can control it without a conflict. [Repo][GiUCAN]
-- **Wiring:** one thin wire (30 AWG wire-wrap or enamelled) from **C1's chip pin 15 = PA5** (LQFP48 numbering from the MKS CANable schematic in the repo: PA4 = 14, PA5 = 15) to **pin 8 of the CAN transceiver** (the 8-pin chip next to the green terminal) on **C2** and on **BH**. Pin 15 is on the 0.5 mm-pitch side of the chip: use flux, a fine tip, and check with a loupe that pins 14/16 are not bridged.
+- **Wiring:** one thin wire (30 AWG wire-wrap or enamelled) from **C1's chip pin 15 = PA5** (LQFP48 numbering from the MKS CANable schematic in the repo: PA4 = 14, PA5 = 15) to **pin 8 of the CAN transceiver** (the 8-pin chip next to the green terminal) on **C2** and on **BH**. Pin 15 is the 3rd pin from the right on the chip's top side (USB on the left; how to confirm it: §2.2). The pitch is 0.5 mm: use flux and a fine tip, and check with a loupe that pins 14/16 are not bridged.
 - **Before soldering, identify pin 8 on your boards:** pin 1 is marked by the dot; pin 8 is the pin beside pin 1 on the opposite row. Confirm with the multimeter: **continuity between transceiver pin 8 and the board's chip pin 2 (PC13)**. If there is no continuity, stop and re-check (the board differs from GiUCAN's). [Infer]
 - **Result:** during sleep the slaves are held in reset **and** their transceivers are in standby/silent mode — the author's exact behaviour and the lowest sleep current. At start-up, before C1's firmware sets PA5, the line is held low by each slave's own **R18 10 kΩ to GND** (R4 removed in H1, §2.2), so the transceivers stay active, as with the author's R27 pull-down. Even if R4 were left in, the line would sit at about half the supply, still below the SN65HVD230's standby threshold (≈ 0.75 × 3.3 V). Load on PA5: ≈ 0.33 mA per slave, well within the pin's rating. [FYSETC][Infer]
 - *Optional, fully pin-identical variant:* also take the reset line from C1's chip **pin 14 (PA4)** instead of the DO pad and build C1 **without** `-DUCAN_LOW_CONSUME_PINS` (the author's stock pins). Same behaviour, but one more fine-pitch joint next to pin 15; the DO-pad route is the easier one.
@@ -358,9 +383,15 @@ Rules for every option: **never put 12 V on a UCAN**; one common ground; C2/BH s
 
 The car buses are already terminated (≈ 60 Ω each), and the author's PCB adds **no** terminator (his diagrams say "TERMINATION NOT INSERTED"). So no board of ours may add one. [Repo]
 
-**What a UCAN has** (FYSETC schematic, §2.2): [FYSETC]
-- **R1 + R2 = 59 Ω + 59 Ω in series across CAN_H–CAN_L (≈ 118 Ω).** This is permanently connected, and the 2-pin header does **not** switch it off.
-- The header **JP1** only adds a **second** terminator (R3 120 Ω) when a jumper is fitted.
+**What a UCAN has** (FYSETC, §2.2): [FYSETC]
+- **README:** "On-board termination resistors (2 x 59R) are used by default", so the board ships terminated.
+- **Schematic:** **R1 + R2 = 59 Ω + 59 Ω in series across CAN_H–CAN_L (≈ 118 Ω)**, permanently connected.
+- **The header JP1:** the README calls it "enable/disable termination", but the schematic shows it adds a **second** terminator (R3 120 Ω) when a jumper is fitted.
+
+**Your H0 measurement decides which description your boards follow** (unpowered, no jumper on JP1, meter across CAN_H–CAN_L on P1):
+- **≈ 118 Ω:** R1 + R2 are hard-wired, as in the schematic. Do steps 1–4 below.
+- **Open (tens of kΩ or more):** the header controls the terminator and it is already off. Remove nothing, and just keep JP1 open.
+- **≈ 60 Ω:** a jumper is on JP1. Take it off and measure again.
 
 Left as delivered, each of our boards would put ≈ 118 Ω on its bus. 60 Ω ∥ 118 Ω ≈ 40 Ω on every bus, which risks bus errors and warning lights.
 
@@ -386,8 +417,8 @@ The author's older single-CANable diagram is where "TERMINATION NOT INSERTED" co
 
 | Step | Action | Pass when |
 |---|---|---|
-| **H0** | Inspect every board: chip marking **STM32F072CB**, transceiver **SN65HVD230** (or 230-compatible); label C1, C2, BH, SPARE. Unpowered, JP1 open: measure CAN_H↔CAN_L on P1. Identify every pad with the continuity table in §2.2. Check whether **R4** is fitted (resistor beside R18; or, powered from USB, U1 pin 8 reads ≈ 1.6 V instead of ≈ 0 V). | ≈ 118 Ω (the fixed R1 + R2); every pad beeps to the chip pin listed; R4 noted |
-| **H1** | **Remove R1 and R2** on C1, C2, BH (and the spare if it will sniff the car) — §6; practise on the spare. Keep JP1 open. **If R4 is fitted, remove it** on C1, C2, BH, so each RS pin has only R18 10 kΩ to GND, as on the author's PCB. | CAN_H↔CAN_L ≫ 1 kΩ on each board; U1 pin 8 ↔ G ≈ 10 kΩ; no solder bridges near U1/P1 |
+| **H0** | Inspect every board: chip marking **STM32F072CB**, transceiver **SN65HVD230** (or 230-compatible); label C1, C2, BH, SPARE. Unpowered, JP1 open: measure CAN_H↔CAN_L on P1. Identify every pad with the continuity table in §2.2. Check whether **R4** is fitted (resistor beside R18; or, powered from USB, U1 pin 8 reads ≈ 1.6 V instead of ≈ 0 V). | ≈ 118 Ω (the fixed R1 + R2, FYSETC's "used by default"); if a jumper sits on JP1, take it off first; every pad beeps to the chip pin listed; R4 noted |
+| **H1** | **Remove R1 and R2** (when H0 read ≈ 118 Ω) on C1, C2, BH (and the spare if it will sniff the car) — §6; practise on the spare. Keep JP1 open. **If R4 is fitted, remove it** on C1, C2, BH, so each RS pin has only R18 10 kΩ to GND, as on the author's PCB. | CAN_H↔CAN_L ≫ 1 kΩ on each board; U1 pin 8 ↔ G ≈ 10 kΩ; no solder bridges near U1/P1 |
 | **H2** | Flash check comes in S1 (needs USB). On every board: wire or header the P2 pads **CK, B0, 3V3** and the P3 pads **3V3, G**. On C1 add **DO**, on C2/BH add **RES**. Fit the boot button **B0 ↔ P2 3V3** on each board (W18–W20, §2.3.4). | pads clean, no bridges; button pressed = B0 beeps to 3V3 |
 | **H3** | **Serial wire:** C1.CK ↔ C2.CK ↔ BH.CK. | continuity CK-CK-CK, no short to G/3V3 |
 | **H4** | **Reset wire:** C1.DO ↔ C2.RES and C1.DO ↔ BH.RES. **Standby wire (§5.2):** first check continuity *transceiver pin 8 ↔ chip pin 2* on C2 and BH, then wire C1 chip pin 15 (PA5) → transceiver pin 8 of C2 and of BH; check pins 14/16 of C1 are not bridged. *(Leave unplugged until the slaves are flashed — §5 bench gotcha.)* | continuity, no short |
@@ -542,4 +573,4 @@ ESC/TC and the race screen need race mode enabled by **proxy alignment** (manual
 4. Standby wire on your boards: transceiver pin 8 ↔ chip pin 2 continuity (H4) and ≈ 0 V awake / ≈ 3.3 V asleep (S4); bus recessive while asleep (S4 voltmeter check).
 
 ## Sources (all in or linked from this fork)
-FYSETC UCAN V1.0 schematic and component position (https://github.com/FYSETC/UCAN/tree/main/Hardware) · diagrams drawn for this plan: `docs/images/src/make_diagrams.py` (+ `render.js` → PNG) · `README.md`, `LICENSE.MD`, `manuals/Baccable_manual_*.pdf` (v4.9), `hardware/newBaccableDedicatedPcb/*`, `hardware/system_interconnection/*`, `hardware/canable/*` (MKS schematics, STM32F072 datasheet), `hardware/box/*`, `firmware/ledsStripController/{Core,Makefile,MAKEFILE.md,*.ld,baccable.ioc,.cproject}`, `.github/workflows/*`, `tools/*.xlsx` · GiUCAN https://github.com/anegrin/GiUCAN · canable-fw https://github.com/normaldotcom/canable-fw · PIDs https://github.com/danardi78/Alfaromeo-Giulia-Stelvio-PIDs · upstream issue #34 (author on power and three boards).
+FYSETC UCAN V1.0 schematic and component position (https://github.com/FYSETC/UCAN/tree/main/Hardware) · FYSETC UCAN README and render (https://github.com/FYSETC/UCAN), product page https://www.fysetc.com/products/fysetc-ucan-board (not readable from this session) · diagrams drawn for this plan: `docs/images/src/make_diagrams.py` (+ `render.js` → PNG) · `README.md`, `LICENSE.MD`, `manuals/Baccable_manual_*.pdf` (v4.9), `hardware/newBaccableDedicatedPcb/*`, `hardware/system_interconnection/*`, `hardware/canable/*` (MKS schematics, STM32F072 datasheet), `hardware/box/*`, `firmware/ledsStripController/{Core,Makefile,MAKEFILE.md,*.ld,baccable.ioc,.cproject}`, `.github/workflows/*`, `tools/*.xlsx` · GiUCAN https://github.com/anegrin/GiUCAN · canable-fw https://github.com/normaldotcom/canable-fw · PIDs https://github.com/danardi78/Alfaromeo-Giulia-Stelvio-PIDs · upstream issue #34 (author on power and three boards).

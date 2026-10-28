@@ -8,8 +8,60 @@
 <rect x="375.59999999999997" y="221.6" width="162.0" height="162.0" rx="3" fill="#111827" stroke="#94a3b8" stroke-width="2"/>
 <text x="456.23999999999995" y="297.2" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#e2e8f0" text-anchor="middle" font-weight="bold">U3</text>
 <text x="456.23999999999995" y="315.2" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#cbd5e1" text-anchor="middle" font-weight="normal">STM32F072CB</text>
-<text x="456.23999999999995" y="329.6" font-family="DejaVu Sans, Arial, sans-serif" font-size="10" fill="#cbd5e1" text-anchor="middle" font-weight="normal">pin 1 at the dot,</text>
-<text x="456.23999999999995" y="339.68" font-family="DejaVu Sans, Arial, sans-serif" font-size="10" fill="#cbd5e1" text-anchor="middle" font-weight="normal">count anticlockwise</text>
+<rect x="523.6384615384615" y="212.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="386.5615384615384" y="383.6" width="3" height="9" rx="1" fill="#60a5fa"/>
+<rect x="366.59999999999997" y="232.56153846153845" width="9" height="3" rx="1" fill="#9ca3af"/>
+<rect x="537.5999999999999" y="369.63846153846157" width="9" height="3" rx="1" fill="#fde047"/>
+<rect x="511.176923076923" y="212.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="399.02307692307687" y="383.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="366.59999999999997" y="245.02307692307693" width="9" height="3" rx="1" fill="#9ca3af"/>
+<rect x="537.5999999999999" y="357.1769230769231" width="9" height="3" rx="1" fill="#9ca3af"/>
+<rect x="498.71538461538455" y="212.6" width="3" height="9" rx="1" fill="#a78bfa"/>
+<rect x="411.4846153846154" y="383.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="366.59999999999997" y="257.4846153846154" width="9" height="3" rx="1" fill="#9ca3af"/>
+<rect x="537.5999999999999" y="344.71538461538466" width="9" height="3" rx="1" fill="#9ca3af"/>
+<rect x="486.25384615384604" y="212.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="423.94615384615383" y="383.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="366.59999999999997" y="269.94615384615383" width="9" height="3" rx="1" fill="#9ca3af"/>
+<rect x="537.5999999999999" y="332.25384615384615" width="9" height="3" rx="1" fill="#9ca3af"/>
+<rect x="473.7923076923076" y="212.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="436.4076923076923" y="383.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="366.59999999999997" y="282.4076923076923" width="9" height="3" rx="1" fill="#9ca3af"/>
+<rect x="537.5999999999999" y="319.7923076923077" width="9" height="3" rx="1" fill="#9ca3af"/>
+<rect x="461.33076923076914" y="212.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="448.86923076923074" y="383.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="366.59999999999997" y="294.86923076923074" width="9" height="3" rx="1" fill="#9ca3af"/>
+<rect x="537.5999999999999" y="307.33076923076925" width="9" height="3" rx="1" fill="#9ca3af"/>
+<rect x="448.8692307692307" y="212.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="461.3307692307692" y="383.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="366.59999999999997" y="307.3307692307692" width="9" height="3" rx="1" fill="#9ca3af"/>
+<rect x="537.5999999999999" y="294.8692307692308" width="9" height="3" rx="1" fill="#9ca3af"/>
+<rect x="436.40769230769223" y="212.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="473.79230769230765" y="383.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="366.59999999999997" y="319.7923076923077" width="9" height="3" rx="1" fill="#9ca3af"/>
+<rect x="537.5999999999999" y="282.40769230769234" width="9" height="3" rx="1" fill="#9ca3af"/>
+<rect x="423.9461538461537" y="212.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="486.2538461538461" y="383.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="366.59999999999997" y="332.25384615384615" width="9" height="3" rx="1" fill="#9ca3af"/>
+<rect x="537.5999999999999" y="269.94615384615383" width="9" height="3" rx="1" fill="#9ca3af"/>
+<rect x="411.48461538461527" y="212.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="498.71538461538455" y="383.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="366.59999999999997" y="344.7153846153846" width="9" height="3" rx="1" fill="#fb923c"/>
+<rect x="537.5999999999999" y="257.4846153846154" width="9" height="3" rx="1" fill="#9ca3af"/>
+<rect x="399.0230769230768" y="212.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="511.176923076923" y="383.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="366.59999999999997" y="357.17692307692306" width="9" height="3" rx="1" fill="#9ca3af"/>
+<rect x="537.5999999999999" y="245.02307692307696" width="9" height="3" rx="1" fill="#9ca3af"/>
+<rect x="386.56153846153836" y="212.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="523.6384615384616" y="383.6" width="3" height="9" rx="1" fill="#9ca3af"/>
+<rect x="366.59999999999997" y="369.63846153846157" width="9" height="3" rx="1" fill="#9ca3af"/>
+<rect x="537.5999999999999" y="232.56153846153848" width="9" height="3" rx="1" fill="#9ca3af"/>
+<circle cx="523.5999999999999" cy="369.6" r="5" fill="#e5e7eb"/>
+<text x="551.5999999999999" y="375.6" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#fde047" text-anchor="start" font-weight="bold">1</text>
+<text x="500.21538461538455" y="205.6" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#c4b5fd" text-anchor="middle" font-weight="bold">15 = PA5 (C1 standby wire)</text>
+<text x="361.59999999999997" y="350.2153846153846" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#fdba74" text-anchor="end" font-weight="bold">34 = DO</text>
+<text x="388.0615384615384" y="407.6" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" fill="#93c5fd" text-anchor="middle" font-weight="bold">37 = CK</text>
+<text x="456.23999999999995" y="329.6" font-family="DejaVu Sans, Arial, sans-serif" font-size="10" fill="#cbd5e1" text-anchor="middle" font-weight="normal">dot = pin 1</text>
 <circle cx="590.16" cy="151.04" r="13" fill="#d4d4d8" stroke="#a1a1aa" stroke-width="2"/>
 <circle cx="590.16" cy="151.04" r="5" fill="#52525b"/>
 <text x="590.16" y="131.04" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#f8fafc" text-anchor="middle" font-weight="bold">CK</text>
@@ -101,7 +153,7 @@
 <text x="1417.44" y="470.0" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#052e16" text-anchor="middle" font-weight="bold">P1</text>
 <circle cx="46" cy="551.8" r="10" fill="#dc2626"/>
 <text x="46" y="556.8" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">1</text>
-<text x="66" y="556.8" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">R1 + R2 (59 Ω each, fixed ≈118 Ω terminator): REMOVE on C1, C2, BH</text>
+<text x="66" y="556.8" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">R1 + R2 (59 Ω each, ≈118 Ω terminator, on by default): REMOVE on C1, C2, BH when H0 reads ≈118 Ω</text>
 <circle cx="46" cy="577.8" r="10" fill="#dc2626"/>
 <text x="46" y="582.8" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">2</text>
 <text x="66" y="582.8" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">R4 (10 kΩ pull-up on U1 pin 8): REMOVE if fitted; keep R18 (10 kΩ to GND)</text>
