@@ -41,7 +41,7 @@ The author's device (schematic `hardware/newBaccableDedicatedPcb/BACCABLE_SCHEMA
 |---|---|---|---|---|
 | **C1** | master/gateway | **6 / 14** | 500 kbit/s | dashboard menu and settings, Start&Stop, immobilizer, shift, 4WD disabler, ACC/HAS pads, windows, seat-belt, read faults (BODY/ECM), ELM327, sniffer, sleep control |
 | **C2** | slave | **12 / 13** | 500 kbit/s | ESC/TC, DYNO, front-brake override, front park mute, ABS faults |
-| **BH** | slave | **3 / 11** | 125 kbit/s | text on the cluster, odometer blink, park mirror, DNA Memory |
+| **BH** | slave | **3 / 11** | 125 kbit/s | text on the cluster, odometer blink, park mirror, DNA Memory (not usable on the owner's car) |
 
 GND = OBD 4 and 5, +12 V = OBD 16. [Repo]
 
@@ -87,6 +87,8 @@ No series resistors on the serial or reset wires (the author's PCB and diagrams 
 **Recommended (parity):** OBD pin 16 → **1 A fuse** → **12 V → 5 V automotive buck converter** (input rating well above 14 V, e.g. ≥ 30 V, for load-dump spikes; ≥ 1 A out; low no-load current because it is always on) → three USB-C power leads to C1, C2, BH. Buck ground to OBD 4/5. This is GiUCAN's OBD-powered layout extended to three boards; the author confirmed "12 V requires a DC-DC, 5 V can directly power a CANable" and that both work for the immobilizer. [Repo][GiUCAN][Author][Infer]
 
 Why always-on matters for parity: with the boards kept powered and sleeping, everything the author's device remembers in RAM survives a parked car — **DNA Memory** (manual: "the stored style is lost if the BACCABLE is disconnected"), the **exhaust-flap remembered choice**, and — if you ever enable it — the immobilizer stays armed while the car sleeps. [Repo]
+
+**For the owner's car specifically:** DNA Memory does not apply (non-monostable selector, §11.12), there are no exhaust valves, and the immobilizer is off by default — so **car-USB power loses nothing that this car can use today**. Always-on 12 V stays the parity choice (and the one to use if you later enable the immobilizer or fit aftermarket valves); car-USB power is equally valid for your current setup and avoids any parked drain. Choose one before H6.
 
 **Alternative (simpler, not full parity):** take 5 V from the car USB in the centre console or the port near the cigarette lighter (manual §1.7/§2.4: switched on when you get in and when the RF hub is woken). The boards then lose power when the car sleeps, so DNA Memory and the remembered exhaust choice do not work; everything else does. [Repo]
 
@@ -166,7 +168,7 @@ sudo dfu-util -d 0483:df11 -c 1 -i 0 -a 0 -s 0x08000000:leave -D C1.bin
 | **S4** | **Bench sleep test:** flash the real `C1`, fit the reset wire, power all three with no car. | ~4 s after power-up the status LEDs of C2 and BH stop (held in reset; their power LEDs stay on) and C1's blue LED flashes once: the reset wire works. **Bus-safety check:** while they are held in reset, measure DC volts between CAN_H and CAN_L on each slave's terminal (nothing else connected): **≈ 0 V = recessive, safe**; ≈ 1.5–3 V = the slave would hold its bus dominant — do not install, report it (§5) |
 | **S5** | **Car, silent sniff (optional but recommended):** flash `SNIFFER_ActAsCanable` on the spare and use SavvyCAN in silent mode (`M1`) on each bus (500 k C1/C2, 125 k BH); the IDs in §11.5 should appear — on the BH bus look specifically for `0x256` and `0x46C`, which DNA Memory needs (§11.12). Then install the three boards (H10) and power them. | no warning lights; on unlock the boards wake |
 | **S6** | **First start:** engine running, cruise control and ACC off → hold **RES** (or DISTANCE) ~2 s → version `BACCABLE ucan-…` on the cluster. With our defaults there is **no** double blue blink and no cluster flash at power-up (those mean "immobilizer active"). Open **SETUP MENU** (§11.7): check **Diesel Params = O** (gasoline), **My23 IPC = O**, Start&Stop = O. | menu works |
-| **S7** | Enable functions **one at a time**, SAVE & EXIT, ignition cycle, check for faults after each: dashboard parameters → shift → seat-belt/odometer → windows, park mirror, park mute → proxy-alignment features (ACC pad, HAS pad, race mask) → DNA Memory (needs §4 always-on power). | no new faults |
+| **S7** | Enable functions **one at a time**, SAVE & EXIT, ignition cycle, check for faults after each: dashboard parameters → shift → seat-belt/odometer → windows, park mirror, park mute → proxy-alignment features (ACC pad, HAS pad, race mask). Leave **DNA Memory off** (selector not compatible, §11.12). | no new faults |
 | **S8** | **Last, stationary / closed course only:** 4WD disabler (C1), ESC/TC, DYNO, front-brake override (C2). Prove the way back first: disable in the menu, ignition cycle, Clear Faults. | rollback works |
 
 ---
@@ -209,7 +211,7 @@ Immobilizer **OFF**, Start&Stop disabler **OFF**, gasoline, Clear Faults ON, sea
 Enable ELM327 in SETUP, connect a data USB cable to **C1**, then the OBD side. It answers as "ELM327 v1.4" for MultiECUScan/AlfaOBD and forwards requests for ECUs on the other buses over the serial wire to **C2/BH** — this is why all three boards matter for proxy alignment. While a host is connected the dashboard buttons are ignored; the mode switches itself off after 120 s without commands. With always-on power, unplug C1's power lead while the laptop powers it (never two 5 V sources on one board). [Repo][Infer]
 
 ### 11.10 Functions that need more than the boards
-ESC/TC and the race screen need race mode enabled by **proxy alignment** (manual §2.19, which also explains keeping the pedal maps); ACC pad needs ACC hardware + proxy; HAS pad needs MY20+ hardware + proxy; park mirror needs mirror encoders; DNA Memory needs a monostable DNA selector on BH **and** always-on power; DPF/regen alert is diesel-only; Remote start and Pedal booster are "do not activate". [Repo]
+ESC/TC and the race screen need race mode enabled by **proxy alignment** (manual §2.19, which also explains keeping the pedal maps); ACC pad needs ACC hardware + proxy; HAS pad needs MY20+ hardware + proxy; park mirror needs mirror encoders; DNA Memory needs a monostable DNA selector on BH **and** always-on power (owner's car: selector not monostable → not available); DPF/regen alert is diesel-only; Remote start and Pedal booster are "do not activate". [Repo]
 
 ### 11.11 Things to know in the code
 - Gasoline parameter "OVER RPM: sec" has reply ID `0xDA18F110` instead of `0x18DAF110` (probable typo, that page may not update) — left unchanged.
@@ -219,7 +221,9 @@ ESC/TC and the race screen need race mode enabled by **proxy alignment** (manual
 
 ---
 
-### 11.12 DNA Memory — how it works and what it needs (`functions_C1baccable.c`, `functions_BHbaccable.c`, `lowConsume.c`, manual §2.34)
+### 11.12 DNA Memory — how it works and what it needs
+**Owner's car: the DNA selector is not monostable, so DNA Memory does not apply.** The manual (§2.34) and the BH code say that with another selector type BH sees no usable `0x256` frames and sends nothing, so leaving it enabled would be harmless but useless — leave it **deselected**. The S5 sniff confirms it (no `0x256` on the BH bus, or not the press pattern described below). Everything else that uses the drive style (ESC/TC race, shift, exhaust DR, pedal booster) reads it from `0x384`/`0x46C`, not from the selector, so it is unaffected. [Repo]
+ (`functions_C1baccable.c`, `functions_BHbaccable.c`, `lowConsume.c`, manual §2.34)
 **How it works**
 1. **C1 remembers** the drive style from frame `0x384` on the C1 bus while the engine runs (> 400 rpm); when the engine stops the memory is frozen. It is kept only in **RAM** (`dnaMemoryStyle`, starts as "none").
 2. **The car sleeps:** C1's bus goes quiet for > 3.5 s, so C1 enters low consume.
