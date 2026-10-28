@@ -1,4 +1,4 @@
-# DIY BACCAble — Full Plan, Build Steps and Firmware (v4)
+# DIY BACCAble — Full Plan, Build Steps and Firmware (v4.1)
 
 **Mission:** build our own BACCAble from loose boards instead of buying the author's ready-made device, and make it **behave the same as the author's device in every way except the WS281x LED strip** (not built, not wired, left disabled).
 **Car:** 2022 Alfa Romeo Giulia Sprint Q4 · 2.0 petrol · MY22 cluster · SGW with an owned bypass cable (owner confirmed it passes all three buses).
@@ -84,13 +84,23 @@ No series resistors on the serial or reset wires (the author's PCB and diagrams 
 
 ## 4. Power — same as the author: always-on 12 V with sleep
 
+**Where "always-on 12 V" comes from:** only the car's OBD port, through your SGW bypass cable — **pin 16 = +12 V** (the pin the author's device is powered from, manual §1.2; the manual's immobilizer section relies on it being live with the car off) and **pins 4/5 = ground**. No other wire in the car is tapped. But a UCAN cannot take 12 V (it runs only from 5 V on its USB-C), so three parts sit in between:
+```
+OBD pin 16 (+12 V) ─ inline fuse 1 A ─ 12→5 V buck converter IN+ ; OUT 5 V ─ 3 × power-only USB-C leads ─ C1, C2, BH
+OBD pins 4/5 (GND) ─────────────────── buck IN− / OUT− (common ground)
+```
+- **Fuse:** inline fuse holder + 1 A fuse, as close to the OBD plug as possible.
+- **Buck:** automotive 12→5 V module, input rated well above 14 V (≈ 30 V or more), ≥ 1 A output, low no-load current (it is never switched off). The author's PCB has the same fuse + buck on board (schematic: F1 → U1).
+- **USB-C leads:** power-only, one per board (or a buck with USB outputs).
+- **Check first** that the bypass cable actually carries pin 16: car off, measure **pin 16 ↔ pin 4 ≈ 12 V** on the bypass cable's OBD port (some bypass cables carry only the CAN pins and ground). This is the first action of H6.
+
 **Recommended (parity):** OBD pin 16 → **1 A fuse** → **12 V → 5 V automotive buck converter** (input rating well above 14 V, e.g. ≥ 30 V, for load-dump spikes; ≥ 1 A out; low no-load current because it is always on) → three USB-C power leads to C1, C2, BH. Buck ground to OBD 4/5. This is GiUCAN's OBD-powered layout extended to three boards; the author confirmed "12 V requires a DC-DC, 5 V can directly power a CANable" and that both work for the immobilizer. [Repo][GiUCAN][Author][Infer]
 
 Why always-on matters for parity: with the boards kept powered and sleeping, everything the author's device remembers in RAM survives a parked car — **DNA Memory** (manual: "the stored style is lost if the BACCABLE is disconnected"), the **exhaust-flap remembered choice**, and — if you ever enable it — the immobilizer stays armed while the car sleeps. [Repo]
 
 **For the owner's car specifically:** DNA Memory does not apply (non-monostable selector, §11.12), there are no exhaust valves, and the immobilizer is off by default — so **car-USB power loses nothing that this car can use today**. Always-on 12 V stays the parity choice (and the one to use if you later enable the immobilizer or fit aftermarket valves); car-USB power is equally valid for your current setup and avoids any parked drain. Choose one before H6.
 
-**Alternative (simpler, not full parity):** take 5 V from the car USB in the centre console or the port near the cigarette lighter (manual §1.7/§2.4: switched on when you get in and when the RF hub is woken). The boards then lose power when the car sleeps, so DNA Memory and the remembered exhaust choice do not work; everything else does. [Repo]
+**Alternative (simpler, not full parity):** take 5 V from the car USB in the centre console or the port near the cigarette lighter (manual §1.7/§2.4: switched on when you get in and when the RF hub is woken). Wiring: car USB-A port → passive 1→3 power splitter → three power-only USB-C leads; CAN terminal grounds still go to OBD 4/5. The boards then lose power when the car sleeps, so DNA Memory and the remembered exhaust choice do not work; everything else does. The reset wire and the sleep flag are harmless here and can stay. [Repo][Infer]
 
 Rules: **never put 12 V on a UCAN**; all boards share one ground; use power-only USB-C leads (C2/BH show up as USB pen drives on a data connection, §11.4).
 
@@ -98,7 +108,7 @@ Rules: **never put 12 V on a UCAN**; all boards share one ground; use power-only
 
 ## 5. Sleep (low consume) on UCAN boards — our one firmware change
 
-**Author's design** (`lowConsume.c`, schematic): C1 never sleeps; after **3.5 s without CAN frames** on its bus it pulls **PA4** low (open-drain) to hold C2 and BH in reset, drives **PA5** to put their transceivers in standby, pauses the serial line and lights its blue LED; when frames come back it releases both, restarts the serial line, re-sends every function setting to the slaves (≈ 3.5 s later) and arms DNA Memory. Sleep is blocked while a sniffer/ELM327/pen-drive USB session is active. [Repo]
+**Author's design** (`lowConsume.c`, schematic): C1 never sleeps; after **3.5 s without CAN frames** on its bus it pulls **PA4** low (open-drain) to hold C2 and BH in reset, drives **PA5** to put their transceivers in standby, pauses the serial line and flashes its blue LED; when frames come back it releases both, restarts the serial line, re-sends every function setting to the slaves (≈ 3.5 s later) and arms DNA Memory. Sleep is blocked while a sniffer/ELM327/pen-drive USB session is active. [Repo]
 
 **Problem on a UCAN:** PA4 and PA5 have no pads.
 **Fix in this fork:** new compile flag **`UCAN_LOW_CONSUME_PINS`** in `Core/Inc/lowConsume.h` moves the reset line to **PA13 = the DO pad** (the pin GiUCAN uses for exactly this, wired to the other board's RES pad). Default builds are unchanged. Verified in the C1 image's disassembly: PA13 open-drain output. [Repo][GiUCAN][Built]
@@ -126,12 +136,12 @@ The car buses are already terminated, so no board may add a terminator. The repo
 | **H3** | **Serial wire:** C1.CK ↔ C2.CK ↔ BH.CK. | continuity CK-CK-CK, no short to G/3V3 |
 | **H4** | **Reset wire:** C1.DO ↔ C2.RES and C1.DO ↔ BH.RES. *(Leave unplugged until the slaves are flashed — §5 bench gotcha.)* | continuity, no short |
 | **H5** | **CAN harness** to each terminal (P1: 1 = CAN_L, 2 = CAN_H, 3 = GND): C1 → 6/14, C2 → 12/13, BH → 3/11; terminal GND → OBD 4/5. Twist pairs, mark every H wire. | H/L not swapped (swapped = warning lights, manual §1.5) |
-| **H6** | **Power harness:** OBD 16 → fuse → buck → three power-only USB-C leads; buck GND → OBD 4/5. Bench-check the buck output = 5 V before connecting boards. | 5.0 V ± 0.25 V, no load drop |
+| **H6** | **Power harness** (always-on option, §4): first measure **pin 16 ↔ pin 4 ≈ 12 V** on the bypass cable's port (no 12 V → use the car-USB option). Then OBD 16 → fuse 1 A → buck → three power-only USB-C leads; buck GND → OBD 4/5. Bench-check the buck output before connecting boards. | 12 V present on pin 16; buck out 5.0 V ± 0.25 V |
 | **H7** | **Bench power test:** each board alone on 5 V: power LED on, 3V3 pad ≈ 3.3 V. Then all three on the harness. | no short, no hot parts |
 | **H8** | **Bypass cable check** (car asleep ≥ 10 min, boards unplugged): 6↔14, 12↔13 ≈ 60 Ω; 3↔11 low value; 16↔4 ≈ 12 V; 4/5↔chassis continuity. | all present (owner already confirmed the buses) |
 | **H9** | **Box:** standoffs, glands, strain relief; USB-C ports and boot buttons reachable; away from pedals, steering column, knee-airbag path, heat and HVAC flaps. Label boards at both ends. | nothing loose |
 | **H10** | **In-car, unpowered:** plug into the bypass port, re-measure every bus ≈ 60 Ω through the harness, connect power last. Do not power the boards on the car with unknown firmware. | ≈ 60 Ω each |
-| **H11** | After the firmware is in (S5): measure the 12 V current at the fuse with the car awake and ≈ 1 min after it sleeps (author's device: ≈ 15 mA asleep, < 30 mA running). | sleep current settles; boards wake when you unlock |
+| **H11** | (Always-on option) after the firmware is in (S5): measure the 12 V current at the fuse with the car awake and ≈ 1 min after it sleeps (author's device: ≈ 15 mA asleep, < 30 mA running). | sleep current settles; boards wake when you unlock |
 
 ---
 
@@ -148,7 +158,7 @@ The car buses are already terminated, so no board may add a terminator. The repo
 | `C2`, `BH` | none (stock) | 37,532 B / 36,800 B |
 | `SNIFFER_ActAsCanable` | `CAN_FLAVOR` (plain SLCAN sniffer for SavvyCAN, for the spare) | 25,644 B |
 
-Checked with the preprocessor: `LOW_CONSUME` defined; `IMMOBILIZER_ENABLED`, `SMART_DISABLE_START_STOP`, `IS_DIESEL` undefined. The defaults apply only to a board whose settings flash page is blank, so **erase the whole chip** when flashing a board that ran BACCAble before. The fork's "Build Beta Version" GitHub workflow accepts the same flags in its `CFLAGS` input. [Repo][Built]
+Checked with the preprocessor: `LOW_CONSUME` defined; `IMMOBILIZER_ENABLED`, `SMART_DISABLE_START_STOP`, `IS_DIESEL` undefined. The defaults apply only to a board whose settings flash page is blank, so **erase the whole chip** when flashing a board that ran BACCAble before (CubeProgrammer "Full chip erase"; with dfu-util the DfuSe option `-s 0x08000000:mass-erase:force:leave` should do the same [Infer]). A new UCAN's settings pages are expected to be blank. The fork's "Build Beta Version" GitHub workflow accepts the same flags in its `CFLAGS` input. [Repo][Built]
 
 **Flash a UCAN** (documented in the repo for loose boards): hold the **B0** button while plugging the **data** USB-C cable (the chip appears as `0483:df11`), then either
 ```bash
@@ -162,11 +172,11 @@ sudo dfu-util -d 0483:df11 -c 1 -i 0 -a 0 -s 0x08000000:leave -D C1.bin
 
 | Step | Action | Pass when |
 |---|---|---|
-| **S1** | On the **spare**: read device ID and **flash size = 128 KB** in CubeProgrammer, flash `BH`, unplug, replug. | it runs (blue LED activity) and appears as a USB drive "BACCABLE BH" with `Version.txt` on a data cable |
-| **S2** | Read and flash all boards: `C1`→C1 board, `C2`→C2, `BH`→BH (full chip erase). Reset wire **not** fitted yet. | each starts; C2/BH show their USB drive label |
+| **S1** | On the **spare**: read device ID and **flash size = 128 KB** in CubeProgrammer, flash `BH`, unplug, replug. | on the data cable it appears as a USB drive "BACCABLE BH" with `Version.txt` (that proves it booted); no steady red blinking |
+| **S2** | Read and flash all boards: `C1`→C1 board, `C2`→C2, `BH`→BH (full chip erase). Reset wire **not** fitted yet. | no steady red blinking on any board; C2/BH show their USB drive label on a data cable |
 | **S3** | **Bench serial test:** flash `C1_BENCH_ONLY` on C1, fit the CK wire, power all three. | after ~3 s the blue LEDs of C2 and BH pulse about once a second (C1 polling them) |
-| **S4** | **Bench sleep test:** flash the real `C1`, fit the reset wire, power all three with no car. | ~4 s after power-up the status LEDs of C2 and BH stop (held in reset; their power LEDs stay on) and C1's blue LED flashes once: the reset wire works. **Bus-safety check:** while they are held in reset, measure DC volts between CAN_H and CAN_L on each slave's terminal (nothing else connected): **≈ 0 V = recessive, safe**; ≈ 1.5–3 V = the slave would hold its bus dominant — do not install, report it (§5) |
-| **S5** | **Car, silent sniff (optional but recommended):** flash `SNIFFER_ActAsCanable` on the spare and use SavvyCAN in silent mode (`M1`) on each bus (500 k C1/C2, 125 k BH); the IDs in §11.5 should appear — on the BH bus look specifically for `0x256` and `0x46C`, which DNA Memory needs (§11.12). Then install the three boards (H10) and power them. | no warning lights; on unlock the boards wake |
+| **S4** | **Bench sleep test:** flash the real `C1`, fit the reset wire, power all three with no car. | ~4 s after power-up the status LEDs of C2 and BH stop (held in reset; their power LEDs stay on) and C1's blue LED flashes once: the reset wire works. **Bus-safety check:** while they are held in reset, measure DC volts between CAN_H and CAN_L on each slave's terminal (nothing else connected): **≈ 0 V = recessive, safe**; anything clearly above ≈ 0.5 V means the slave would hold its bus dominant — do not install it (§5) |
+| **S5** | **Car, silent sniff (optional but recommended):** flash `SNIFFER_ActAsCanable` on the spare and use SavvyCAN in silent mode (`M1`) on each bus (500 k C1/C2, 125 k BH); the IDs in §11.5 should appear — on the BH bus look specifically for `0x256` and `0x46C`, which DNA Memory needs (§11.12). Then install the three boards (H10) and power them. | no warning lights; with always-on power the boards wake on unlock (blue LEDs active again) |
 | **S6** | **First start:** engine running, cruise control and ACC off → hold **RES** (or DISTANCE) ~2 s → version `BACCABLE ucan-…` on the cluster. With our defaults there is **no** double blue blink and no cluster flash at power-up (those mean "immobilizer active"). Open **SETUP MENU** (§11.7): check **Diesel Params = O** (gasoline), **My23 IPC = O**, Start&Stop = O. | menu works |
 | **S7** | Enable functions **one at a time**, SAVE & EXIT, ignition cycle, check for faults after each: dashboard parameters → shift → seat-belt/odometer → windows, park mirror, park mute → proxy-alignment features (ACC pad, HAS pad, race mask). Leave **DNA Memory off** (selector not compatible, §11.12). | no new faults |
 | **S8** | **Last, stationary / closed course only:** 4WD disabler (C1), ESC/TC, DYNO, front-brake override (C2). Prove the way back first: disable in the menu, ignition cycle, Clear Faults. | rollback works |
@@ -208,7 +218,7 @@ Driven by the steering-wheel buttons (0x2FA), only with cruise control and ACC o
 Immobilizer **OFF**, Start&Stop disabler **OFF**, gasoline, Clear Faults ON, seat-belt alarm "enabled"; everything else OFF. Note: the seat-belt setting has no "leave untouched" choice — about 2 s after each engine start after a board power-up, C1 writes it to the cluster (`2F 55A0 03 01` = chime on, stock behaviour; `00` if you deselect it). [Repo]
 
 ### 11.9 ELM327 mode (manual §2.32)
-Enable ELM327 in SETUP, connect a data USB cable to **C1**, then the OBD side. It answers as "ELM327 v1.4" for MultiECUScan/AlfaOBD and forwards requests for ECUs on the other buses over the serial wire to **C2/BH** — this is why all three boards matter for proxy alignment. While a host is connected the dashboard buttons are ignored; the mode switches itself off after 120 s without commands. With always-on power, unplug C1's power lead while the laptop powers it (never two 5 V sources on one board). [Repo][Infer]
+Enable ELM327 in SETUP, connect a data USB cable to **C1**, then the OBD side. It answers as "ELM327 v1.4" for MultiECUScan/AlfaOBD and forwards requests for ECUs on the other buses over the serial wire to **C2/BH** — this is why all three boards matter for proxy alignment. While a host is connected the dashboard buttons are ignored; the mode switches itself off after 120 s without commands (and a lost host is waited for 3 min). **The host must enumerate the USB within 10 s of the function starting** (`SNIFFER_ACTIVATION_TIMEOUT_MS`), which happens at board start-up — that is why the manual says "USB cable first, then the OBD connector". With our boards: (1) unplug the OBD plug (everything off); (2) remove the power lead of the board you want (C1 for ELM327; C1, C2 or BH for the built-in sniffer) and connect the laptop's data cable to it instead; (3) plug the OBD plug back so all boards start together. Never two 5 V sources on one board. Afterwards put the power lead back. [Repo][Infer]
 
 ### 11.10 Functions that need more than the boards
 ESC/TC and the race screen need race mode enabled by **proxy alignment** (manual §2.19, which also explains keeping the pedal maps); ACC pad needs ACC hardware + proxy; HAS pad needs MY20+ hardware + proxy; park mirror needs mirror encoders; DNA Memory needs a monostable DNA selector on BH **and** always-on power (owner's car: selector not monostable → not available); DPF/regen alert is diesel-only; Remote start and Pedal booster are "do not activate". [Repo]
@@ -219,12 +229,11 @@ ESC/TC and the race screen need race mode enabled by **proxy alignment** (manual
 - `user_config.h.sample` calls READ FAULTS experimental while the manual documents it.
 - Licence (`LICENSE.MD`): use, modify and share with attribution to Gaucholivido - Tr3ma; **commercial resale prohibited**. [Repo]
 
----
 
 ### 11.12 DNA Memory — how it works and what it needs
 **Owner's car: the DNA selector is not monostable, so DNA Memory does not apply.** The manual (§2.34) and the BH code say that with another selector type BH sees no usable `0x256` frames and sends nothing, so leaving it enabled would be harmless but useless — leave it **deselected**. The S5 sniff confirms it (no `0x256` on the BH bus, or not the press pattern described below). Everything else that uses the drive style (ESC/TC race, shift, exhaust DR, pedal booster) reads it from `0x384`/`0x46C`, not from the selector, so it is unaffected. [Repo]
- (`functions_C1baccable.c`, `functions_BHbaccable.c`, `lowConsume.c`, manual §2.34)
-**How it works**
+
+**How it works** (`functions_C1baccable.c`, `functions_BHbaccable.c`, `lowConsume.c`, manual §2.34)
 1. **C1 remembers** the drive style from frame `0x384` on the C1 bus while the engine runs (> 400 rpm); when the engine stops the memory is frozen. It is kept only in **RAM** (`dnaMemoryStyle`, starts as "none").
 2. **The car sleeps:** C1's bus goes quiet for > 3.5 s, so C1 enters low consume.
 3. **The car wakes:** frames come back, C1 leaves low consume and sets `dnaMemoryWakeUp` — this is the *only* place the restore is armed.
@@ -240,7 +249,7 @@ ESC/TC and the race screen need race mode enabled by **proxy alignment** (manual
 | **Low consume enabled on C1** | the wake from low consume is what arms the restore | ✅ (`UCAN_LOW_CONSUME_PINS`; a build with `DISABLE_LOW_CONSUME` never restores) |
 | Reset wire | **not** needed for DNA Memory (it only lowers the sleep current; BH just keeps running without it) | fitted anyway |
 | **A monostable DNA selector that sends `0x256` on the BH bus** | its frames are the trigger for every press; with another selector type BH sees no `0x256` and does nothing (code comment cites such a car) | **check in S5:** sniff the BH bus at 125 kbit/s and look for `0x256` (every ≈ 250 ms) and `0x46C` |
-| "DNA Memory" selected in SETUP + SAVE & EXIT | off by default | enable in S7 |
+| "DNA Memory" selected in SETUP + SAVE & EXIT | off by default | **leave off on the owner's car** |
 | One drive first | right after installing nothing is memorized yet | first restore happens on the drive after the next sleep |
 
 ---
