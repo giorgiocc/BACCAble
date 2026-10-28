@@ -26,14 +26,21 @@ The author's device (schematic `hardware/newBaccableDedicatedPcb/BACCABLE_SCHEMA
 | Status LEDs | green power + red (PA0) + white/blue/yellow (PA1) per chip | each UCAN's **LD3 "3V3"** (power), **LD1 "RX"** (PA0 = red) and **LD2 "TX"** (PA1 = blue), seen through windows in the box (§2.3.5; `UCAN_BOARD_LED_INVERSION` is the build default) | ✅ |
 | No CAN termination | none on the PCB | each UCAN's fixed 118 Ω terminator (**R1 + R2, 2 × 59 Ω**) **removed**, termination header JP1 left **open** (§6) | ✅ |
 | OBD plug through the SGW bypass | the PCB is the OBD plug | OBD male breakout harness into the bypass port | ✅ |
-| LED-strip output (PA11) | OBD pin 8 | **not built** (mission) | ➖ excluded |
+| LED-strip output (PA11) | OBD pin 8 (on C1, PA11 is also the USB D− line of J10: shared net) | **not built** (mission) | ➖ excluded |
 | Aftermarket exhaust-valve remote output | C1 **PA8** → R15 4.64 kΩ → NPN **Q10** → R16 1 kΩ → `CMD_1` = **OBD pin 1** (the firmware also pulses **PA7** for "close", but the schematic draws no transistor on PA7) | optional: copy Q10 on a fine wire to C1 chip pin 29 (and, for "close", a second one on pin 17) (§10) — only if you fit aftermarket valves with a radio remote | ⚪ optional |
 | Pedal-booster serial (C1 USART1 on PB6) | cable to "schizzaForte" | optional fine-wire on C1 pin 42 (§10); the manual says the pedal booster is "under development, do not activate" | ⚪ optional |
 | STS inputs, C2/BH output transistors, GSM footprint | STS_1–3 on PA6 of each chip; Q20 (C2 PA8 → `CMD_2`, OBD 15) and Q30 (BH PA8 → `CMD_3`, OBD 2); GSM module on C2 | **not used by the firmware** (no code reads PA6; only C1's code drives PA7/PA8; no GSM code) | — nothing to copy |
 
 **What is not the same (honestly):** loose boards in our own box instead of the moulded OBD plug; the reset line leaves from PA13 instead of PA4 (same signal, a pad instead of a chip pin); one boot button per board instead of one shared button; each UCAN keeps its own power LED and regulator (bypassed by the 3.3 V rail).
 
-**The author's device we are copying** (manual §1.11): one box, three USB-C ports (one per chip: BH, C2, C1 from left to right) and one programming button.
+**The author's device we are copying** (manual §1.11): one box, three USB-C ports (one per chip: BH, C2, C1 from left to right) and one programming button. The author's video walkthrough of the PCB (screenshots and transcript supplied by the owner) describes the same design:
+- three sections on one 3.3 V supply, with USB power entering the same regulator input;
+- one boot button that puts all three chips in boot mode;
+- green power LED, a red LED per chip, and white / blue / yellow for C1 / C2 / BH;
+- C1 waking the other two through reset and putting their transceivers in low power;
+- CMD/STS pins, the LED-strip pin and a GSM header for future use.
+
+Nothing in it differs from the schematic in the repo.
 
 ![Author's BACCAble: USB-C per bus and programming button](images/manual_programming_button_usb_ports.png)
 
@@ -573,4 +580,4 @@ ESC/TC and the race screen need race mode enabled by **proxy alignment** (manual
 4. Standby wire on your boards: transceiver pin 8 ↔ chip pin 2 continuity (H4) and ≈ 0 V awake / ≈ 3.3 V asleep (S4); bus recessive while asleep (S4 voltmeter check).
 
 ## Sources (all in or linked from this fork)
-FYSETC UCAN V1.0 schematic and component position (https://github.com/FYSETC/UCAN/tree/main/Hardware) · FYSETC UCAN README and render (https://github.com/FYSETC/UCAN), product page https://www.fysetc.com/products/fysetc-ucan-board (not readable from this session) · diagrams drawn for this plan: `docs/images/src/make_diagrams.py` (+ `render.js` → PNG) · `README.md`, `LICENSE.MD`, `manuals/Baccable_manual_*.pdf` (v4.9), `hardware/newBaccableDedicatedPcb/*`, `hardware/system_interconnection/*`, `hardware/canable/*` (MKS schematics, STM32F072 datasheet), `hardware/box/*`, `firmware/ledsStripController/{Core,Makefile,MAKEFILE.md,*.ld,baccable.ioc,.cproject}`, `.github/workflows/*`, `tools/*.xlsx` · GiUCAN https://github.com/anegrin/GiUCAN · canable-fw https://github.com/normaldotcom/canable-fw · PIDs https://github.com/danardi78/Alfaromeo-Giulia-Stelvio-PIDs · upstream issue #34 (author on power and three boards).
+FYSETC UCAN V1.0 schematic and component position (https://github.com/FYSETC/UCAN/tree/main/Hardware) · FYSETC UCAN README and render (https://github.com/FYSETC/UCAN), product page https://www.fysetc.com/products/fysetc-ucan-board (not readable from this session) · diagrams drawn for this plan: `docs/images/src/make_diagrams.py` (+ `render.js` → PNG) · `README.md`, `LICENSE.MD`, `manuals/Baccable_manual_*.pdf` (v4.9), `hardware/newBaccableDedicatedPcb/*`, `hardware/system_interconnection/*`, `hardware/canable/*` (MKS schematics, STM32F072 datasheet), `hardware/box/*`, `firmware/ledsStripController/{Core,Makefile,MAKEFILE.md,*.ld,baccable.ioc,.cproject}`, `.github/workflows/*`, `tools/*.xlsx` · GiUCAN https://github.com/anegrin/GiUCAN · canable-fw https://github.com/normaldotcom/canable-fw · PIDs https://github.com/danardi78/Alfaromeo-Giulia-Stelvio-PIDs · upstream issue #34 (author on power and three boards) · the author's video walkthrough of the BACCAble PCB (owner's screenshots and transcript).
