@@ -1,23 +1,28 @@
-# Prebuilt images for loose FYSETC UCAN boards (C1 / C2 / BH)
+# Prebuilt images for a DIY BACCAble on FYSETC UCAN boards (C1 / C2 / BH)
 
-Built from this repository with `docs/build_ucan.sh` (ARM GCC 13.2, Ubuntu `gcc-arm-none-eabi`). **Not yet tested on hardware.**
-Firmware version string on the dashboard: `BACCABLE ucan-<git short hash>`.
+Built from this repository with `docs/build_ucan.sh` (ARM GCC 13.2). **Not yet tested on hardware.**
+Dashboard version string: `BACCABLE ucan-<git short hash>`. Full plan: `docs/BACCAble_Giulia_Q4_Full_Plan.md`.
 
-| File | Board | OBD pins | CAN speed | Size |
-|---|---|---|---|---|
-| `C1.elf` / `C1.bin` | C1 master | 6 (H) / 14 (L) | 500 kbit/s | 78,624 bytes |
-| `BH.elf` / `BH.bin` | BH slave | 3 (H) / 11 (L) | 125 kbit/s | 36,800 bytes |
-| `C2.elf` / `C2.bin` | C2 slave (optional) | 12 (H) / 13 (L) | 500 kbit/s | 37,532 bytes |
+| File | Board | OBD pins | CAN speed |
+|---|---|---|---|
+| `C1.elf` / `C1.bin` | C1 master | 6 (H) / 14 (L) | 500 kbit/s |
+| `C2.elf` / `C2.bin` | C2 slave | 12 (H) / 13 (L) | 500 kbit/s |
+| `BH.elf` / `BH.bin` | BH slave | 3 (H) / 11 (L) | 125 kbit/s |
+| `C1_BENCH_ONLY.*` | C1, desk tests only (CAN silent loopback + simulated frames) — **never in the car** | – | – |
 
-## Defaults baked into C1 (apply only when the board's settings flash page is blank)
-`-DIS_GASOLINE -DDISABLE_LOW_CONSUME -DDISABLE_IMMOBILIZER -DDISABLE_THE_FUNCTION_SMART_DISABLE_START_STOP`
+## C1 flags
+`-DIS_GASOLINE -DUCAN_LOW_CONSUME_PINS -DDISABLE_IMMOBILIZER -DDISABLE_THE_FUNCTION_SMART_DISABLE_START_STOP`
 
-* gasoline parameters, **immobilizer OFF**, **Start&Stop disabler OFF**, sleep (low-consume) disabled
-* every other function is OFF until enabled in the dashboard SETUP menu
-* if the board already ran BACCAble before, its saved settings win over these defaults: do a full chip erase when flashing, or change the items in the SETUP menu
+* sleep (low consume) **on**, as on the author's device; the reset line to the slaves leaves from the **DO pad (PA13)**: wire **C1.DO → C2.RES and BH.RES**
+* serial line: wire **C1.CK ↔ C2.CK ↔ BH.CK**
+* defaults on a blank settings page: gasoline, **immobilizer OFF**, **Start&Stop disabler OFF**; everything else as the author's release. LED strip: leave "Led Controller" deselected.
+* a board that ran BACCAble before keeps its saved settings: use a full chip erase when flashing
+* C2 and BH are the author's stock images
 
 ## Flashing (USB DFU)
-Hold B0 to 3V3 while powering the board over USB-C (the chip then appears as USB device `0483:df11`), then flash the `.elf` with STM32CubeProgrammer, or the `.bin` with `sudo dfu-util -d 0483:df11 -c 1 -i 0 -a 0 -s 0x08000000:leave -D C1.bin` (the command the repo's Makefile uses). Check first that the chip reports **128 KB** of flash: all three images need the flash up to `0x0801FFFF`.
+Hold the B0 button (B0 shorted to 3V3) while plugging a data USB-C cable; the chip appears as `0483:df11`. Then flash the `.elf` with STM32CubeProgrammer, or the `.bin` with
+`sudo dfu-util -d 0483:df11 -c 1 -i 0 -a 0 -s 0x08000000:leave -D C1.bin` (the command the repo's Makefile uses).
+Check first that every chip reports **128 KB** of flash. Flash C2 and BH before fitting the reset wire, or C1 will hold them in reset on the bench.
 
 ## Licence / attribution
 Built from BACCAble, Copyright (c) 2025 Gaucholivido - Tr3ma (see `LICENSE.MD`): free to use, modify and distribute with attribution; commercial resale is prohibited.
