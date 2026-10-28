@@ -1,6 +1,7 @@
-# DIY BACCAble — Full Plan, Build Steps and Firmware (v4.4)
+# DIY BACCAble — Full Plan, Build Steps and Firmware (v4.5)
 
 **Mission:** build our own BACCAble from loose boards instead of buying the author's ready-made device, and make it **behave the same as the author's device in every way except the WS281x LED strip** (not built, not wired, left disabled).
+**Build:** the **full BACCAble — three UCAN boards, C1 + C2 + BH**, one per CAN bus, exactly like the three chips on the author's PCB. This is **not** the two-board (C1 + BH) minimalist/test setup: every board, wire and step below is for three boards, and wherever a repo picture shows only one or two UCANs it is used only as a pad/label/mounting reference.
 **Car:** 2022 Alfa Romeo Giulia Sprint Q4 · 2.0 petrol · MY22 cluster · SGW with an owned bypass cable (owner confirmed it passes all three buses).
 **Owner's default choices:** gasoline parameters, **immobilizer OFF** and **Start&Stop disabler OFF** at first start (both still available: Start&Stop in the SETUP menu, immobilizer with the long button press).
 **Status:** research, design and firmware build done; **nothing flashed or installed yet; the images are untested on hardware.**
@@ -73,11 +74,27 @@ Check these against your own boards before soldering. [Repo][GiUCAN]
 
 *Zoom of the author's diagram below: left board seen from the bottom (CAN_L · CAN_H · GND terminal; right column CK · DO · RES · G · B0 · 3V3, the blue serial wire on CK; left column RX · TX · G · 3V3); right board seen from the top (TX/RX LEDs, chip, termination header next to the green terminal).*
 
-![Author's two-UCAN wiring](../hardware/system_interconnection/ShowParamsOnDashboardConnections.png)
+![Author's UCAN pad and serial-wire reference](../hardware/system_interconnection/ShowParamsOnDashboardConnections.png)
 
-*Source: `hardware/system_interconnection/ShowParamsOnDashboardConnections.png` — the author's two-board example (C1 master + BH slave, one wire on the SWCLK/CK pad, USB 5 V). Our build adds C2 on the same wire (author, issue #34), the reset wire, and the 3.3 V rail of §4.*
+*Source: `hardware/system_interconnection/ShowParamsOnDashboardConnections.png`. **Use it only as a pad reference** (where CK, DO, RES, G, B0, 3V3 are and how the serial wire lands on CK): the picture is the author's reduced test drawing with just C1 and BH on USB 5 V. **It is not our build.** Our build is the three-board drawing in §2.3: C2 joins the same CK wire (author, issue #34), plus the reset wire, the standby wire and the 3.3 V rail of §4.*
 
-### 2.3 Complete wiring (the author's PCB rebuilt)
+### 2.3 Complete wiring — three boards (the author's PCB rebuilt)
+Physical layout (left to right like the author's three USB-C ports: BH, C2, C1; each wire lands on C2's pad and carries on to BH):
+```
+   ┌───────────┐      ┌───────────┐      ┌───────────┐
+   │ BH        │      │ C2        │      │ C1 master │   ← three UCANs, all required
+   │ 125 kbit  │      │ 500 kbit  │      │ 500 kbit  │
+   │ OBD 3/11  │      │ OBD 12/13 │      │ OBD 6/14  │
+   │ CK     ●──┼──────┼─●CK ──────┼──────┼─●CK       │   serial  (one wire, three pads)
+   │ RES    ●──┼──────┼─●RES ─────┼──────┼─●DO       │   reset   (one wire from C1 DO)
+   │ xcvr 8 ●──┼──────┼─●xcvr 8 ──┼──────┼─●pin 15   │   standby (one wire from C1 PA5)
+   │ 3V3+G  ●  │      │ 3V3+G  ●  │      │ 3V3+G  ●  │
+   │ B0 button │      │ B0 button │      │ B0 button │
+   └──USB-C────┘      └──USB-C────┘      └──USB-C────┘
+            │                  │                  │
+            └──────────────────┴──────────────────┴── 2-pin plugs (3V3 + G) from the 3.3 V buck (§4)
+```
+Netlist:
 ```
                          OBD male plug (into the SGW bypass port)
   pin 6 ─ C1.CAN_H    pin 12 ─ C2.CAN_H    pin 3  ─ BH.CAN_H
@@ -102,9 +119,9 @@ No series resistors on the serial or reset wires (the author's PCB and diagrams 
 - **All three need 128 KB of flash**: C1 is 79,004 bytes [Built]; C2 and BH keep a 64 KB FAT area and their settings in flash up to `0x0801FFFF` (§11.4). The author's own chips are labelled C8T6 (64 KB on paper, see the datasheet in `hardware/canable/`) yet run these images with a 96 KB code region and settings at `0x0801F800`, so they behave as 128 KB; the UCAN's CB chip is 128 KB on paper. **Read the flash size of every board in STM32CubeProgrammer before flashing.** [Repo][GiUCAN]
 - Other boards the README lists (MKS CANable, DykbRadio Nano, candleLight) work only with a 128 KB STM32F072; CANable-type boards need `-DDISABLE_UCAN_BOARD_LED_INVERSION` (their LEDs are active-low on PA0/PA1, see the MKS schematic in the repo). Not needed for this build. [Repo]
 
-The author's own 3D cases for the UCAN (we build our own box, but they show how he mounts the board and the 2-pin header next to the green terminal):
+The author's own 3D cases for the UCAN. **Mounting reference only:** they hold one or two boards (the author's partial-test setups); our box must hold **all three UCANs** side by side plus the buck and the fuse (H9). Look at them only for how a board sits, where the USB-C opening goes and the 2-pin header next to the green terminal:
 
-| Two UCANs (`hardware/box/dual_fysect_ucan/preview.png`) | One UCAN (`hardware/box/single_fysect_ucan/preview.png`) |
+| Two-UCAN case (`hardware/box/dual_fysect_ucan/preview.png`) — reference only | One-UCAN case (`hardware/box/single_fysect_ucan/preview.png`) — reference only |
 |---|---|
 | ![Dual UCAN case](../hardware/box/dual_fysect_ucan/preview.png) | ![Single UCAN case](../hardware/box/single_fysect_ucan/preview.png) |
 
@@ -212,7 +229,7 @@ The author's older single-CANable diagram is where "TERMINATION NOT INSERTED" co
 | **H6** | **Power harness** (§4): first measure **pin 16 ↔ pin 4 ≈ 12 V** on the bypass cable's port (no 12 V → fallback car USB, §4.5). Then OBD 16 → fuse 1 A → 12→3.3 V buck → three 2-pin plugs (3V3 + G); buck GND → OBD 4/5. On the bench, with **no board connected**, power the buck from 12 V and set/check its output. | 12 V on pin 16; buck out **3.30 V ± 0.1 V** |
 | **H7** | **Bench power test:** connect one board's 3V3 plug (USB-C empty): power LED on, 3V3 pad 3.3 V; measure its USB-C VBUS (back-feed check, §4.3). Then all three plugs. Separately confirm each board also runs from USB alone with its 3V3 plug **removed**. | no short, no hot parts, rail stays 3.2–3.4 V |
 | **H8** | **Bypass cable check** (car asleep ≥ 10 min, boards unplugged): 6↔14, 12↔13 ≈ 60 Ω; 3↔11 low value; 16↔4 ≈ 12 V; 4/5↔chassis continuity. | all present (owner already confirmed the buses) |
-| **H9** | **Box:** standoffs, glands, strain relief; USB-C ports and boot buttons reachable; away from pedals, steering column, knee-airbag path, heat and HVAC flaps. Label boards at both ends. | nothing loose |
+| **H9** | **Box (holds all three UCANs + buck + fuse):** standoffs, glands, strain relief; USB-C ports and boot buttons reachable; away from pedals, steering column, knee-airbag path, heat and HVAC flaps. Label boards at both ends. | nothing loose |
 | **H10** | **In-car, unpowered:** plug into the bypass port, re-measure every bus ≈ 60 Ω through the harness, connect power last. Do not power the boards on the car with unknown firmware. | ≈ 60 Ω each |
 | **H11** | (Always-on option) after the firmware is in (S5): measure the 12 V current at the fuse with the car awake and ≈ 1 min after it sleeps (author's device: ≈ 15 mA asleep, < 30 mA running). | sleep current settles; boards wake when you unlock |
 
@@ -329,7 +346,7 @@ ESC/TC and the race screen need race mode enabled by **proxy alignment** (manual
 **What it needs**
 | Need | Why | Our build |
 |---|---|---|
-| **C1 and BH boards** with the serial wire | C1 decides, BH presses | ✅ |
+| **C1 and BH** (two of our three boards) with the serial wire | C1 decides, BH presses | ✅ (C2 is not involved in this function but is fitted as always) |
 | **Continuous power through the parked period** | the memorized style is in RAM; losing power erases it | ✅ with §4 always-on 12 V power; ❌ with car-USB power |
 | **Low consume enabled on C1** | the wake from low consume is what arms the restore | ✅ (`UCAN_LOW_CONSUME_PINS`; a build with `DISABLE_LOW_CONSUME` never restores) |
 | Reset wire | **not** needed for DNA Memory (it only lowers the sleep current; BH just keeps running without it) | fitted anyway |
