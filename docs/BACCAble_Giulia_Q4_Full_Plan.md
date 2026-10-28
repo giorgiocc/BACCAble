@@ -1,4 +1,4 @@
-# DIY BACCAble — Full Plan, Build Steps and Firmware (v4.8)
+# DIY BACCAble — Full Plan, Build Steps and Firmware (v4.9)
 
 **Mission:** build our own BACCAble from loose boards instead of buying the author's ready-made device, and make it **behave the same as the author's device in every way except the WS281x LED strip** (not built, not wired, left disabled).
 **Build:** the **full BACCAble — three UCAN boards, C1 + C2 + BH**, one per CAN bus, exactly like the three chips on the author's PCB. This is **not** the two-board (C1 + BH) minimalist/test setup: every board, wire and step below is for three boards, and wherever a repo picture shows only one or two UCANs it is used only as a pad/label/mounting reference.
@@ -10,7 +10,83 @@ Evidence tags: **[Repo]** read in this fork (manual v4.9, code, schematic, diagr
 
 ---
 
+## 0. Read this first — the plan in plain words
+
+### 0.1 What we are building
+- **The BACCAble** plugs into the car's OBD port and talks to the car on its **three CAN buses**: C1, C2 and BH. A CAN bus is a two-wire network the car's computers use to talk to each other.
+- **The author's device** has three small computers (STM32F072 chips) on one circuit board, one chip per bus.
+- **We build the same thing from three FYSETC UCAN boards.** Each UCAN is a ready-made little board with the same chip family (STM32F072) and a CAN driver.
+  - We name the boards **C1**, **C2** and **BH** after the bus each one sits on.
+  - **C1 is the boss:** it shows the menu on the dashboard and tells the other two what to do over one shared wire.
+- **Everything matches the author's device except the LED strip,** which we leave out (§1 lists every part side by side).
+
+What makes our version work like the author's:
+
+| Item | What we do | Where |
+|---|---|---|
+| Power | 12 V from OBD pin 16 → **1 A fuse** → small **12 V → 3.3 V converter** ("buck") → one plug per board | §4 |
+| Serial wire | **one wire** joins C1, C2 and BH so they can talk | §2.3 |
+| Sleep wires | **two wires** let C1 put C2 and BH to sleep when the car is parked, as the author's board does | §5 |
+| Board changes | remove **two (sometimes three) tiny resistors** on each UCAN | §6 |
+| Buttons | **one push button per board** for loading firmware | §2.3.4 |
+| Firmware | the author's firmware with **one small switch** for the UCAN pins, already built for you in `firmware/ucan_prebuilt/` | §8 |
+
+### 0.2 The golden rules (break one of these and something gets damaged or the car complains)
+1. **12 V never touches a UCAN.** OBD pin 16 goes only to the fuse and the 3.3 V converter.
+2. **Set the converter to 3.30 V before any board is connected,** and check it with the meter.
+3. **USB or power plug, never both.** Before plugging USB into a board, unplug that board's power plug (§4.3).
+4. **Remove the factory terminator (R1 + R2) on all three boards.** Through the finished harness each bus must measure about **60 Ω**; about 40 Ω means a terminator is still on (§6).
+5. **Never swap CAN_H and CAN_L.** Mark every H wire at both ends. Swapped wires give warning lights.
+6. **Load the firmware into C2 and BH before you fit the reset wire,** otherwise C1 keeps them asleep on the bench (§5.3).
+7. **In the car, switch functions on one at a time.** Use DYNO, 4WD disable, ESC/TC and brake override only off public roads.
+
+### 0.3 The whole job in 11 steps
+| # | What you do | Details |
+|---|---|---|
+| 1 | **Check each board:** chip name, measure across the CAN terminal, find every pad with the meter's beep mode | H0, §2.2 |
+| 2 | **Change each board:** take off R1 and R2 (and R4 if fitted), leave the jumper header empty | H1, §6 |
+| 3 | **Solder** short wires or pins on the pads you need, and a boot button on each board | H2, §2.3.4 |
+| 4 | **Make the OBD cable:** 9 pins used, one twisted pair plus ground to each board | H5, §2.3.2–2.3.3 |
+| 5 | **Make the power cable:** fuse, converter set to 3.30 V, three small plugs | H6–H7, §4 |
+| 6 | **Load the firmware** into C1, C2 and BH over USB (button held while plugging in) | S1–S2, §8 |
+| 7 | **Join the boards:** serial wire, reset wire, standby wire; then the two bench tests | H3–H4, S3–S4, §5 |
+| 8 | **Put everything in the box** with the USB ports, buttons and LED windows reachable | H9, §2.3.5 |
+| 9 | **In the car, power off:** measure each bus (≈ 60 Ω), then connect | H8, H10 |
+| 10 | **First start:** open the dashboard menu, check the settings | S5–S6 |
+| 11 | **Switch functions on one by one,** then measure the parked current | S7–S8, H11 |
+
+### 0.4 How this document is organised
+- **§1–3:** what we copy from the author and how the boards are wired.
+- **§4–6:** the three special topics: power, sleep, terminators.
+- **§7 (hardware) and §9 (bring-up):** the step lists you follow with tools in hand.
+- **§8:** the firmware and how to load it.
+- **§10–11:** reference only. You don't need them to build.
+- **§12–13:** risks, and what only the real boards can answer.
+
+### 0.5 Words used in this plan
+| Word | Meaning |
+|---|---|
+| **CAN bus, CAN_H / CAN_L** | the car's two-wire network; H and L are the two wires (always twisted together) |
+| **C1, C2, BH** | the car's three CAN buses, and our three boards named after them: C1 on OBD 6/14, C2 on OBD 12/13 (both 500 kbit/s), BH on OBD 3/11 (125 kbit/s) |
+| **SGW bypass** | the cable that lets a device reach the buses past the car's Secure Gateway; we plug into its OBD port |
+| **UCAN** | the FYSETC USB-to-CAN board we use, three times (plus one spare) |
+| **Pad** | a small round soldering point on the board, named by its printed label (CK, DO, RES, G, B0, 3V3…) |
+| **Terminator** | a resistor across CAN_H–CAN_L at each end of a bus; the car already has them, so our boards must not add more |
+| **Buck / converter** | a small module that turns 12 V into 3.3 V efficiently |
+| **Ground star** | the one point where every ground wire meets (OBD pins 4 + 5) |
+| **Firmware / image** | the program inside each board's chip; the `.bin`/`.elf` files are the images we load |
+| **Flashing, DFU, boot button** | loading firmware over USB; holding the boot button while plugging USB in puts the chip in loading mode (DFU) |
+| **Serial wire** | the shared wire the three chips talk over |
+| **Reset wire / standby wire** | C1's two sleep wires: one holds C2/BH stopped, one puts their CAN drivers to sleep |
+| **Transceiver (U1)** | the small 8-pin chip that drives the CAN wires |
+| **Beep test** | the multimeter's continuity mode: it beeps when two points are connected |
+| **Hn / Sn** | numbered hardware steps (§7) and bring-up steps (§9) |
+
+---
+
 ## 1. What "the same as the author's device" means — parity table
+
+**In short:** every part of the author's board has a matching part in our build. The only differences are where a wire is soldered, our own box, and one boot button per board instead of one shared button. The LED strip is left out on purpose.
 
 The author's device (schematic `hardware/newBaccableDedicatedPcb/BACCABLE_SCHEMATIC.pdf`) is one PCB in an OBD plug with three STM32F072 chips. We rebuild it from three FYSETC UCAN boards.
 
@@ -19,7 +95,7 @@ The author's device (schematic `hardware/newBaccableDedicatedPcb/BACCABLE_SCHEMA
 | Three chips, one per CAN bus (C1, C2, BH) | U10/U20/U30, STM32F072, one transceiver each, CAN on PB8/PB9 | **Three UCAN boards** (STM32F072CB + CAN transceiver, CAN on PB8/PB9) | ✅ — **all three are required** |
 | Firmware | `baccableC1/C2/BH` images from this repo | Same source; C1 built with our flags (§8), C2/BH unchanged | ✅ |
 | Serial link between chips | one `Serial` net on PA14 of all three chips (USART2, 38400 baud, half-duplex, open-drain) | one wire joining the **CK pads** (PA14) of the three UCANs | ✅ |
-| Sleep ("low consume") | C1 **PA4** holds C2/BH in reset; C1 **PA5** puts the C2/BH transceivers in standby; C1 keeps listening and wakes them on CAN activity | **Reset line:** C1 **DO pad (PA13)** → **RES pads** of C2 and BH (flag `UCAN_LOW_CONSUME_PINS`). **Standby line:** C1 **PA5** (unchanged author pin, fine wire on chip pin 15) → **pin 8 (S/RS) of the CAN transceiver** on C2 and BH (§5.1) | ✅ identical behaviour (same firmware logic, same two lines) |
+| Sleep ("low consume") | C1 **PA4** holds C2/BH in reset; C1 **PA5** puts the C2/BH transceivers in standby; C1 keeps listening and wakes them on CAN activity | **Reset line:** C1 **DO pad (PA13)** → **RES pads** of C2 and BH (flag `UCAN_LOW_CONSUME_PINS`). **Standby line:** C1 **PA5** (unchanged author pin, fine wire on chip pin 15) → **pin 8 (S/RS) of the CAN transceiver** on C2 and BH (§5.2) | ✅ identical behaviour (same firmware logic, same two lines) |
 | Power | 12 V from OBD pin 16 → fuse F1 → buck U1 (4.5–35 V in) → **3.3 V straight to the chips**; USB 5 V can also feed the buck input through diode D2; ≈ 15 mA asleep, < 30 mA running | **Chosen — Option B:** pin 16 → fuse 1 A → **12→3.3 V buck → P3 3V3 + G pads** of the three UCANs (§4) | ✅ identical topology; rule: unplug a board's 3V3 plug before plugging USB into it (no D2 diode on a UCAN) |
 | Programming button | one button pulling BOOT0 of all three chips | one push button **B0 ↔ 3V3** per UCAN | ✅ |
 | USB port per chip (flash, sniffer, ELM327, pen drive) | J10/J20/J30 USB-C | each UCAN's own USB-C | ✅ |
@@ -61,7 +137,7 @@ GND = OBD 4 and 5, +12 V = OBD 16. [Repo]
 
 ![DLC pinout](images/dlc_pinout.png)
 
-The picture is drawn from the car side (pins 1–8 bottom row, 9–16 top row): trust the numbers on your plug.
+The picture is drawn from the car side (pins 1–8 bottom row, 9–16 top row). The drawings in the repo, and ours in §2.3.2, are not all turned the same way. **Always go by the pin numbers moulded into your plug.**
 
 The author's own OBD plug pinout (what his PCB uses on each pin — we only use 3, 4, 5, 6, 11, 12, 13, 14, 16):
 
@@ -93,7 +169,7 @@ The board details below come from FYSETC's schematic and component-position draw
 | **U3** | STM32F072**CB**T6 (128 KB), the chip | runs C1 / C2 / BH firmware (the 8 MHz crystal X1 is unused: the firmware runs on the internal 48 MHz clock) |
 | **U1** | **SN65HVD230** CAN transceiver (the bus driver), powered from 3.3 V (R22 0 Ω). **Pin 8 (RS)** is the net `CAN_S` = chip **pin 2 (PC13)**, with **R4 10 kΩ to 3.3 V** and **R18 10 kΩ to GND** next to it. The author has only pull-downs: **R17 10 kΩ** on C1's RS pin, and **one R27 10 kΩ** on the shared `CanLowConsumeCmd` net of C2/BH | **remove R4** if it is fitted (H0/H1), leaving R18 = the author's 10 kΩ pull-down |
 | **P1** | green 3-way screw terminal: **1 = CAN_L, 2 = CAN_H, 3 = GND** | the car bus |
-| **R1, R2** | **59 Ω + 59 Ω in series across CAN_H–CAN_L** (split terminator, ≈ 118 Ω; the middle goes to C4 4.7 nF to GND). **Always connected; the header does not switch it** | **remove both** on C1, C2 and BH (§6) |
+| **R1, R2** | **59 Ω + 59 Ω in series across CAN_H–CAN_L** (split terminator, ≈ 118 Ω; the middle goes to C4 4.7 nF to GND). In the schematic they are always connected, and FYSETC says they are on by default | **remove both** on C1, C2 and BH when H0 reads ≈ 118 Ω (§6) |
 | **JP1 + R3** | 2-pin header + 120 Ω: adds a **second** terminator when a jumper is fitted | keep **open** |
 | TVS1, C5, C6 | CAN-line surge protection and filter | keep |
 | **P2** | 6-pad row, printed in this order from the USB end: **1 CK** = SWCLK = **PA14** (chip pin 37, R14 **4.7 kΩ pull-up**) · **2 DO** = SWDIO = **PA13** (chip pin 34) · **3 RES** = NRST (chip pin 7, R9 **10 kΩ pull-up** + C10 100 nF) · **4 G** · **5 B0** = BOOT0 (chip pin 44, R8 **10 kΩ pull-down**) · **6 3V3** | serial, reset, boot button |
@@ -422,6 +498,8 @@ The author's older single-CANable diagram is where "TERMINATION NOT INSERTED" co
 
 **Parts:** 3 UCAN + 1 spare (owned); OBD2 male plug (populate only 3, 4, 5, 6, 11, 12, 13, 14, 16 — §2.3.2); 12 → 3.3 V automotive buck (§4.2) + inline fuse holder + 1 A fuse; 3 small **polarised** 2-pin plugs (3V3 + G, one per board); 22–24 AWG wire for three H/L/GND trios and power (~3 m), 26 AWG for serial/reset, 30 AWG wire-wrap or enamelled wire for the standby line; 2.54 mm pin headers; 4 small momentary push buttons (boot, normally open); a clear lid or 3 mm light pipes for the LEDs; 1 short USB-C **data** cable for flashing; project box, standoffs, cable glands, heat-shrink, ferrules. Tools: multimeter, fine-tip iron (plus hot tweezers or a second iron for R1/R2), flux, wick, tweezers, loupe, Kapton tape; a 12 V bench supply (or 12 V battery) to run the buck on the bench, and a 5 V USB supply for single-board tests.
 
+**Order:** do H0–H2 and H5–H7 first. Load the firmware next (S1–S2 in §9). Then fit the board-to-board wires H3–H4 and run the bench tests S3–S4. Finish with H8–H11. This is the order of §0.3.
+
 | Step | Action | Pass when |
 |---|---|---|
 | **H0** | Inspect every board: chip marking **STM32F072CB**, transceiver **SN65HVD230** (or 230-compatible); label C1, C2, BH, SPARE. Unpowered, JP1 open: measure CAN_H↔CAN_L on P1. Identify every pad with the continuity table in §2.2. Check whether **R4** is fitted (resistor beside R18; or, powered from USB, U1 pin 8 reads ≈ 1.6 V instead of ≈ 0 V). | ≈ 118 Ω (the fixed R1 + R2, FYSETC's "used by default"); if a jumper sits on JP1, take it off first; every pad beeps to the chip pin listed; R4 noted |
@@ -485,6 +563,8 @@ sudo dfu-util -d 0483:df11 -c 1 -i 0 -a 0 -s 0x08000000:leave -D C1.bin
 
 ## 10. Optional author I/O (not needed for the car functions)
 
+*Skip this section unless you add aftermarket exhaust valves.*
+
 - **Aftermarket exhaust-valve remote** ("Exhaust Flap" with non-QV radio-remote valves; manual §2.30, upstream issue #40): the C1 firmware pulses **PA8 (`Q10mosfet`, "open")** and **PA7 (`Q11mosfet`, "close")** high for ≈ 1 s to press the remote's buttons (`functions_C1baccable.c`). The author's schematic (sheet 2) has only the PA8 stage: **PA8 → R15 4.64 kΩ → base of NPN Q10, emitter to GND, collector → R16 1 kΩ → `CMD_1` (OBD pin 1)**. On a UCAN these pins have no pad: copy that stage on a fine wire from the C1 chip's **pin 29 (PA8)**, and an identical one on **pin 17 (PA7)** if you need "close"; each collector goes across one button of the remote. Only if you fit such valves; your 2.0 Sprint has no factory valves, so the CAN "QV" mode does not apply. [Repo][Infer]
 - **Pedal booster ("schizzaForte")** on C1 **USART1, PB6 = pin 42**, half-duplex 9600 baud: manual says "under development, do not activate". Not wired. [Repo]
 - **LED strip (PA11): excluded by the mission.** Leave "Led Controller" deselected in SETUP.
@@ -492,6 +572,8 @@ sudo dfu-util -d 0483:df11 -c 1 -i 0 -a 0 -s 0x08000000:leave -D C1.bin
 ---
 
 ## 11. Reference — how the firmware works (read from this fork)
+
+*You don't need this section to build. It explains what the firmware does, for checking and troubleshooting.*
 
 ### 11.1 Start-up and main loop
 Clocks (internal HSI48, no crystal) → LEDs → CAN init → C1 loads settings from flash → serial (USART2 on PA14) → C2/BH format/mount their flash drive and start USB at power-on → C1 and C2 open CAN at 500 k, BH at 125 k (accept-all filter). Main loop: LEDs, CAN transmit queue, serial queue, flavor periodic function, CAN receive → per-ID handlers. A loop iteration longer than 2 ms lights the red LED. [Repo]
@@ -518,7 +600,23 @@ Driven by the steering-wheel buttons (0x2FA), only with cruise control and ACC o
 Immobilizer **OFF**, Start&Stop disabler **OFF**, gasoline, Clear Faults ON, seat-belt alarm "enabled"; everything else OFF. Note: the seat-belt setting has no "leave untouched" choice — about 2 s after each engine start after a board power-up, C1 writes it to the cluster (`2F 55A0 03 01` = chime on, stock behaviour; `00` if you deselect it). [Repo]
 
 ### 11.9 ELM327 mode (manual §2.32)
-Enable ELM327 in SETUP, connect a data USB cable to **C1**, then the OBD side. It answers as "ELM327 v1.4" for MultiECUScan/AlfaOBD and forwards requests for ECUs on the other buses over the serial wire to **C2/BH** — this is why all three boards matter for proxy alignment. While a host is connected the dashboard buttons are ignored; the mode switches itself off after 120 s without commands (and a lost host is waited for 3 min). **The host must enumerate the USB within 10 s of the function starting** (`SNIFFER_ACTIVATION_TIMEOUT_MS`), which happens at board start-up — that is why the manual says "USB cable first, then the OBD connector". With our boards: (1) unplug the OBD plug (everything off); (2) unplug the **3V3 plug** of the board you want (C1 for ELM327; C1, C2 or BH for the built-in sniffer) and connect the laptop's data cable to it instead — that board now runs from the laptop; (3) plug the OBD plug back so all boards start together. Never USB and the 3V3 plug on the same board at once. Afterwards remove the USB cable, then reconnect the 3V3 plug. [Repo][Infer]
+**What it does:** C1 answers as "ELM327 v1.4" for MultiECUScan or AlfaOBD. It forwards requests for ECUs on the other buses over the serial wire to C2/BH, which is why all three boards matter for proxy alignment.
+
+**Rules from the code:**
+- While a laptop is connected, the dashboard buttons are ignored.
+- The mode switches itself off after 120 s without commands, and waits 3 min for a laptop that went away.
+- **The laptop must see the USB device within 10 s** of the function starting (`SNIFFER_ACTIVATION_TIMEOUT_MS`). The function starts at power-up when it is saved as enabled, or at once when you select it in the menu. That is why the manual says "USB cable first, then the OBD connector".
+- Only one of the two can run: if both Sniffer and ELM327 are selected, C1 starts the sniffer (`functions_C1baccable.c`).
+
+**How to use it with our boards** (the same for the built-in sniffer on C1, C2 or BH):
+1. In the dashboard SETUP menu, select **ELM327** (or **Sniffer**), then SAVE & EXIT.
+2. Unplug the OBD plug, so everything is off.
+3. Unplug the **power plug** of the board you want: C1 for ELM327; C1, C2 or BH for the sniffer.
+4. Connect the laptop's **data** USB cable to that board. It now runs from the laptop.
+5. Plug the OBD plug back in, so the other boards start too.
+6. When finished, remove the USB cable first, then reconnect that board's power plug.
+
+Never have USB and the power plug on the same board at once. [Repo][Infer]
 
 ### 11.10 Functions that need more than the boards
 ESC/TC and the race screen need race mode enabled by **proxy alignment** (manual §2.19, which also explains keeping the pedal maps); ACC pad needs ACC hardware + proxy; HAS pad needs MY20+ hardware + proxy; park mirror needs mirror encoders; DNA Memory needs a monostable DNA selector on BH **and** always-on power (owner's car: selector not monostable → not available); DPF/regen alert is diesel-only; Remote start and Pedal booster are "do not activate". [Repo]
