@@ -132,7 +132,7 @@ BACCAble builds with the **internal 48 MHz oscillator** (`INTERNAL_OSCILLATOR`, 
 | BACCAble `lowConsume.h` (dedicated PCB) | **PA4** | **PA5** |
 | GiUCAN on UCAN (defaults) | **PA13 (DO pad)** → BH RES | **PC13** |
 
-On loose UCANs the BACCAble sleep code points at pads that aren't wired. Choices: **(1)** build C1 with `DISABLE_LOW_CONSUME` (no sleep; use switched car USB so there is no drain); **(2)** optional firmware change to move the two pins to PA13/PC13 and wire DO→RES like GiUCAN (**untested**). [Repo][GiUCAN][Infer]
+On loose UCANs the BACCAble sleep code points at pads that aren't wired. Note (§8d.B): a build with sleep disabled also disables **DNA Memory**. Choices: **(1)** build C1 with `DISABLE_LOW_CONSUME` (no sleep; use switched car USB so there is no drain); **(2)** optional firmware change to move the two pins to PA13/PC13 and wire DO→RES like GiUCAN (**untested**). [Repo][GiUCAN][Infer]
 
 ### 4.6 SGW
 Closed (you own a bypass). Remaining check: that **your** cable passes all buses you use — C1 and BH always, C2 if you build it (step H7). [Repo manual §1.8]
@@ -243,7 +243,7 @@ Pin 16 ↔ 4 ≈ 12 V is not required for USB-powered builds.
 
 Build commands (BACCAble, GCC): from `firmware/ledsStripController`, copy `Core/Inc/user_config.h.sample` → `user_config.h` and add `-DINCLUDE_USER_CONFIG_H`; flavors via `-DRELEASE_FLAVOR=C1_FLAVOR -DC1_FLAVOR=1` (likewise `C2_FLAVOR`, `BH_FLAVOR`). Example C1: `CFLAGS='-DINCLUDE_USER_CONFIG_H -DIS_GASOLINE -DRELEASE_FLAVOR=C1_FLAVOR -DC1_FLAVOR=1' make clean all` with `#define DISABLE_LOW_CONSUME` in `user_config.h`. Flashing: STM32CubeProgrammer in USB-DFU mode with the `.elf` (the repo's flashing app is documented for the dedicated PCB; loose-module flashing is not documented by the repo). [Repo][Unv]
 
-**Excluded:** REMOTE START, READ FAULTS, PEDAL BOOSTER (under development per manual). **Not for petrol:** DPF/regeneration alert. [Repo]
+**Excluded:** REMOTE START and PEDAL BOOSTER ("under development, do not activate" per manual v4.9). **Not for petrol:** DPF/regeneration alert. [Repo]
 
 ### Feature → chip → hardware
 | Feature | Chip | Notes |
@@ -292,6 +292,44 @@ Build commands (BACCAble, GCC): from `firmware/ledsStripController`, copy `Core/
 
 ---
 
+## 8d. Verified from the files of this repo (v3 read-through)
+
+Everything below was read directly from `manuals/Baccable_manual_EN.pdf` (v4.9), `hardware/newBaccableDedicatedPcb/` (schematic + pinout), `firmware/ledsStripController/Core/{Src,Inc}` and the build workflows.
+
+### A. How the author's own PCB is built (schematic `BACCABLE_SCHEMATIC.pdf`) — this is the design our three UCANs copy
+- **Three identical STM32F072C8T6 chips (U10 = C1, U20 = C2, U30 = BH)**, one CAN transceiver each (U11, U21, U31), one USB-C connector each (J10, J20, J30 with 5.1 kΩ CC resistors). Manual: from left to right on the case the USB ports are **BH, C2, C1**. [Schem][Repo]
+- **CAN pins:** each chip's CAN uses **PB8 (RX) / PB9 (TX)** to its transceiver — the same pins GiUCAN uses on the UCAN. **No termination resistor** is drawn across CANH/CANL on any bus: the transceivers connect straight to the OBD pins. (Supports removing R1/R2 on the UCANs.) [Schem]
+- **One shared serial net called `Serial`** goes to **PA14 of all three chips** (the same pin as the UCAN CK pad). [Schem] Firmware: USART2, **38400 baud, 8N1, half-duplex, open-drain with pull-up on PA14**. [Repo: `uart.c`]
+- **LEDs on every chip:** PA0 (red) and PA1 (second LED: **white on C1, blue on C2, yellow on BH**), 280 Ω / 100 Ω series resistors. The firmware's `LED_RED`=PA0, `LED_BLUE`=PA1. [Schem][Repo]
+- **Power:** 12 V from OBD pin 16 → fuse F1 → one buck converter (4.5–35 V input) → 3.3 V for all chips; each USB-C VBUS also meets the board's 5 V net. Manual: input 4.5–35 V, **~15 mA at 12 V asleep, < 30 mA running**; pin 16 can also take 5 V. [Schem][Repo manual §1.10, §1.2]
+- **Programming:** **one** push button (S1) pulls BOOT0 of **all three chips** high (10 kΩ pull-down), because everything shares one 3.3 V rail. You flash one chip at a time through its own USB-C port, holding the button while plugging in; release when the green LED is lit. [Schem][Repo manual §1.11]
+- **Sleep wiring on the PCB:** C1's **PA4** (`ChipLowConsumeCmd`) goes to the **reset pins of C2 and BH**; C1's **PA5** (`CanLowConsumeCmd`) goes to the **RS (standby) pins of the C2 and BH transceivers**; C1's own transceiver RS is just pulled low. [Schem][Repo: `lowConsume.c`]
+- **Extra I/O (not needed for us):** three open-collector outputs CMD1–3 (PA8 via a transistor), three inputs STS1–3, LED CTRL (PA11), exposed on the spare OBD-plug pins 1, 2, 15 / 9, 10, 7 / 8. The author's PCB is an OBD plug, and **he declines to publish the Gerber files**, so the dedicated PCB cannot be rebuilt from this repo — only the schematic is public. [Schem][upstream issue #29]
+- **Flash size:** the author's own PCB uses the **F072C8T6** and runs this firmware; settings are written to the last flash pages at `0x0801F800` (settings), `0x0801F000` (statistics), `0x0801E800` (shown params) via the HAL's `FLASH_BANK1_END` for a 128 KB part. So the chips on that PCB behave as 128 KB. A C8T6 board is therefore plausible, but still check the flash size in STM32CubeProgrammer before flashing; a true 64 KB chip would fail every settings save (red LED blinks 8× or 9×). [Schem][Repo: `globalVariables.h`, `functions_C1baccable.c`]
+
+### B. Firmware facts that matter for the build
+- **Clock:** the CAN timing (prescaler 12, 1+4+3 time quanta = 500 kbit/s; prescaler 48 = 125 kbit/s) assumes a **48 MHz** peripheral clock, i.e. the internal HSI48. The Makefile sets `INTERNAL_OSCILLATOR` by default, so the UCAN's crystal is not needed. [Repo: `can.c`, Makefile]
+- **Start-up order:** clocks → LEDs → CAN init → C1 reads its settings from flash → UART init → USB only on demand (not at boot for the BACCAble flavors) → C1 and C2 open CAN at 500 kbit/s; **BH opens CAN at 125 kbit/s** and loads the park-mirror positions from flash. The CAN receive filter accepts every frame. [Repo: `main.c`, `functions_BHbaccable.c`]
+- **Single-wire protocol (`uart.c`, `uart.h`):** fixed-length frames, first byte = destination (C1=0x01, C2=0x02, BH string=0x03, BH status=0x08, BH=0x0A, C2+BH=0x0B, C1+BH=0x0C, C1+C2=0x0D). Rules: **only C1 starts a conversation** — every ≈250 ms it sends one queued message; **C2 and BH may answer only within ≈200 ms after a message addressed to them**; for messages sent to both slaves only C2 answers, so they never collide. After a 2 s start-up quiet period C1 asks C2 for status about every 1.0 s and BH about every 1.26 s. Receivers re-synchronise on the start byte, and the transmitter switches its own receiver off while sending. [Repo]
+- **Consequence for the two-board build:** C1 never waits for a reply, so **C1 + BH works without C2**; messages meant for C2 (ESC/TC toggle, dyno, brake) are simply not answered. [Repo: `uart.c`]
+- **Settings are pushed to the slaves once** about 3.5 s after C1 boots (and after every wake-up from sleep): ESC/TC state, pedal-booster state, odometer blink, race mask, park mirror, etc. [Repo: `functions_C1baccable.c`]
+- **`DISABLE_LOW_CONSUME` side effect:** the wake-up code in `lowConsume.c` also arms the **DNA Memory** restore (`dnaMemoryWakeUp`). Without low-consume that flag is never set, so **DNA Memory (manual §2.34) will not restore the drive style** on a build with sleep disabled. Everything else the code reads is unaffected. [Repo: grep of `dnaMemoryWakeUp`]
+- **C1 also opens USART1 on PB6 for the pedal booster (schizzaForte)**; with no booster connected this has no effect. [Repo]
+
+### C. Bench test without the car (from the source)
+- **`-DDEBUG_CAN_RX_SIMULATION`** puts the CAN controller in *silent loopback* (nothing drives the bus, no ACK needed) and injects a test frame every 100 ms, so a board boots and runs its normal receive path on a desk. **`-DDEBUG_START_SNIFFER`** and **`-DDEBUG_START_ELM327`** auto-enable those functions 10 s after boot. All three are marked DO NOT USE for normal builds. [Repo: `user_config.h.sample`, `main.c`]
+- On the bench with C1 + BH (+ C2) wired by the CK wire, the **blue LEDs pulse on every UART frame**, so you can see the serial link working: C1's status requests (about 1 s) make BH and C2 answer. [Repo: `uart.c`]
+
+### D. Facts from the manual that change or confirm the plan
+- Manual v4.9 §2 describes: Start&Stop disabler, immobilizer, shift, parameters, route, ESC/TC, DYNO, ACC pad, clear faults, 4WD disabler, brake override, **read faults (§2.18)**, odometer blink, seat-belt alarm, park mirror, ACC autostart, windows, HAS pad, exhaust flap, front park mute, ELM327, Max Hold, DNA Memory. Only **REMOTE START** and **PEDAL BOOSTER** are marked "under development, do not activate". Note `user_config.h.sample` still calls READ FAULTS "experimental: doesn't work yet" while the manual documents it — treat READ FAULTS as untested and leave it off. [Repo]
+- ESC/TC needs the car's **race mode enabled by proxy alignment**; enabling race this way loses the pedal maps unless race is disabled again on the engine ECU only (manual §2.19). ACC pad and HAS pad also need proxy alignment. [Repo manual]
+- **Immobilizer test:** a theft attempt can be simulated with an ELM327 + AlfaOBD/MultiECUScan connecting to the RF hub; the car then cannot be started until you unplug the ELM327 and wait ~30 s. [Repo manual §2.4]
+- **SGW:** "if the vehicle has an SGW, the OBD pins cannot be used — use an SGW bypass cable, or tap the CAN wires upstream of the SGW" (manual §1.8, with four tapping examples on the body computer). Reports from other users confirm that a car with an SGW but no bypass can show wrong values (e.g. oil pressure 0.00 bar). [Repo manual][upstream issue #41]
+- **Compatibility:** the author reports one user on a MY23; MY22 is not reported either way. [upstream issue #5]
+- **Menu basics:** hold RES (or DISTANCE) ~2 s with the engine running and cruise control off; use SETUP MENU → select functions → SAVE & EXIT; the menu hides 40 s after the engine stops. [Repo manual §2.1]
+
+---
+
 ## 9. Risks and stop conditions
 | Risk | Rule |
 |---|---|
@@ -307,9 +345,9 @@ Build commands (BACCAble, GCC): from `firmware/ledsStripController`, copy `Core/
 ---
 
 ## 10. Still uncertain
-1. Whether UCAN users remove R1/R2; R1/R2 package size.
+1. R1/R2 package size on your UCANs. (The author's own PCB has no termination across CANH/CANL, which supports removing them; no UCAN user report found.)
 2. ~~Whether the bypass cable passes C2 and BH~~ — confirmed by the owner.
-3. Exact CK-to-CK wire length/layout for three UCANs (the author confirms the single shared wire, but gives no drawing).
+3. Exact CK-to-CK wire length/layout for three UCANs (the author's PCB shares one `Serial` net on PA14 across all three chips and he confirms a single wire; no drawing for loose boards).
 4. Whether the optional PA13/PC13 sleep-pin change works with BACCAble.
 5. Loose-module flashing procedure (repo documents only the PCB app).
 6. Whether the car's USB ports follow the RF-hub wake for your 2022 car.
