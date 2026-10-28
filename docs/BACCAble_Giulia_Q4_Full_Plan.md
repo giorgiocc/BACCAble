@@ -408,6 +408,22 @@ If a bus is silent in the S2 sniff, the cable or pair is wrong: these IDs are wh
 
 ---
 
+## 8k. Dashboard parameters and ELM327 details (from `uds_parameters.c`, `elm327.h`, `elm327.c`)
+
+**Parameter tables**
+- The **gasoline list has 47 pages** (diesel 57). The dashboard asks for the shown parameter about every 500 ms **only while the menu is open**, so there is no background UDS traffic otherwise. [Repo]
+- **Two kinds of parameters:** (a) *native* values taken from broadcast CAN frames with no request on the bus — oil pressure/temperature `0x4B2`, power and torque `0x0FB`, battery `0x41A`, speed `0x101`, gear `0x2EF`, DPF regen type `0x5AE`; (b) *UDS reads* (service `0x22`) sent on the C1 bus to **ECM `0x10`** (`18DA10F1` — most engine, turbo, oil, intercooler, knock, spark-correction and exhaust values), **BODY `0x40`** (battery %, voltage, key ID), **TCM `0x18`** (gearbox temperature) and the **instrument cluster `0x60`** (seat-belt alarm state). [Repo]
+- **Tyre-pressure entries (ECU `0xC7`, the RF hub) exist only as commented/"not implemented" rows** and are not in the active gasoline list, so BACCAble's own menu never talks to the RF hub: the `DAC7F1` warning applies to the CarScanner PID file, not to this firmware. [Repo]
+- **Suspected upstream typo:** the gasoline parameter "OVER RPM: sec" (single entry 38) lists its reply ID as `0xDA18F110`; every other entry uses `0x18DAF110`. It probably never receives an answer, so that page would not update. I have not changed it (cannot test without the car); it is a one-line fix if you want it. [Repo: `uds_parameters.c`, to be verified on the car]
+- Also noted: the particulate entry has `0,001` (comma) instead of `0.001` and is unused; the "Brake pedal" page reads the brake value from `0x107` on C1. [Repo]
+
+**ELM327 interpreter**
+- Identifies as **"ELM327 v1.4"** / "OBDII to RS232 Interpreter", with *strict ELM defaults* (echo on, linefeeds off), because AlfaOBD discards the first line otherwise; unknown AT commands answer `OK` (tools like AlfaOBD close the link on `?`). Supported AT set found in the code includes `Z WS I @1 @2 E0/E1 L0/L1 H0/H1 S0/S1 V0/V1 CAF0/CAF1 CFC0/CFC1 AL AR NL BI D DP DPN PC RV MA`, plus ATSH/ATCRA/ATCF/ATCM/ATST/ATCP/ATFCSH/ATFCSD and the programmable parameters `PP 2C–2F` that MultiECUScan uses to select bus speed (500 kbit/s divided by the divisor: 01 = 500k, 02 = 250k, 04 = 125k, 0A = 50k). [Repo: `elm327.c`, `elm327.h`]
+- **Frame padding byte `0xAA`**, ISO-TP multi-frame up to 255 bytes, up to 64 raw frames per command in `ATCAF0` mode, a **16-entry cache remembering which bus each ECU address lives on** (first tried with a 200 ms probe timeout, then the right bus is used directly). [Repo]
+- **Safety exit:** while ELM327 is active the dashboard no longer answers the steering-wheel buttons, so the mode **switches itself off after 120 s without a command** (`ELM327_IDLE_EXIT_MS`) and the board resumes normal work. The `ATLOG` trace recorder is compiled out of the C1 build (RAM). [Repo]
+
+---
+
 ## 9. Risks and stop conditions
 | Risk | Rule |
 |---|---|
@@ -432,7 +448,8 @@ If a bus is silent in the S2 sniff, the cable or pair is wrong: these IDs are wh
 5. Loose-module flashing procedure (repo documents only the PCB app).
 6. Whether the car's USB ports follow the RF-hub wake for your 2022 car (matters only if you later enable the immobilizer).
 7. The prebuilt images have not run on a UCAN: first flash and boot behaviour (LED pattern, `Version.txt` on C2/BH) is unconfirmed.
-8. Files not read word for word: most of `elm327.c`, `elmlink.c` (headers and top read), `vuMeter.c` (LED strip, out of scope), the middle of `processingStandardMessage.c`, the middle of `processingExtendedMessage.c` and `uds_parameters.c`. Read in full or in the relevant parts: everything else in `Core/Src`.
+8. Not read line by line: the body of `elm327.c` and `elmlink.c` (headers, structure and the AT-command set were read), `vuMeter.c` (LED strip, out of scope) and the middle of `processingStandardMessage.c`. Everything else in `Core/Src` and `Core/Inc` that matters for the hardware and the menu was read.
+9b. The suspected `0xDA18F110` typo in gasoline parameter 38 (§8k) is unverified on a car.
 9. Powering C1 from a PC for ELM327 use while C2/BH stay on car USB (§8i) is my inference, not a documented procedure.
 
 ---
