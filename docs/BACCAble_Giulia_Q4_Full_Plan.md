@@ -1,4 +1,4 @@
-# DIY BACCAble — Full Plan, Build Steps and Firmware (v4.11)
+# DIY BACCAble — Full Plan, Build Steps and Firmware (v4.12)
 
 **Mission:** build our own BACCAble from loose boards instead of buying the author's ready-made device, and make it **behave the same as the author's device in every way except the WS281x LED strip** (not built, not wired, left disabled).
 **Build:** the **full BACCAble — three UCAN boards, C1 + C2 + BH**, one per CAN bus, exactly like the three chips on the author's PCB. This is **not** the two-board (C1 + BH) minimalist/test setup: every board, wire and step below is for three boards, and wherever a repo picture shows only one or two UCANs it is used only as a pad/label/mounting reference.
@@ -110,7 +110,7 @@ The author's device (schematic `hardware/newBaccableDedicatedPcb/BACCABLE_SCHEMA
 | Firmware | `baccableC1/C2/BH` images from this repo | Same source; C1 built with our flags (§8), C2/BH unchanged | ✅ |
 | Serial link between chips | one `Serial` net on PA14 of all three chips (USART2, 38400 baud, half-duplex, open-drain) | one wire joining the **CK pads** (PA14) of the three UCANs | ✅ |
 | Sleep ("low consume") | C1 **PA4** holds C2/BH in reset; C1 **PA5** puts the C2/BH transceivers in standby; C1 keeps listening and wakes them on CAN activity | **Reset line:** C1 **DO pad (PA13)** → **RES pads** of C2 and BH (flag `UCAN_LOW_CONSUME_PINS`). **Standby line:** C1 **PA5** (unchanged author pin, fine wire on chip pin 15) → **pin 8 (S/RS) of the CAN transceiver** on C2 and BH (§5.2) | ✅ identical behaviour (same firmware logic, same two lines) |
-| Power | 12 V from OBD pin 16 → fuse F1 → buck U1 (4.5–35 V in) → **3.3 V straight to the chips**; USB 5 V can also feed the buck input through diode D2; ≈ 15 mA asleep, < 30 mA running | **Chosen — Option B:** pin 16 → fuse 1 A → **12→3.3 V buck → P3 3V3 + G pads** of the three UCANs (§4) | ✅ identical topology; rule: unplug a board's 3V3 plug before plugging USB into it (no D2 diode on a UCAN) |
+| Power | 12 V from OBD pin 16 → fuse F1 → buck U1 (4.5–35 V in) → **3.3 V straight to the chips**; USB 5 V can also feed the buck input through diode D2; ≈ 15 mA asleep, < 30 mA running | **Chosen — Option B:** pin 16 → fuse 1 A → **12→3.3 V buck → P3 3V3 + G pads** of the three UCANs (§4) | ✅ identical topology; rule: unplug a board's 3V3 plug before plugging USB into it (no D2 diode on a UCAN); a board with a 5 V transceiver build needs 5 V instead (§4.6) |
 | Programming button | one button pulling BOOT0 of all three chips | one push button **B0 ↔ 3V3** per UCAN | ✅ |
 | USB port per chip (flash, sniffer, ELM327, pen drive) | J10/J20/J30 USB-C | each UCAN's own USB-C | ✅ |
 | Status LEDs | green power + red (PA0) + white/blue/yellow (PA1) per chip | each UCAN's **LD3 "3V3"** (power), **LD1 "RX"** (PA0 = red) and **LD2 "TX"** (PA1 = blue), seen through windows in the box (§2.3.5; `UCAN_BOARD_LED_INVERSION` is the build default) | ✅ |
@@ -122,6 +122,12 @@ The author's device (schematic `hardware/newBaccableDedicatedPcb/BACCABLE_SCHEMA
 | STS inputs, C2/BH output transistors, GSM footprint | STS_1–3 on PA6 of each chip; Q20 (C2 PA8 → `CMD_2`, OBD 15) and Q30 (BH PA8 → `CMD_3`, OBD 2); GSM module on C2 | **not used by the firmware** (no code reads PA6; only C1's code drives PA7/PA8; no GSM code) | — nothing to copy |
 
 **What is not the same (honestly):** loose boards in our own box instead of the moulded OBD plug; the reset line leaves from PA13 instead of PA4 (same signal, a pad instead of a chip pin); one boot button per board instead of one shared button; each UCAN keeps its own power LED and regulator (bypassed by the 3.3 V rail).
+
+**The author's own warning, in the README:** loose canable/UCAN boards are "just for partial testing … with some limits". His single PCB adds "efficient power consumption and optimized electromagnetic interference management". This plan closes the two concrete limits: the sleep lines (§5) and the always-on 3.3 V power (§4). The remaining difference is physical: loose boards joined by wires pick up more electrical noise than one compact PCB. Keep that small:
+- every wire short (≤ 30 cm);
+- CAN pairs twisted;
+- one ground star;
+- everything fixed in a closed box away from ignition and injector wiring. [Repo][Infer]
 
 **The author's device we are copying** (manual §1.11): one box, three USB-C ports (one per chip: BH, C2, C1 from left to right) and one programming button. The author's video walkthrough of the PCB (screenshots and transcript supplied by the owner) describes the same design:
 - three sections on one 3.3 V supply, with USB power entering the same regulator input;
@@ -545,7 +551,7 @@ The author's older single-CANable diagram is where "TERMINATION NOT INSERTED" co
 | 12 → 3.3 V step-down converter | 1 | input up to ≈ 30–36 V, output ≥ 0.5 A, small idle current | Pololu D24V5F3 (3.3 V, 500 mA, 4–36 V in) |
 | 12 → 5 V converter (only if §4.6 finds a 5 V transceiver) | 1 | same, 5 V output | Pololu D24V5F5 |
 | Inline fuse holder + fuse | 1 + spares | mini blade (ATM) holder, **1 A** fuse | any automotive mini-blade holder |
-| OBD2 male plug | 1 | 16-pin male, solder cups or loose pins | "OBD2 male connector DIY" |
+| OBD2 male plug | 1 | 16-pin male, solder cups or loose pins; or a ready **male OBD2 pigtail cable** with 16 coloured wires (the author's own install cable in `hardware/newBaccableDedicatedPcb/cable.jpg` is the female version) | "OBD2 male connector DIY"; with a pigtail, beep each wire to its pin and label it, because colours are not standard |
 | Wire for the CAN cables | ≈ 2 m | twisted pairs, 22–24 AWG | **Cat5e/Cat6 network cable**: four twisted pairs inside, ideal for H/L/GND |
 | Wire for power | ≈ 1 m | 22 AWG, red + black | silicone hook-up wire |
 | Wire for serial and reset | ≈ 1 m | 26 AWG | silicone hook-up wire |
@@ -585,12 +591,20 @@ The author's older single-CANable diagram is where "TERMINATION NOT INSERTED" co
 
 **Build** (tested, ARM GCC 13.2; `apt install gcc-arm-none-eabi libnewlib-arm-none-eabi`): run `docs/build_ucan.sh`. It writes `firmware/ucan_prebuilt/` (prebuilt copies are committed there):
 
-| Image | Flags (besides `-DRELEASE_FLAVOR=…`) | Size [Built] |
-|---|---|---|
-| `C1` | `-DIS_GASOLINE -DUCAN_LOW_CONSUME_PINS -DDISABLE_IMMOBILIZER -DDISABLE_THE_FUNCTION_SMART_DISABLE_START_STOP` | 79,004 B |
-| `C1_BENCH_ONLY` | same + `-DDEBUG_CAN_RX_SIMULATION` (CAN in silent loopback, simulated frames; **never in the car**) | 79,080 B |
-| `C2`, `BH` | none (stock) | 37,532 B / 36,800 B |
-| `SNIFFER_ActAsCanable` | `CAN_FLAVOR` (plain SLCAN sniffer for SavvyCAN, for the spare) | 25,644 B |
+| Image | Flags (besides `-DRELEASE_FLAVOR=…`) | Flash size [Built] | RAM used (of 16 KB) [Built] |
+|---|---|---|---|
+| `C1` | `-DIS_GASOLINE -DUCAN_LOW_CONSUME_PINS -DDISABLE_IMMOBILIZER -DDISABLE_THE_FUNCTION_SMART_DISABLE_START_STOP` | 79,004 B (limit 96 KB) | 14,756 B |
+| `C1_BENCH_ONLY` | same + `-DDEBUG_CAN_RX_SIMULATION` (CAN in silent loopback, simulated frames; **never in the car**) | 79,080 B | 14,764 B |
+| `C2`, `BH` | none (stock) | 37,532 B / 36,800 B (limit 60 KB) | 10,720 B / 10,548 B |
+| `SNIFFER_ActAsCanable` | `CAN_FLAVOR` (plain SLCAN sniffer for SavvyCAN, for the spare) | 25,644 B | 6,336 B |
+
+**Byte-level checks on the committed images:**
+- **Reproducible:** they rebuild byte-identical from the fork apart from the version tag.
+- **Sane start-up:** each starts with stack pointer `0x20004000` and a start address inside the code.
+- **Inside their limits:** each ends inside its linker region, far below the settings pages and the C2/BH USB drive.
+- **Version string:** each carries `BACCABLE ucan-1a45e5b`.
+- **Our change in C1:** `lowConsume_init` sets GPIOA pin 13 (mask `0x2000`) as an open-drain output and `Reset_Other_Chips` drives it low.
+- **RAM:** C1 uses ≈ 90 % of RAM, the same as the author's own C1 build, and the linker still reserves the minimum stack (1 KB) and heap (512 B). [Built]
 
 Checked with the preprocessor: `LOW_CONSUME` defined; `IMMOBILIZER_ENABLED`, `SMART_DISABLE_START_STOP`, `IS_DIESEL` undefined. The defaults apply only to a board whose settings flash page is blank, so **erase the whole chip** when flashing a board that ran BACCAble before (CubeProgrammer "Full chip erase"; with dfu-util the DfuSe option `-s 0x08000000:mass-erase:force:leave` should do the same [Infer]). A new UCAN's settings pages are expected to be blank. The fork's "Build Beta Version" GitHub workflow accepts the same flags in its `CFLAGS` input. [Repo][Built]
 
@@ -626,7 +640,7 @@ sudo dfu-util -d 0483:df11 -c 1 -i 0 -a 0 -s 0x08000000:leave -D C1.bin
 | **S2** | Read and flash all boards: `C1`→C1 board, `C2`→C2, `BH`→BH (full chip erase). Reset wire **not** fitted yet. | no steady red blinking on any board; C2/BH show their USB drive label on a data cable |
 | **S3** | **Bench serial test:** flash `C1_BENCH_ONLY` on C1, fit the CK wire, power all three. | after ~3 s the blue LEDs of C2 and BH pulse about once a second (C1 polling them) |
 | **S4** | **Bench sleep test:** flash the real `C1`, fit the reset wire, power all three with no car. | ~4 s after power-up the status LEDs of C2 and BH stop (held in reset; their power LEDs stay on) and C1's blue LED flashes once: the reset wire works. **Standby check:** C1 pin 15 / slave transceiver pin 8 read ≈ 0 V while awake and ≈ 3.3 V once asleep (the standby wire works). **Bus-safety check:** while they are held in reset, measure DC volts between CAN_H and CAN_L on each slave's terminal (nothing else connected): **≈ 0 V = recessive, safe**; anything clearly above ≈ 0.5 V means the slave would hold its bus dominant — do not install it (§5) |
-| **S5** | **Car, silent sniff (optional but recommended):** flash `SNIFFER_ActAsCanable` on the spare and use SavvyCAN in silent mode (`M1`) on each bus (500 k C1/C2, 125 k BH); the IDs in §11.5 should appear — on the BH bus look specifically for `0x256` and `0x46C`, which DNA Memory needs (§11.12). Then install the three boards (H10) and power them. | no warning lights; with always-on power the boards wake on unlock (blue LEDs active again) |
+| **S5** | **Car, silent sniff (optional but recommended):** flash `SNIFFER_ActAsCanable` on the spare and use SavvyCAN (a portable Windows copy ships in the fork: `tools/SavvyCAN-Windows_x64/`) in silent mode (`M1`) on each bus (500 k C1/C2, 125 k BH); the IDs in §11.5 should appear — on the BH bus look specifically for `0x256` and `0x46C`, which DNA Memory needs (§11.12). Then install the three boards (H10) and power them. | no warning lights; with always-on power the boards wake on unlock (blue LEDs active again) |
 | **S6** | **First start:** engine running, cruise control and ACC off → hold **RES** (or DISTANCE) ~2 s → version `BACCABLE ucan-…` on the cluster. With our defaults there is **no** double blue blink and no cluster flash at power-up (those mean "immobilizer active"). Open **SETUP MENU** (§11.7): check **Diesel Params = O** (gasoline), **My23 IPC = O**, Start&Stop = O. | menu works |
 | **S7** | Enable functions **one at a time**, SAVE & EXIT, ignition cycle, check for faults after each: dashboard parameters → shift → seat-belt/odometer → windows, park mirror, park mute → proxy-alignment features (ACC pad, HAS pad, race mask). Leave **DNA Memory off** (selector not compatible, §11.12). | no new faults |
 | **S8** | **Last, stationary / closed course only:** 4WD disabler (C1), ESC/TC, DYNO, front-brake override (C2). Prove the way back first: disable in the menu, ignition cycle, Clear Faults. The 4WD disabler also switches itself off whenever the engine stops (`processingMessage0x000000FC.c`). | rollback works |
@@ -755,6 +769,21 @@ ESC/TC and the race screen need race mode enabled by **proxy alignment** (manual
 | **A monostable DNA selector that sends `0x256` on the BH bus** | its frames are the trigger for every press; with another selector type BH sees no `0x256` and does nothing (code comment cites such a car) | **check in S5:** sniff the BH bus at 125 kbit/s and look for `0x256` (every ≈ 250 ms) and `0x46C` |
 | "DNA Memory" selected in SETUP + SAVE & EXIT | off by default | **leave off on the owner's car** |
 | One drive first | right after installing nothing is memorized yet | first restore happens on the drive after the next sleep |
+
+### 11.13 Every pin the firmware uses (all `HAL_GPIO_Init` calls in the fork)
+| Pin (chip pin) | Use | Boards | On a UCAN |
+|---|---|---|---|
+| PA0 (10), PA1 (11) | red / blue LED, open-drain + pull-up | all | LD1 "RX" / LD2 "TX" |
+| PA4 (14) | reset line (stock build) | C1 | no pad: moved to PA13 by our flag |
+| PA5 (15) | standby line, push-pull | C1 | no pad: fine wire (§5.2) |
+| PA7 (17), PA8 (29) | exhaust-remote transistors, push-pull, low | all (only C1's code pulses them) | not connected |
+| PA11 (32), PA12 (33) | USB (PA11 is also the LED-strip timer output) | all | USB-C (leave the LED strip off) |
+| PA13 (34) | reset line with `UCAN_LOW_CONSUME_PINS`, open-drain | C1 | DO pad |
+| PA14 (37) | serial link USART2, half-duplex, open-drain + pull-up | all | CK pad (+ R14 4.7 kΩ) |
+| PB6 (42) | pedal-booster USART1 | C1 | not connected (R20 4.7 kΩ pull-up on the UCAN) |
+| PB8 (45), PB9 (46) | CAN RX / TX | all | to U1 |
+
+PC13 and PA6 (the author's STS inputs) are never configured. Nothing in the firmware conflicts with our wiring. [Repo][FYSETC]
 
 ---
 
