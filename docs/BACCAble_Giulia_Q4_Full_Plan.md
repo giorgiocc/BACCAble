@@ -1,4 +1,4 @@
-# DIY BACCAble — Full Plan, Build Steps and Firmware (v4.12)
+# DIY BACCAble — Full Plan, Build Steps and Firmware (v4.13)
 
 **Mission:** build our own BACCAble from loose boards instead of buying the author's ready-made device, and make it **behave the same as the author's device in every way except the WS281x LED strip** (not built, not wired, left disabled).
 **Build:** the **full BACCAble — three UCAN boards, C1 + C2 + BH**, one per CAN bus, exactly like the three chips on the author's PCB. This is **not** the two-board (C1 + BH) minimalist/test setup: every board, wire and step below is for three boards, and wherever a repo picture shows only one or two UCANs it is used only as a pad/label/mounting reference.
@@ -70,6 +70,7 @@ What makes our version work like the author's:
 - **When something goes wrong:** the troubleshooting table in §9.1.
 
 ### 0.4 How this document is organised
+- **§0.6:** quick answers to common questions (settings, battery, 4WD, removal).
 - **§1–3:** what we copy from the author and how the boards are wired.
 - **§4–6:** the three special topics: power, sleep, terminators.
 - **§7 (hardware) and §9 (bring-up):** the step lists you follow with tools in hand.
@@ -95,6 +96,18 @@ What makes our version work like the author's:
 | **Transceiver (U1)** | the small 8-pin chip that drives the CAN wires |
 | **Beep test** | the multimeter's continuity mode: it beeps when two points are connected |
 | **Hn / Sn** | numbered hardware steps (§7) and bring-up steps (§9) |
+
+### 0.6 Questions the owner asked, answered from the fork
+| Question | Short answer | Details |
+|---|---|---|
+| Why three boards? | The car has three separate CAN networks (C1, C2, BH) and one STM32F072 has one CAN port. One board per network; C1 is the boss and gives orders over the serial wire. Without C2 there is no ESC/TC, DYNO, brake override, park mute or ABS faults | §0.1, §2.1 |
+| Is a separate USB 5 V supply needed? | No. The author confirmed: *"Con la mia scheda la alimentazione viene dalla obd"* — power comes from OBD pin 16 | §4.1 |
+| Do my settings survive switching the car off, or a battery disconnect? | Yes, once you choose **SAVE & EXIT**: C1 writes all 33 SETUP values to its flash. The immobilizer ON/OFF is saved when toggled; the shown dashboard parameters and BH's mirror positions have their own flash pages. A **full chip erase** when re-flashing brings back the defaults | §11.8, §8 |
+| What resets on purpose? | 4WD-disabled (engine off), DYNO and front-brake override (car asleep), Max Hold (power loss), DNA Memory's remembered style (power loss) | §11.14 |
+| Will it drain the battery? | Asleep, the author's device draws ≈ 15 mA: about **11 Ah per month**. Fine for daily use; for parking longer than ~2 weeks, unplug the OBD plug or use a battery maintainer. Measure your own build in H11 | §4.4, H11 |
+| How does the 4WD disabler work, and can it harm the module? | C1 keeps the drivetrain module rebooting (`11 01` every 30 ms) so it never sends torque to the front. Physical damage is unlikely (a software reset), but fault codes and changed stability behaviour are likely; use it briefly, stationary or on a closed course. A question about warning lights is pending with the author | §11.14 |
+| What happens if the BACCAble fails? | The car keeps working: the boards only add messages. The one bad failure is a board holding a bus busy (warning lights): unplug the OBD plug and everything is back to stock | §12 |
+| How do I remove it? | Unplug the OBD plug, do an ignition cycle, and clear faults with a diagnostic tool if any were stored. The seat-belt chime setting the BACCAble writes is the stock value with our defaults (§11.8). Proxy-alignment changes you make yourself with MultiECUScan stay until you undo them | §11.10 |
 
 ---
 
@@ -496,6 +509,7 @@ Using Option A for all three boards keeps the build simple if any board is build
 - **Wiring:** one thin wire (30 AWG wire-wrap or enamelled) from **C1's chip pin 15 = PA5** (LQFP48 numbering from the MKS CANable schematic in the repo: PA4 = 14, PA5 = 15) to **pin 8 of the CAN transceiver** (the 8-pin chip next to the green terminal) on **C2** and on **BH**. Pin 15 is the 3rd pin from the right on the chip's top side (USB on the left; how to confirm it: §2.2). The pitch is 0.5 mm: use flux and a fine tip, and check with a loupe that pins 14/16 are not bridged.
 - **Before soldering, identify pin 8 on your boards:** pin 1 is marked by the dot; pin 8 is the pin beside pin 1 on the opposite row. Confirm with the multimeter: **continuity between transceiver pin 8 and the board's chip pin 2 (PC13)**. If there is no continuity, stop and re-check (the board differs from GiUCAN's). [Infer]
 - **Result:** during sleep the slaves are held in reset **and** their transceivers are in standby/silent mode — the author's exact behaviour and the lowest sleep current. At start-up, before C1's firmware sets PA5, the line is held low by each slave's own **R18 10 kΩ to GND** (R4 removed in H1, §2.2), so the transceivers stay active, as with the author's R27 pull-down. Even if R4 were left in, the line would sit at about half the supply, still below the SN65HVD230's standby threshold (≈ 0.75 × 3.3 V). Load on PA5: ≈ 0.33 mA per slave, well within the pin's rating. [FYSETC][Infer]
+- **The standby wire is also a safety line, not only a current saver.** While C1 holds C2 and BH in reset, their chips' CAN_TX pins (PB9) float, because an STM32 in reset leaves its pins as floating inputs. Whether the transceiver then keeps the bus quiet depends only on its own input. The standby wire removes that question: with pin 8 high the transceiver's driver is switched off, exactly as on the author's PCB. **Don't skip W17**, and do the S4 bus-safety check. [Infer]
 - *Optional, fully pin-identical variant:* also take the reset line from C1's chip **pin 14 (PA4)** instead of the DO pad and build C1 **without** `-DUCAN_LOW_CONSUME_PINS` (the author's stock pins). Same behaviour, but one more fine-pitch joint next to pin 15; the DO-pad route is the easier one.
 
 ### 5.3 Bench note
@@ -785,6 +799,29 @@ ESC/TC and the race screen need race mode enabled by **proxy alignment** (manual
 
 PC13 and PA6 (the author's STS inputs) are never configured. Nothing in the firmware conflicts with our wiring. [Repo][FYSETC]
 
+### 11.14 4WD disabler — exactly what the code does
+**Where:** C1 only (`functions_C1baccable.c`, `processingMessage0x000002FA.c`, `processingMessage0x000000FC.c`), on the C1 bus. [Repo]
+
+**Steps:**
+1. **Visibility:** the main-menu item "4WD" exists only if "4WD disabler" is selected in SETUP.
+2. **Switching on:** the item can be switched to "Dis" only when the car has been standing still for ≥ 1 s (`carSteadyCounter`, from `0x101`). Otherwise the cluster shows "stop the car".
+3. **The command sequence:** C1 sends to the drivetrain module (`0x18DA1AF1`):
+   1. `10 03` — extended diagnostic session;
+   2. `3E 80` — tester present;
+   3. `2F 2A AA 03 00 00` — IO control: the code's comment says front torque 0;
+   4. `11 01` — hard reset.
+4. **Timing:** steps 1–3 go out about 100 ms apart. The reset then repeats **every 30 ms** while the function is on. The code's own name for this state is "ECU reset loop".
+5. **Feedback:** C1's blue LED pulses with each message, and the cluster shows a "4WD disabled" notice every 5–6 s.
+6. **Switching off:** select the item again, or stop the engine: `0x0FC` with 0 rpm resets it.
+7. **DYNO:** it does not switch 4WD off; that code is commented out ("not working now").
+
+**Risks:**
+- **Fault codes (likely):** the module and its neighbours probably store communication faults.
+- **Stability systems:** ESC/ABS lose the AWD information while the loop runs.
+- **Memory wear:** unknown — the module may write to its memory on every boot.
+
+The manual (§2.15) only says to use it on AWD cars and to switch it on while stationary. [Repo][Infer]
+
 ---
 
 ## 12. Risks and stop conditions
@@ -797,6 +834,8 @@ PC13 and PA6 (the author's STS inputs) are never configured. Nothing in the firm
 | A board with a 5 V transceiver (U1 pin 3 ≈ 5 V on USB) on the 3.3 V rail | its CAN would be dead; feed it 5 V through USB-C instead (§4.6) |
 | Reset wire fitted while flashing slaves on the bench | C1 will hold them in reset — fit it after S2, or use `C1_BENCH_ONLY` |
 | Parked drain | measure in H11; if it does not drop after the car sleeps, check the reset wire and the sleep LED |
+| Long parking (> ~2 weeks) | ≈ 15 mA asleep ≈ 11 Ah per month: unplug the OBD plug or use a battery maintainer |
+| Skipping the standby wire W17 | asleep slaves could hold a bus busy; fit it and pass the S4 bus-safety check (§5.2) |
 | Immobilizer turned on later | it reacts to any diagnostic session on the RF hub; turn it off before MultiECUScan/AlfaOBD work |
 | DYNO, 4WD disable, brake override | stationary/closed course only; the repo is "educational and research", not for public roads |
 | Warranty/insurance/inspection | your responsibility |
