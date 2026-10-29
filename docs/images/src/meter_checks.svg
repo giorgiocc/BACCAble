@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="840" viewBox="0 0 1500 840">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="30" y="42" font-family="DejaVu Sans, Arial, sans-serif" font-size="26" fill="#111827" text-anchor="start" font-weight="bold">Every measurement in the build, with the value you should see</text>
+<text x="30" y="70" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#64748b" text-anchor="start" font-weight="normal">Ω = resistance (board/car unpowered) · V = voltage · BEEP = continuity mode · mA = current (meter in series at the fuse)</text>
+<rect x="30" y="90" width="1440" height="40" rx="6" fill="#e2e8f0"/>
+<text x="50" y="116" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">Step</text>
+<text x="130" y="116" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">Meter</text>
+<text x="230" y="116" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">Where to put the probes</text>
+<text x="870" y="116" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">What you should read</text>
+<rect x="30" y="140" width="1440" height="50" rx="6" fill="#f8fafc"/>
+<text x="50" y="171" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#111827" text-anchor="start" font-weight="bold">H0</text>
+<rect x="122" y="151" width="82" height="28" rx="14" fill="#0891b2"/>
+<text x="163" y="170" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">Ω</text>
+<text x="230" y="171" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">CAN_H ↔ CAN_L on each board's terminal (unpowered, no jumper)</text>
+<text x="870" y="171" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#0f172a" text-anchor="start" font-weight="bold">118 Ω → remove R1+R2 · open → OK · 60 Ω → jumper on</text>
+<rect x="30" y="196" width="1440" height="50" rx="6" fill="#ffffff"/>
+<text x="50" y="227" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#111827" text-anchor="start" font-weight="bold">H0</text>
+<rect x="122" y="207" width="82" height="28" rx="14" fill="#16a34a"/>
+<text x="163" y="226" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">BEEP</text>
+<text x="230" y="227" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">Each pad ↔ its chip pin (CK 37, DO 34, RES 7, B0 44, G, 3V3)</text>
+<text x="870" y="227" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#0f172a" text-anchor="start" font-weight="bold">every pad beeps to the pin listed in §2.2</text>
+<rect x="30" y="252" width="1440" height="50" rx="6" fill="#f8fafc"/>
+<text x="50" y="283" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#111827" text-anchor="start" font-weight="bold">H0</text>
+<rect x="122" y="263" width="82" height="28" rx="14" fill="#dc2626"/>
+<text x="163" y="282" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">V</text>
+<text x="230" y="283" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">U1 pin 3 (transceiver supply), board on USB only</text>
+<text x="870" y="283" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#0f172a" text-anchor="start" font-weight="bold">≈ 3.3 V → OK for our power · ≈ 5 V → 5 V transceiver, see §4.6</text>
+<rect x="30" y="308" width="1440" height="50" rx="6" fill="#ffffff"/>
+<text x="50" y="339" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#111827" text-anchor="start" font-weight="bold">H1</text>
+<rect x="122" y="319" width="82" height="28" rx="14" fill="#0891b2"/>
+<text x="163" y="338" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">Ω</text>
+<text x="230" y="339" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">CAN_H ↔ CAN_L again, after removing R1 + R2</text>
+<text x="870" y="339" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#0f172a" text-anchor="start" font-weight="bold">well above 1 kΩ</text>
+<rect x="30" y="364" width="1440" height="50" rx="6" fill="#f8fafc"/>
+<text x="50" y="395" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#111827" text-anchor="start" font-weight="bold">H1</text>
+<rect x="122" y="375" width="82" height="28" rx="14" fill="#0891b2"/>
+<text x="163" y="394" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">Ω</text>
+<text x="230" y="395" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">U1 pin 8 ↔ G (after removing R4, if fitted)</text>
+<text x="870" y="395" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#0f172a" text-anchor="start" font-weight="bold">≈ 10 kΩ (R18 only)</text>
+<rect x="30" y="420" width="1440" height="50" rx="6" fill="#ffffff"/>
+<text x="50" y="451" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#111827" text-anchor="start" font-weight="bold">H6</text>
+<rect x="122" y="431" width="82" height="28" rx="14" fill="#dc2626"/>
+<text x="163" y="450" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">V</text>
+<text x="230" y="451" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">Converter output, NO board connected, 12 V in</text>
+<text x="870" y="451" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#0f172a" text-anchor="start" font-weight="bold">3.30 V (3.2–3.4 V); never above 3.6 V</text>
+<rect x="30" y="476" width="1440" height="50" rx="6" fill="#f8fafc"/>
+<text x="50" y="507" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#111827" text-anchor="start" font-weight="bold">H7</text>
+<rect x="122" y="487" width="82" height="28" rx="14" fill="#dc2626"/>
+<text x="163" y="506" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">V</text>
+<text x="230" y="507" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">P3 3V3 pad of each board on the rail</text>
+<text x="870" y="507" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#0f172a" text-anchor="start" font-weight="bold">3.2–3.4 V, power LED on, nothing warm</text>
+<rect x="30" y="532" width="1440" height="50" rx="6" fill="#ffffff"/>
+<text x="50" y="563" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#111827" text-anchor="start" font-weight="bold">H8</text>
+<rect x="122" y="543" width="82" height="28" rx="14" fill="#0891b2"/>
+<text x="163" y="562" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">Ω / V</text>
+<text x="230" y="563" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">Bypass port, car asleep: 6↔14 · 12↔13 · 3↔11 · 16↔4</text>
+<text x="870" y="563" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#0f172a" text-anchor="start" font-weight="bold">≈ 60 Ω · ≈ 60 Ω · low value · ≈ 12 V</text>
+<rect x="30" y="588" width="1440" height="50" rx="6" fill="#f8fafc"/>
+<text x="50" y="619" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#111827" text-anchor="start" font-weight="bold">S4</text>
+<rect x="122" y="599" width="82" height="28" rx="14" fill="#dc2626"/>
+<text x="163" y="618" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">V</text>
+<text x="230" y="619" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">C1 chip pin 15 / slave U1 pin 8 (bench, no car)</text>
+<text x="870" y="619" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#0f172a" text-anchor="start" font-weight="bold">≈ 0 V awake → ≈ 3.3 V asleep</text>
+<rect x="30" y="644" width="1440" height="50" rx="6" fill="#ffffff"/>
+<text x="50" y="675" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#111827" text-anchor="start" font-weight="bold">S4</text>
+<rect x="122" y="655" width="82" height="28" rx="14" fill="#dc2626"/>
+<text x="163" y="674" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">V</text>
+<text x="230" y="675" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">CAN_H ↔ CAN_L DC on each slave while asleep</text>
+<text x="870" y="675" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#0f172a" text-anchor="start" font-weight="bold">≈ 0 V (safe); clearly above 0.5 V → stop</text>
+<rect x="30" y="700" width="1440" height="50" rx="6" fill="#f8fafc"/>
+<text x="50" y="731" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#111827" text-anchor="start" font-weight="bold">H10</text>
+<rect x="122" y="711" width="82" height="28" rx="14" fill="#0891b2"/>
+<text x="163" y="730" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">Ω</text>
+<text x="230" y="731" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">Each bus through the finished harness, in the car, unpowered</text>
+<text x="870" y="731" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#0f172a" text-anchor="start" font-weight="bold">≈ 60 Ω (≈ 40 Ω = a terminator is still on)</text>
+<rect x="30" y="756" width="1440" height="50" rx="6" fill="#ffffff"/>
+<text x="50" y="787" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#111827" text-anchor="start" font-weight="bold">H11</text>
+<rect x="122" y="767" width="82" height="28" rx="14" fill="#7c3aed"/>
+<text x="163" y="786" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">mA</text>
+<text x="230" y="787" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">12 V current at the fuse: awake, then ≈ 1 min after the car sleeps</text>
+<text x="870" y="787" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#0f172a" text-anchor="start" font-weight="bold">drops when asleep (author: ≈ 15 mA asleep, &lt; 30 mA running)</text>
+</svg>

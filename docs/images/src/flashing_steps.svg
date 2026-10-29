@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="560" viewBox="0 0 1500 560">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="30" y="42" font-family="DejaVu Sans, Arial, sans-serif" font-size="26" fill="#111827" text-anchor="start" font-weight="bold">Loading the firmware into one board (repeat for C1, C2, BH)</text>
+<text x="30" y="70" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#64748b" text-anchor="start" font-weight="normal">The chip's own USB loader (DFU) does the work. Nothing can be damaged by trying again.</text>
+<rect x="30" y="100" width="225" height="250" rx="12" fill="#fff" stroke="#dc2626" stroke-width="3"/>
+<circle cx="60" cy="132" r="15" fill="#dc2626"/>
+<text x="60" y="137" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#fff" text-anchor="middle" font-weight="bold">1</text>
+<text x="82" y="138" font-family="DejaVu Sans, Arial, sans-serif" font-size="1" fill="#111827" text-anchor="start" font-weight="normal"></text>
+<text x="142.5" y="180" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="middle" font-weight="bold">Unplug its power</text>
+<text x="142.5" y="200" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="middle" font-weight="bold">plug</text>
+<text x="142.5" y="236" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="middle" font-weight="normal">the 2-pin plug on P3</text>
+<text x="142.5" y="256" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="middle" font-weight="normal">(rule: never USB + plug</text>
+<text x="142.5" y="276" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="middle" font-weight="normal">on the same board)</text>
+<polyline points="257,225 269,225" fill="none" stroke="#94a3b8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="269,225 257.2941876694152,230.654551943446 257.2941876694152,219.345448056554" fill="#94a3b8"/>
+<rect x="271" y="100" width="225" height="250" rx="12" fill="#fff" stroke="#0f766e" stroke-width="3"/>
+<circle cx="301" cy="132" r="15" fill="#0f766e"/>
+<text x="301" y="137" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#fff" text-anchor="middle" font-weight="bold">2</text>
+<text x="323" y="138" font-family="DejaVu Sans, Arial, sans-serif" font-size="1" fill="#111827" text-anchor="start" font-weight="normal"></text>
+<text x="383.5" y="180" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="middle" font-weight="bold">Hold its BOOT</text>
+<text x="383.5" y="200" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="middle" font-weight="bold">button</text>
+<text x="383.5" y="236" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="middle" font-weight="normal">keep holding…</text>
+<polyline points="498,225 510,225" fill="none" stroke="#94a3b8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="510,225 498.2941876694152,230.654551943446 498.2941876694152,219.345448056554" fill="#94a3b8"/>
+<rect x="512" y="100" width="225" height="250" rx="12" fill="#fff" stroke="#2563eb" stroke-width="3"/>
+<circle cx="542" cy="132" r="15" fill="#2563eb"/>
+<text x="542" y="137" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#fff" text-anchor="middle" font-weight="bold">3</text>
+<text x="564" y="138" font-family="DejaVu Sans, Arial, sans-serif" font-size="1" fill="#111827" text-anchor="start" font-weight="normal"></text>
+<text x="624.5" y="180" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="middle" font-weight="bold">Plug the USB-C</text>
+<text x="624.5" y="200" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="middle" font-weight="bold">data cable</text>
+<text x="624.5" y="236" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="middle" font-weight="normal">laptop ↔ board, while</text>
+<text x="624.5" y="256" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="middle" font-weight="normal">still holding BOOT</text>
+<polyline points="739,225 751,225" fill="none" stroke="#94a3b8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="751,225 739.2941876694152,230.654551943446 739.2941876694152,219.345448056554" fill="#94a3b8"/>
+<rect x="753" y="100" width="225" height="250" rx="12" fill="#fff" stroke="#0f766e" stroke-width="3"/>
+<circle cx="783" cy="132" r="15" fill="#0f766e"/>
+<text x="783" y="137" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#fff" text-anchor="middle" font-weight="bold">4</text>
+<text x="805" y="138" font-family="DejaVu Sans, Arial, sans-serif" font-size="1" fill="#111827" text-anchor="start" font-weight="normal"></text>
+<text x="865.5" y="180" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="middle" font-weight="bold">Release BOOT</text>
+<text x="865.5" y="236" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="middle" font-weight="normal">PC sees "STM32 BOOTLOADER"</text>
+<text x="865.5" y="256" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="middle" font-weight="normal">(USB ID 0483:df11)</text>
+<polyline points="980,225 992,225" fill="none" stroke="#94a3b8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="992,225 980.2941876694152,230.654551943446 980.2941876694152,219.345448056554" fill="#94a3b8"/>
+<rect x="994" y="100" width="225" height="250" rx="12" fill="#fff" stroke="#7c3aed" stroke-width="3"/>
+<circle cx="1024" cy="132" r="15" fill="#7c3aed"/>
+<text x="1024" y="137" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#fff" text-anchor="middle" font-weight="bold">5</text>
+<text x="1046" y="138" font-family="DejaVu Sans, Arial, sans-serif" font-size="1" fill="#111827" text-anchor="start" font-weight="normal"></text>
+<text x="1106.5" y="180" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="middle" font-weight="bold">Load the image</text>
+<text x="1106.5" y="236" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="middle" font-weight="normal">C1.bin → C1, C2.bin → C2,</text>
+<text x="1106.5" y="256" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="middle" font-weight="normal">BH.bin → BH</text>
+<text x="1106.5" y="276" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="middle" font-weight="normal">first time: full chip erase</text>
+<polyline points="1221,225 1233,225" fill="none" stroke="#94a3b8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="1233,225 1221.2941876694151,230.654551943446 1221.2941876694151,219.345448056554" fill="#94a3b8"/>
+<rect x="1235" y="100" width="225" height="250" rx="12" fill="#fff" stroke="#16a34a" stroke-width="3"/>
+<circle cx="1265" cy="132" r="15" fill="#16a34a"/>
+<text x="1265" y="137" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#fff" text-anchor="middle" font-weight="bold">6</text>
+<text x="1287" y="138" font-family="DejaVu Sans, Arial, sans-serif" font-size="1" fill="#111827" text-anchor="start" font-weight="normal"></text>
+<text x="1347.5" y="180" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="middle" font-weight="bold">Unplug USB, then</text>
+<text x="1347.5" y="236" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="middle" font-weight="normal">reconnect the power plug</text>
+<rect x="30" y="380" width="1440" height="160" rx="12" fill="#0f172a"/>
+<text x="50" y="412" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#93c5fd" text-anchor="start" font-weight="bold">Linux / macOS (dfu-util), the repo Makefile's own command:</text>
+<text x="50" y="442" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#e2e8f0" text-anchor="start" font-weight="normal">sudo dfu-util -d 0483:df11 -c 1 -i 0 -a 0 -s 0x08000000:leave -D C1.bin</text>
+<text x="50" y="480" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#e2e8f0" text-anchor="start" font-weight="normal">Windows: STM32CubeProgrammer → USB → Connect → "Erasing &amp; Programming" → choose the .elf → Start.</text>
+<text x="50" y="508" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#94a3b8" text-anchor="start" font-weight="normal">If the PC does not see the board: shorter cable, other port, flip the USB-C plug, hold BOOT until the plug is fully in (manual §1.11).</text>
+</svg>

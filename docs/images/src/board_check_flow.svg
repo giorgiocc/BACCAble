@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="30" y="42" font-family="DejaVu Sans, Arial, sans-serif" font-size="26" fill="#111827" text-anchor="start" font-weight="bold">Checking one UCAN before it is used (do this on each board — step H0/H1)</text>
+<circle cx="60" cy="140" r="15" fill="#2563eb"/>
+<text x="60" y="145" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#fff" text-anchor="middle" font-weight="bold">1</text>
+<rect x="90" y="110" width="560" height="64" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="110" y="148" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="bold">Chip marked STM32F072CB?</text>
+<polyline points="650,132 720,132" fill="none" stroke="#16a34a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="720,132 708.2941876694152,137.654551943446 708.2941876694152,126.345448056554" fill="#16a34a"/>
+<rect x="720" y="110" width="360" height="44" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+<text x="735" y="138" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#14532d" text-anchor="start" font-weight="bold">yes → continue</text>
+<polyline points="650,160 1100,160 1100,140 1110,140" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="1110,140 1098.2941876694151,145.654551943446 1098.2941876694151,134.345448056554" fill="#dc2626"/>
+<rect x="1110" y="118" width="360" height="44" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+<text x="1124" y="146" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#7f1d1d" text-anchor="start" font-weight="bold">no → don't use this board</text>
+<polyline points="60,157 60,235" fill="none" stroke="#93c5fd" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="60" cy="280" r="15" fill="#2563eb"/>
+<text x="60" y="285" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#fff" text-anchor="middle" font-weight="bold">2</text>
+<rect x="90" y="250" width="560" height="64" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="110" y="277" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="bold">Transceiver U1: marked VP230 (SN65HVD230)? On USB only, U1</text>
+<text x="110" y="297" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="bold">pin 3 ≈ 3.3 V?</text>
+<polyline points="650,272 720,272" fill="none" stroke="#16a34a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="720,272 708.2941876694152,277.654551943446 708.2941876694152,266.345448056554" fill="#16a34a"/>
+<rect x="720" y="250" width="360" height="44" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+<text x="735" y="278" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#14532d" text-anchor="start" font-weight="bold">yes → OK for our 3.3 V power</text>
+<polyline points="650,300 1100,300 1100,280 1110,280" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="1110,280 1098.2941876694151,285.654551943446 1098.2941876694151,274.345448056554" fill="#dc2626"/>
+<rect x="1110" y="258" width="360" height="56" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+<text x="1124" y="282" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#7f1d1d" text-anchor="start" font-weight="bold">pin 3 ≈ 5 V → 5 V transceiver: feed this</text>
+<text x="1124" y="300" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#7f1d1d" text-anchor="start" font-weight="bold">board 5 V (§4.6)</text>
+<polyline points="60,297 60,375" fill="none" stroke="#93c5fd" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="60" cy="420" r="15" fill="#2563eb"/>
+<text x="60" y="425" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#fff" text-anchor="middle" font-weight="bold">3</text>
+<rect x="90" y="390" width="560" height="64" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="110" y="428" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="bold">Unpowered, no jumper: CAN_H ↔ CAN_L on the terminal?</text>
+<polyline points="650,412 720,412" fill="none" stroke="#16a34a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="720,412 708.2941876694152,417.654551943446 708.2941876694152,406.345448056554" fill="#16a34a"/>
+<rect x="720" y="390" width="360" height="44" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+<text x="735" y="418" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#14532d" text-anchor="start" font-weight="bold">≈ 118 Ω → remove R1 + R2</text>
+<polyline points="650,440 1100,440 1100,420 1110,420" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="1110,420 1098.2941876694151,425.654551943446 1098.2941876694151,414.345448056554" fill="#dc2626"/>
+<rect x="1110" y="398" width="360" height="56" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+<text x="1124" y="422" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#7f1d1d" text-anchor="start" font-weight="bold">open → nothing to remove · ≈ 60 Ω → remove</text>
+<text x="1124" y="440" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#7f1d1d" text-anchor="start" font-weight="bold">the jumper, measure again</text>
+<polyline points="60,437 60,515" fill="none" stroke="#93c5fd" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="60" cy="560" r="15" fill="#2563eb"/>
+<text x="60" y="565" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#fff" text-anchor="middle" font-weight="bold">4</text>
+<rect x="90" y="530" width="560" height="64" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="110" y="568" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="bold">R4 fitted? (resistor beside R18; U1 pin 8 ≈ 1.6 V on USB)</text>
+<polyline points="650,552 720,552" fill="none" stroke="#16a34a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="720,552 708.2941876694152,557.654551943446 708.2941876694152,546.345448056554" fill="#16a34a"/>
+<rect x="720" y="530" width="360" height="44" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+<text x="735" y="558" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#14532d" text-anchor="start" font-weight="bold">yes → remove R4 (keep R18)</text>
+<polyline points="650,580 1100,580 1100,560 1110,560" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="1110,560 1098.2941876694151,565.654551943446 1098.2941876694151,554.345448056554" fill="#dc2626"/>
+<rect x="1110" y="538" width="360" height="44" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+<text x="1124" y="566" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#7f1d1d" text-anchor="start" font-weight="bold">no → nothing to do</text>
+<polyline points="60,577 60,655" fill="none" stroke="#93c5fd" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="60" cy="700" r="15" fill="#2563eb"/>
+<text x="60" y="705" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#fff" text-anchor="middle" font-weight="bold">5</text>
+<rect x="90" y="670" width="560" height="64" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="110" y="708" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="bold">Every pad beeps to its chip pin (§2.2 table)?</text>
+<polyline points="650,692 720,692" fill="none" stroke="#16a34a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="720,692 708.2941876694152,697.654551943446 708.2941876694152,686.345448056554" fill="#16a34a"/>
+<rect x="720" y="670" width="360" height="44" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+<text x="735" y="698" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#14532d" text-anchor="start" font-weight="bold">yes → solder the wires</text>
+<polyline points="650,720 1100,720 1100,700 1110,700" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="1110,700 1098.2941876694151,705.654551943446 1098.2941876694151,694.345448056554" fill="#dc2626"/>
+<rect x="1110" y="678" width="360" height="56" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+<text x="1124" y="702" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#7f1d1d" text-anchor="start" font-weight="bold">no → stop: your board differs from FYSETC</text>
+<text x="1124" y="720" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#7f1d1d" text-anchor="start" font-weight="bold">V1.0</text>
+<polyline points="60,717 60,795" fill="none" stroke="#93c5fd" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="60" cy="820" r="15" fill="#2563eb"/>
+<text x="60" y="825" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#fff" text-anchor="middle" font-weight="bold">6</text>
+<rect x="90" y="790" width="560" height="64" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="110" y="828" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="bold">Later, in S1: CubeProgrammer reports 128 KB flash?</text>
+<polyline points="650,812 720,812" fill="none" stroke="#16a34a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="720,812 708.2941876694152,817.654551943446 708.2941876694152,806.345448056554" fill="#16a34a"/>
+<rect x="720" y="790" width="360" height="44" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+<text x="735" y="818" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#14532d" text-anchor="start" font-weight="bold">yes → board is ready</text>
+<polyline points="650,840 1100,840 1100,820 1110,820" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="1110,820 1098.2941876694151,825.654551943446 1098.2941876694151,814.345448056554" fill="#dc2626"/>
+<rect x="1110" y="798" width="360" height="44" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+<text x="1124" y="826" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#7f1d1d" text-anchor="start" font-weight="bold">64 KB → don't use it</text>
+</svg>

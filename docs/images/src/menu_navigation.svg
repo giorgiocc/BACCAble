@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="700" viewBox="0 0 1500 700">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="30" y="42" font-family="DejaVu Sans, Arial, sans-serif" font-size="26" fill="#111827" text-anchor="start" font-weight="bold">Using the BACCAble menu on the dashboard (cruise control and ACC must be OFF)</text>
+<rect x="30" y="80" width="560" height="420" rx="14" fill="#f8fafc" stroke="#334155" stroke-width="2"/>
+<text x="310" y="112" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#111827" text-anchor="middle" font-weight="bold">Cruise-control buttons on the steering wheel</text>
+<circle cx="310" cy="290" r="120" fill="#1f2937" stroke="#475569" stroke-width="4"/>
+<text x="310" y="296" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#e2e8f0" text-anchor="middle" font-weight="normal">cruise</text>
+<rect x="262" y="172" width="96" height="36" rx="10" fill="#334155" stroke="#94a3b8" stroke-width="2"/>
+<text x="310" y="196" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#f8fafc" text-anchor="middle" font-weight="bold">SPEED +</text>
+<rect x="262" y="377" width="96" height="36" rx="10" fill="#334155" stroke="#94a3b8" stroke-width="2"/>
+<text x="310" y="401" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#f8fafc" text-anchor="middle" font-weight="bold">SPEED −</text>
+<rect x="147" y="272" width="96" height="36" rx="10" fill="#334155" stroke="#94a3b8" stroke-width="2"/>
+<text x="195" y="296" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#f8fafc" text-anchor="middle" font-weight="bold">RES</text>
+<rect x="377" y="272" width="96" height="36" rx="10" fill="#334155" stroke="#94a3b8" stroke-width="2"/>
+<text x="425" y="296" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#f8fafc" text-anchor="middle" font-weight="bold">DIST</text>
+<text x="60" y="450" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="start" font-weight="normal">Button names differ per wheel: RES or DISTANCE do the same here.</text>
+<text x="60" y="472" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="start" font-weight="normal">The exact layout of your wheel may differ from this sketch.</text>
+<rect x="630" y="120" width="360" height="50" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="650" y="151" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">Hold RES (or DIST) ≈ 2 s</text>
+<polyline points="990,145 1030,145" fill="none" stroke="#2563eb" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="1030,145 1018.2941876694152,150.654551943446 1018.2941876694152,139.345448056554" fill="#2563eb"/>
+<text x="1040" y="151" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">show / hide the menu</text>
+<rect x="630" y="182" width="360" height="50" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="650" y="213" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">SPEED −</text>
+<polyline points="990,207 1030,207" fill="none" stroke="#2563eb" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="1030,207 1018.2941876694152,212.654551943446 1018.2941876694152,201.345448056554" fill="#2563eb"/>
+<text x="1040" y="213" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">next item</text>
+<rect x="630" y="244" width="360" height="50" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="650" y="275" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">SPEED +</text>
+<polyline points="990,269 1030,269" fill="none" stroke="#2563eb" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="1030,269 1018.2941876694152,274.654551943446 1018.2941876694152,263.345448056554" fill="#2563eb"/>
+<text x="1040" y="275" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">previous item</text>
+<rect x="630" y="306" width="360" height="50" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="650" y="337" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">Press firmly</text>
+<polyline points="990,331 1030,331" fill="none" stroke="#2563eb" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="1030,331 1018.2941876694152,336.654551943446 1018.2941876694152,325.345448056554" fill="#2563eb"/>
+<text x="1040" y="337" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">jump ±10 (numbers)</text>
+<rect x="630" y="368" width="360" height="50" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="650" y="399" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">Short press RES</text>
+<polyline points="990,393 1030,393" fill="none" stroke="#2563eb" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="1030,393 1018.2941876694152,398.654551943446 1018.2941876694152,387.345448056554" fill="#2563eb"/>
+<text x="1040" y="399" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="normal">select / toggle the item</text>
+<rect x="30" y="530" width="1440" height="150" rx="12" fill="#fff" stroke="#334155" stroke-width="2"/>
+<text x="50" y="560" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#111827" text-anchor="start" font-weight="bold">Main menu</text>
+<text x="50" y="584" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="start" font-weight="normal">version · Show Params · Read/Clear Faults · Immobilizer ON/OFF · Dyno · ESC/TC · Front Brake · 4WD · SETUP MENU · PARAMS SETUP …</text>
+<text x="50" y="618" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" fill="#111827" text-anchor="start" font-weight="bold">SETUP MENU</text>
+<text x="50" y="642" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#111827" text-anchor="start" font-weight="normal">first item SAVE &amp; EXIT · then one item per function: O = not selected, Ø = selected — choose, then SAVE &amp; EXIT to store</text>
+<text x="50" y="666" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" fill="#64748b" text-anchor="start" font-weight="normal">Only the functions selected in SETUP appear in the main menu. The menu hides ≈ 40 s after the engine stops.</text>
+</svg>

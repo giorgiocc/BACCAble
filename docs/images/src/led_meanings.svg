@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="690" viewBox="0 0 1500 690">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="30" y="42" font-family="DejaVu Sans, Arial, sans-serif" font-size="26" fill="#111827" text-anchor="start" font-weight="bold">What the three LEDs on each board tell you</text>
+<text x="30" y="70" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#64748b" text-anchor="start" font-weight="normal">LD3 = power · LD2 "TX" = the firmware's blue LED · LD1 "RX" = the firmware's red LED. They are dim by design.</text>
+<rect x="30" y="100" width="1440" height="64" rx="8" fill="#f8fafc"/>
+<circle cx="60" cy="132" r="12" fill="#22c55e" stroke="#334155" stroke-width="1.5"/>
+<text x="82" y="128" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">LD3 power</text>
+<text x="82" y="148" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal">steady</text>
+<polyline points="300,144 720,144" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="300.0" y="118" width="420.0" height="26" rx="3" fill="#22c55e"/>
+<text x="750" y="138" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">board has 3.3 V</text>
+<rect x="30" y="175" width="1440" height="64" rx="8" fill="#fff"/>
+<circle cx="60" cy="207" r="12" fill="#3b82f6" stroke="#334155" stroke-width="1.5"/>
+<text x="82" y="203" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">LD2 blue</text>
+<text x="82" y="223" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal">short pulses</text>
+<polyline points="300,219 720,219" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="325.2" y="193" width="12.600000000000023" height="26" rx="3" fill="#3b82f6"/>
+<rect x="438.6" y="193" width="12.599999999999966" height="26" rx="3" fill="#3b82f6"/>
+<rect x="556.2" y="193" width="12.599999999999909" height="26" rx="3" fill="#3b82f6"/>
+<rect x="669.6" y="193" width="12.600000000000023" height="26" rx="3" fill="#3b82f6"/>
+<text x="750" y="213" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">the board is acting on something (a CAN frame it handles, a serial order, a menu press, a save)</text>
+<rect x="30" y="250" width="1440" height="64" rx="8" fill="#f8fafc"/>
+<circle cx="60" cy="282" r="12" fill="#3b82f6" stroke="#334155" stroke-width="1.5"/>
+<text x="82" y="278" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">LD2 blue</text>
+<text x="82" y="298" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal">2 blinks at power-up</text>
+<polyline points="300,294 720,294" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="316.8" y="268" width="42.0" height="26" rx="3" fill="#3b82f6"/>
+<rect x="400.8" y="268" width="42.0" height="26" rx="3" fill="#3b82f6"/>
+<text x="750" y="288" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">immobilizer is ON (with our defaults it is OFF, so no double blink)</text>
+<rect x="30" y="325" width="1440" height="64" rx="8" fill="#fff"/>
+<circle cx="60" cy="357" r="12" fill="#3b82f6" stroke="#334155" stroke-width="1.5"/>
+<text x="82" y="353" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">LD2 blue (C1)</text>
+<text x="82" y="373" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal">1 flash, then C2/BH go dark</text>
+<polyline points="300,369 720,369" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="333.6" y="343" width="12.599999999999966" height="26" rx="3" fill="#3b82f6"/>
+<text x="750" y="363" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">the car went quiet 3.5 s → C1 put C2 and BH to sleep (their power LED stays on)</text>
+<rect x="30" y="400" width="1440" height="64" rx="8" fill="#f8fafc"/>
+<circle cx="60" cy="432" r="12" fill="#ef4444" stroke="#334155" stroke-width="1.5"/>
+<text x="82" y="428" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">LD1 red</text>
+<text x="82" y="448" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal">single short flash</text>
+<polyline points="300,444 720,444" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="510.0" y="418" width="12.600000000000023" height="26" rx="3" fill="#ef4444"/>
+<text x="750" y="438" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">something needed attention (a serial error, a slow loop); a flash at start-up is normal</text>
+<rect x="30" y="475" width="1440" height="64" rx="8" fill="#fff"/>
+<circle cx="60" cy="507" r="12" fill="#ef4444" stroke="#334155" stroke-width="1.5"/>
+<text x="82" y="503" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">LD1 red</text>
+<text x="82" y="523" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal">8 or 9 blinks</text>
+<polyline points="300,519 720,519" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="300.0" y="493" width="23.100000000000023" height="26" rx="3" fill="#ef4444"/>
+<rect x="346.2" y="493" width="23.100000000000023" height="26" rx="3" fill="#ef4444"/>
+<rect x="392.4" y="493" width="23.100000000000023" height="26" rx="3" fill="#ef4444"/>
+<rect x="438.6" y="493" width="23.099999999999966" height="26" rx="3" fill="#ef4444"/>
+<rect x="484.8" y="493" width="23.099999999999966" height="26" rx="3" fill="#ef4444"/>
+<rect x="531.0" y="493" width="23.100000000000023" height="26" rx="3" fill="#ef4444"/>
+<rect x="577.2" y="493" width="23.09999999999991" height="26" rx="3" fill="#ef4444"/>
+<rect x="623.4" y="493" width="23.100000000000023" height="26" rx="3" fill="#ef4444"/>
+<text x="750" y="513" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">saving settings to flash failed (erase / write)</text>
+<rect x="30" y="550" width="1440" height="64" rx="8" fill="#f8fafc"/>
+<circle cx="60" cy="582" r="12" fill="#ef4444" stroke="#334155" stroke-width="1.5"/>
+<text x="82" y="578" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" fill="#111827" text-anchor="start" font-weight="bold">LD1 red</text>
+<text x="82" y="598" font-family="DejaVu Sans, Arial, sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal">blinking forever</text>
+<polyline points="300,594 720,594" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="300.0" y="568" width="42.0" height="26" rx="3" fill="#ef4444"/>
+<rect x="384.0" y="568" width="42.0" height="26" rx="3" fill="#ef4444"/>
+<rect x="468.0" y="568" width="42.0" height="26" rx="3" fill="#ef4444"/>
+<rect x="552.0" y="568" width="42.0" height="26" rx="3" fill="#ef4444"/>
+<rect x="636.0" y="568" width="42.0" height="26" rx="3" fill="#ef4444"/>
+<text x="750" y="588" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#111827" text-anchor="start" font-weight="normal">start-up error; the speed tells which (§11.3) → reflash</text>
+<text x="30" y="670" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" fill="#64748b" text-anchor="start" font-weight="normal">If C2 and BH never pulse on the bench, check the serial wire (S3). If they go dark ≈ 4 s after power-up with no car, that is sleep working (S4).</text>
+</svg>
