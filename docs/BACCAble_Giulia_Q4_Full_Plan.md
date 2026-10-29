@@ -385,6 +385,8 @@ The author's own 3D cases for the UCAN. **Mounting reference only:** they hold o
 ## 4. Power — chosen design: Option B, identical to the author (always-on 12 V → 3.3 V rail)
 
 ### 4.1 The chain
+**The author confirmed this to the owner directly:** asked whether the USB +5 V connection is always needed when the cable is plugged into the OBD port, even without the immobilizer, he answered *"Con la mia scheda la alimentazione viene dalla obd"* ("with my board the power comes from the OBD"). No separate USB 5 V feed is needed. [Author]
+
 Only the car's OBD port is used, through your SGW bypass cable: **pin 16 = +12 V** (the pin the author's device is powered from, manual §1.2; the manual's immobilizer section relies on it being live with the car off) and **pins 4/5 = ground**. No other wire in the car is tapped.
 ```
 OBD pin 16 (+12 V) ─ inline fuse 1 A ─ 12→3.3 V buck IN+ ; OUT 3.3 V ─┬─ 2-pin plug ─ C1: P3 3V3 + P3 G
