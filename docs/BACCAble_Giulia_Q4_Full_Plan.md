@@ -1,4 +1,4 @@
-# DIY BACCAble — Full Plan, Build Steps and Firmware (v4.13)
+# DIY BACCAble — Full Plan, Build Steps and Firmware (v4.14)
 
 **Mission:** build our own BACCAble from loose boards instead of buying the author's ready-made device, and make it **behave the same as the author's device in every way except the WS281x LED strip** (not built, not wired, left disabled).
 **Build:** the **full BACCAble — three UCAN boards, C1 + C2 + BH**, one per CAN bus, exactly like the three chips on the author's PCB. This is **not** the two-board (C1 + BH) minimalist/test setup: every board, wire and step below is for three boards, and wherever a repo picture shows only one or two UCANs it is used only as a pad/label/mounting reference.
@@ -6,7 +6,7 @@
 **Owner's default choices:** gasoline parameters, **immobilizer OFF** and **Start&Stop disabler OFF** at first start (both still available: Start&Stop in the SETUP menu, immobilizer with the long button press).
 **Status:** research, design and firmware build done; **nothing flashed or installed yet; the images are untested on hardware.**
 
-Evidence tags: **[Repo]** read in this fork (manual v4.9, code, schematic, diagrams, build files) · **[FYSETC]** the UCAN maker's schematic and component drawing (github.com/FYSETC/UCAN `Hardware/`) · **[GiUCAN]** anegrin/GiUCAN, linked from the README · **[Author]** author's answer in upstream issue #34 · **[Infer]** my engineering inference — verify · **[Built]** compiled and checked in this session.
+Evidence tags: **[Repo]** read in this fork (manual v4.9, code, schematic, diagrams, build files) · **[FYSETC]** the UCAN maker's schematic and component drawing (github.com/FYSETC/UCAN `Hardware/`) · **[GiUCAN]** anegrin/GiUCAN, linked from the README · **[Author]** the author's answers (upstream issue #34, and directly to the owner) · **[Infer]** my engineering inference — verify · **[Built]** compiled and checked in this session.
 
 ---
 
@@ -100,10 +100,10 @@ What makes our version work like the author's:
 ### 0.6 Questions the owner asked, answered from the fork
 | Question | Short answer | Details |
 |---|---|---|
-| Why three boards? | The car has three separate CAN networks (C1, C2, BH) and one STM32F072 has one CAN port. One board per network; C1 is the boss and gives orders over the serial wire. Without C2 there is no ESC/TC, DYNO, brake override, park mute or ABS faults | §0.1, §2.1 |
+| Why three boards? | The car has three separate CAN networks (C1, C2, BH) and one STM32F072 has one CAN port. One board per network; C1 is the boss and gives orders over the serial wire. Without C2 there is no ESC/TC, DYNO, brake override, park mute or ABS faults. Some functions need two networks at once: park mute runs on C2 but needs the brake pedal state, which only C1 sees (`0x107`) and forwards over the serial wire | §0.1, §2.1 |
 | Is a separate USB 5 V supply needed? | No. The author confirmed: *"Con la mia scheda la alimentazione viene dalla obd"* — power comes from OBD pin 16 | §4.1 |
 | Do my settings survive switching the car off, or a battery disconnect? | Yes, once you choose **SAVE & EXIT**: C1 writes all 33 SETUP values to its flash. The immobilizer ON/OFF is saved when toggled; the shown dashboard parameters and BH's mirror positions have their own flash pages. A **full chip erase** when re-flashing brings back the defaults | §11.8, §8 |
-| What resets on purpose? | 4WD-disabled (engine off), DYNO and front-brake override (car asleep), Max Hold (power loss), DNA Memory's remembered style (power loss) | §11.14 |
+| What resets on purpose? | 4WD-disabled (engine off), ESC/TC switched state (engine off, rpm < 400), DYNO and front-brake override (car asleep), Max Hold (power loss), DNA Memory's remembered style (power loss) | §11.7, §11.14 |
 | Will it drain the battery? | Asleep, the author's device draws ≈ 15 mA: about **11 Ah per month**. Fine for daily use; for parking longer than ~2 weeks, unplug the OBD plug or use a battery maintainer. Measure your own build in H11 | §4.4, H11 |
 | How does the 4WD disabler work, and can it harm the module? | C1 keeps the drivetrain module rebooting (`11 01` every 30 ms) so it never sends torque to the front. Physical damage is unlikely (a software reset), but fault codes and changed stability behaviour are likely; use it briefly, stationary or on a closed course. A question about warning lights is pending with the author | §11.14 |
 | What happens if the BACCAble fails? | The car keeps working: the boards only add messages. The one bad failure is a board holding a bus busy (warning lights): unplug the OBD plug and everything is back to stock | §12 |
@@ -163,7 +163,7 @@ Nothing in it differs from the schematic in the repo.
 | Board | Role | OBD H / L | Bus speed | Main functions |
 |---|---|---|---|---|
 | **C1** | master/gateway | **6 / 14** | 500 kbit/s | dashboard menu and settings, Start&Stop, immobilizer, shift, 4WD disabler, ACC/HAS pads, windows, seat-belt, read faults (BODY/ECM), ELM327, sniffer, sleep control |
-| **C2** | slave | **12 / 13** | 500 kbit/s | ESC/TC, DYNO, front-brake override, front park mute, ABS faults |
+| **C2** | slave | **12 / 13** | 500 kbit/s | ESC/TC (also via the LANE button), DYNO, front-brake override, front park mute (brake state from C1), ABS faults for Read Faults |
 | **BH** | slave | **3 / 11** | 125 kbit/s | text on the cluster, odometer blink, park mirror, DNA Memory (not usable on the owner's car) |
 
 GND = OBD 4 and 5, +12 V = OBD 16. [Repo]
@@ -457,7 +457,7 @@ Otherwise the board's own regulator and the buck would both drive its 3.3 V rail
 - **Parked current:** measure in H11 (author's device ≈ 15 mA asleep).
 
 ### 4.5 Fallbacks (not chosen)
-- **Option A:** pin 16 → fuse → 12→5 V buck (≥ 1 A) → power-only USB-C leads. Same source, one extra regulator stage per board (a bit more parked current); USB service is just swapping leads.
+- **Option A:** pin 16 → fuse → 12→5 V buck (≥ 0.5 A) → power-only USB-C leads. Same source, one extra regulator stage per board (a bit more parked current); USB service is just swapping leads.
 - **Car USB:** 5 V from the console USB or the port near the cigarette lighter (manual §1.7/§2.4: switched on when you get in and when the RF hub wakes) → passive splitter → power-only USB-C leads. Boards lose power when the car sleeps, so DNA Memory and remembered states are lost; otherwise works.
 
   ![USB-A pinout from the manual](images/manual_usb_hub_5v_pinout.png)
@@ -582,7 +582,7 @@ The author's older single-CANable diagram is where "TERMINATION NOT INSERTED" co
 
 | Step | Action | Pass when |
 |---|---|---|
-| **H0** | Inspect every board: chip marking **STM32F072CB**, transceiver **SN65HVD230** (or 230-compatible); label C1, C2, BH, SPARE. Unpowered, JP1 open: measure CAN_H↔CAN_L on P1. Identify every pad with the continuity table in §2.2. Check whether **R4** is fitted (resistor beside R18; or, powered from USB, U1 pin 8 reads ≈ 1.6 V instead of ≈ 0 V). | ≈ 118 Ω (the fixed R1 + R2, FYSETC's "used by default"); if a jumper sits on JP1, take it off first; every pad beeps to the chip pin listed; R4 noted; **U1 marked VP230 and U1 pin 3 ≈ 3.3 V on USB** (≈ 5 V → §4.6) |
+| **H0** | Inspect every board: chip marking **STM32F072CB**; note the transceiver U1 marking (**VP230** = SN65HVD230, the 3.3 V build; anything else → §4.6); label C1, C2, BH, SPARE. Unpowered, JP1 open: measure CAN_H↔CAN_L on P1. Identify every pad with the continuity table in §2.2. Check whether **R4** is fitted (resistor beside R18; or, powered from USB, U1 pin 8 reads ≈ 1.6 V instead of ≈ 0 V). | ≈ 118 Ω (the fixed R1 + R2, FYSETC's "used by default"); if a jumper sits on JP1, take it off first; every pad beeps to the chip pin listed; R4 noted; **U1 marked VP230 and U1 pin 3 ≈ 3.3 V on USB** (≈ 5 V → §4.6) |
 | **H1** | **Remove R1 and R2** (when H0 read ≈ 118 Ω) on C1, C2, BH (and the spare if it will sniff the car) — §6; practise on the spare. Keep JP1 open. **If R4 is fitted, remove it** on C1, C2, BH, so each RS pin has only R18 10 kΩ to GND, as on the author's PCB. | CAN_H↔CAN_L ≫ 1 kΩ on each board; U1 pin 8 ↔ G ≈ 10 kΩ; no solder bridges near U1/P1 |
 | **H2** | Flash check comes in S1 (needs USB). On every board: wire or header the P2 pads **CK, B0, 3V3** and the P3 pads **3V3, G**. On C1 add **DO**, on C2/BH add **RES**. Fit the boot button **B0 ↔ P2 3V3** on each board (W18–W20, §2.3.4). | pads clean, no bridges; button pressed = B0 beeps to 3V3 |
 | **H3** | **Serial wire:** C1.CK ↔ C2.CK ↔ BH.CK. | continuity CK-CK-CK, no short to G/3V3 |
@@ -650,7 +650,7 @@ sudo dfu-util -d 0483:df11 -c 1 -i 0 -a 0 -s 0x08000000:leave -D C1.bin
 
 | Step | Action | Pass when |
 |---|---|---|
-| **S1** | On the **spare**: read device ID and **flash size = 128 KB** in CubeProgrammer, flash `BH`, unplug, replug. | on the data cable it appears as a USB drive "BACCABLE BH" with `Version.txt` (that proves it booted; the label and file are written when the drive is first formatted, i.e. on a blank or fully erased chip); no steady red blinking |
+| **S1** | On the **spare**: read device ID and **flash size = 128 KB** in CubeProgrammer, flash `BH`, unplug, replug. | on the data cable it appears as "BACCAble MSC" (`0483:572A`), a USB drive "BACCABLE BH" with `Version.txt` (that proves it booted; the label and file are written when the drive is first formatted, i.e. on a blank or fully erased chip); no steady red blinking |
 | **S2** | Read and flash all boards: `C1`→C1 board, `C2`→C2, `BH`→BH (full chip erase). Reset wire **not** fitted yet. | no steady red blinking on any board; C2/BH show their USB drive label on a data cable |
 | **S3** | **Bench serial test:** flash `C1_BENCH_ONLY` on C1, fit the CK wire, power all three. | after ~3 s the blue LEDs of C2 and BH pulse about once a second (C1 polling them) |
 | **S4** | **Bench sleep test:** flash the real `C1`, fit the reset wire, power all three with no car. | ~4 s after power-up the status LEDs of C2 and BH stop (held in reset; their power LEDs stay on) and C1's blue LED flashes once: the reset wire works. **Standby check:** C1 pin 15 / slave transceiver pin 8 read ≈ 0 V while awake and ≈ 3.3 V once asleep (the standby wire works). **Bus-safety check:** while they are held in reset, measure DC volts between CAN_H and CAN_L on each slave's terminal (nothing else connected): **≈ 0 V = recessive, safe**; anything clearly above ≈ 0.5 V means the slave would hold its bus dominant — do not install it (§5) |
@@ -706,15 +706,31 @@ On a UCAN: blue = **LD2 "TX"**, red = **LD1 "RX"**, power = **LD3 "3V3"** (§2.3
 ### 11.4 Flash map and USB
 C1 settings `0x0801F800` (33 values), statistics `0x0801F000`, shown parameters `0x0801E800`. C2/BH: 60 KB code region, a 64 KB FAT drive at `0x08010000–0x0801FFFF` ("BACCABLE C2/BH", `Version.txt`), BH mirror positions at `0x0801F800`. C1 starts USB only for sniffer/ELM327; C2/BH start their USB drive at power-on (not after a reset). PA14 is the serial line, so SWD is not usable on any board. [Repo]
 
+**What the laptop sees on each USB-C** (`usbd_desc.c`):
+
+| Situation | USB ID | Name shown |
+|---|---|---|
+| Boot button held while plugging in | `0483:df11` | STM32 BOOTLOADER (DFU) |
+| C2 or BH, normal | `0483:572A` | "BACCAble MSC" (Tr3ma), a USB drive labelled "BACCABLE C2" / "BACCABLE BH" |
+| Sniffer function on C1/C2/BH | `0483:5740` | "BACCAble Sniffer", a serial (COM) port |
+| ELM327 function on C1 | `0483:5740` | "ELM327-Emulator", a serial (COM) port |
+| `SNIFFER_ActAsCanable` image on the spare | `0483:5740` | "Canable and Leds Strip Controller V.1.0", a serial port for SavvyCAN |
+
+C1 shows nothing on USB unless the Sniffer or ELM327 function is on. [Repo]
+
 ### 11.5 CAN IDs each board reads (for the S5 sniff)
 IDs the code actually acts on (`processingStandardMessage.c`):
 
 | Board | IDs |
 |---|---|
-| C1 | 0x0FB, 0x101, 0x107, 0x192, 0x1F7, 0x2EF, 0x412, 0x41A, 0x41E, 0x420, 0x4AF, 0x4B1, 0x4B2, 0x545, 0x5A5, 0x5A8, 0x5AE, 0x73C, 0x73E |
+| C1 | 0x0FB, 0x0FC, 0x101, 0x107, 0x192, 0x1EF, 0x1F7, 0x226, 0x2ED, 0x2EF, 0x2FA, 0x384, 0x412, 0x41A, 0x41E, 0x420, 0x4AF, 0x4B1, 0x4B2, 0x545, 0x5A5, 0x5A8, 0x5AE, 0x73C, 0x73E |
 | BH | 0x090, 0x256, 0x25A, 0x354, 0x356, 0x3E6, 0x3E8, 0x46C, 0x5A0, 0x5A6, 0x5A8, 0x5AC |
-| C2 | 0x1F5, 0x3E7, 0x4AF, 0x4B4, 0x54A, 0x5B0 |
-| All boards | 0x0FC, 0x1EF, 0x226, 0x2ED, 0x2FA, 0x384 |
+| C2 | 0x0FC, 0x1F5, 0x2FA, 0x384, 0x3E7, 0x4AF, 0x4B4, 0x54A, 0x5B0 |
+
+Shared handler files, with their real per-board actions (`processingMessage0x*.c`):
+- **C1 only:** 0x1EF (key fob), 0x226 (Start&Stop status), 0x2ED (shift indicator).
+- **C1 and C2:** 0x0FC (rpm; C2 also reverse gear), 0x2FA (steering buttons; C2 for the HAS pad), 0x384 (drive style; C2 for ESC/TC and the LANE button).
+- **BH:** none of these. BH reads the rpm from 0x3E6 instead.
 
 The code also has comment-only notes, with no action, for 0x0FA, 0x116, 0x1F0, 0x1FC, 0x2EE, 0x358, 0x5CA and 0x73A. [Repo]
 
@@ -722,7 +738,7 @@ The code also has comment-only notes, with no action, for 0x0FA, 0x116, 0x1F0, 0
 The boards are bus participants, not a gateway: to change something they receive a frame and immediately send a modified copy with the same ID and a recomputed CRC (drive style 0x384, shift 0x2ED, key fob 0x1EF, steering buttons 0x2FA), or use UDS requests (parameters, seat-belt, read/clear faults, DYNO, exhaust QV). Engine "on" = rpm > 400 from 0x0FC; most functions wait ≈ 5 s of engine running. [Repo]
 
 ### 11.7 Dashboard menu
-Driven by the steering-wheel buttons (0x2FA), only with cruise control and ACC off. Hold RES/DISTANCE ≈ 2 s to show/hide; short press selects; speed-down = next, speed-up = previous, firm press = ±10. **Main menu:** version · Show Params · Read Faults · Clear Faults · Immobilizer ON/OFF · Dyno · ESC/TC · Front Brake · 4WD · SETUP MENU · PARAMS SETUP MENU · HAS · Exhaust Flap · "Save Log" (test stub, ignore) · Reset statistics · Max Hold (disabled functions are skipped). **SETUP MENU:** SAVE & EXIT · Start&Stop · Launch Torque · Led Controller (leave off) · Shift indicator · Shift RPM · My23 IPC · Regen alert · Seat-belt alarm · Route · ESC/TC · Dyno · ACC pad · Brakes override · 4WD disabler · Clear faults · Read faults · Remote start (do not enable) · **Diesel Params** · Odometer blink · Pedal booster (do not enable) · Pedal power · Park mirror · ACC autostart · Close windows · Open windows · HAS pad · Exhaust flap · Front park mute · Sniffer · ELM327 · DNA Memory. There is no immobilizer item: toggle it with engine running, cruise/ACC off, gear in neutral, holding cruise **speed-up** ≈ 20 s (manual says 30–40 s) until the cluster blinks (3 blinks = ON, 6 = OFF). The menu hides ≈ 40 s after the engine stops. [Repo]
+Driven by the steering-wheel buttons (0x2FA), only with cruise control and ACC off. Hold RES/DISTANCE ≈ 2 s to show/hide; short press selects; speed-down = next, speed-up = previous, firm press = ±10. **Main menu:** version · Show Params · Read Faults · Clear Faults · Immobilizer ON/OFF · Dyno · ESC/TC · Front Brake · 4WD · SETUP MENU · PARAMS SETUP MENU · HAS · Exhaust Flap · "Save Log" (test stub, ignore) · Reset statistics · Max Hold (disabled functions are skipped). **SETUP MENU:** SAVE & EXIT · Start&Stop · Launch Torque · Led Controller (leave off) · Shift indicator · Shift RPM · My23 IPC · Regen alert · Seat-belt alarm · Route · ESC/TC · Dyno · ACC pad · Brakes override · 4WD disabler · Clear faults · Read faults · Remote start (do not enable) · **Diesel Params** · Odometer blink · Pedal booster (do not enable) · Pedal power · Park mirror · ACC autostart · Close windows · Open windows · HAS pad · Exhaust flap · Front park mute · Sniffer · ELM327 · DNA Memory. **ESC/TC has a second switch:** on C2, holding the **LANE** button (left stalk) for 2 s toggles it, when ESC/TC is selected in SETUP and DYNO is not active. Like the menu toggle, it returns to normal when the engine stops (rpm < 400). There is no immobilizer item: toggle it with engine running, cruise/ACC off, gear in neutral, holding cruise **speed-up** ≈ 20 s (manual says 30–40 s) until the cluster blinks (3 blinks = ON, 6 = OFF). The menu hides ≈ 40 s after the engine stops. [Repo]
 
 ### 11.8 Fresh-board defaults (`readFromFlash()`), with our C1 flags
 Immobilizer **OFF**, Start&Stop disabler **OFF**, gasoline, Clear Faults ON, seat-belt alarm "enabled"; everything else OFF. Note: the seat-belt setting has no "leave untouched" choice — about 2 s after the first engine start after C1 powers up (and again only if that attempt timed out), C1 writes it to the cluster (`2F 55A0 03 01` = chime on, stock behaviour; `00` if you deselect it). [Repo]
@@ -836,7 +852,7 @@ The manual (§2.15) only says to use it on AWD cars and to switch it on while st
 | Parked drain | measure in H11; if it does not drop after the car sleeps, check the reset wire and the sleep LED |
 | Long parking (> ~2 weeks) | ≈ 15 mA asleep ≈ 11 Ah per month: unplug the OBD plug or use a battery maintainer |
 | Skipping the standby wire W17 | asleep slaves could hold a bus busy; fit it and pass the S4 bus-safety check (§5.2) |
-| Immobilizer turned on later | it reacts to any diagnostic session on the RF hub; turn it off before MultiECUScan/AlfaOBD work |
+| Immobilizer turned on later | while the engine is not running, it reacts to any diagnostic request to the RF hub (`0x18DAC7Fx`), resets the hub and sounds the panic alarm if enabled; turn it off before MultiECUScan/AlfaOBD work |
 | DYNO, 4WD disable, brake override | stationary/closed course only; the repo is "educational and research", not for public roads |
 | Warranty/insurance/inspection | your responsibility |
 
@@ -846,6 +862,7 @@ The manual (§2.15) only says to use it on AWD cars and to switch it on while st
 2. First boot of the prebuilt images and the `UCAN_LOW_CONSUME_PINS` sleep on real boards (S3, S4).
 3. Sleep current of the three-UCAN build (H11).
 4. Standby wire on your boards: transceiver pin 8 ↔ chip pin 2 continuity (H4) and ≈ 0 V awake / ≈ 3.3 V asleep (S4); bus recessive while asleep (S4 voltmeter check).
+5. The author's answer on the 4WD disabler: whether warning lights come on and faults are stored while the drivetrain module is being reset (question sent by the owner; §11.14).
 
 ## Sources (all in or linked from this fork)
-FYSETC UCAN V1.0 schematic and component position (https://github.com/FYSETC/UCAN/tree/main/Hardware) · FYSETC UCAN README and render (https://github.com/FYSETC/UCAN), product page https://www.fysetc.com/products/fysetc-ucan-board (not readable from this session) · diagrams drawn for this plan: `docs/images/src/make_diagrams.py` (+ `render.js` → PNG) · `README.md`, `LICENSE.MD`, `manuals/Baccable_manual_*.pdf` (v4.9), `hardware/newBaccableDedicatedPcb/*`, `hardware/system_interconnection/*`, `hardware/canable/*` (MKS schematics, STM32F072 datasheet), `hardware/box/*`, `firmware/ledsStripController/{Core,Makefile,MAKEFILE.md,*.ld,baccable.ioc,.cproject}`, `.github/workflows/*`, `tools/*.xlsx` · GiUCAN https://github.com/anegrin/GiUCAN · canable-fw https://github.com/normaldotcom/canable-fw · PIDs https://github.com/danardi78/Alfaromeo-Giulia-Stelvio-PIDs · upstream issue #34 (author on power and three boards) · the author's video walkthrough of the BACCAble PCB (owner's screenshots and transcript). The committed images in `firmware/ucan_prebuilt/` were rebuilt from this fork with `docs/build_ucan.sh` and came out byte-identical apart from the version tag.
+FYSETC UCAN V1.0 schematic and component position (https://github.com/FYSETC/UCAN/tree/main/Hardware) · FYSETC UCAN README and render (https://github.com/FYSETC/UCAN), product page https://www.fysetc.com/products/fysetc-ucan-board (not readable from this session) · diagrams drawn for this plan: `docs/images/src/make_diagrams.py` (+ `render.js` → PNG) · `README.md`, `LICENSE.MD`, `manuals/Baccable_manual_*.pdf` (v4.9), `hardware/newBaccableDedicatedPcb/*`, `hardware/system_interconnection/*`, `hardware/canable/*` (MKS schematics, STM32F072 datasheet), `hardware/box/*`, `firmware/ledsStripController/{Core,Makefile,MAKEFILE.md,*.ld,baccable.ioc,.cproject}`, `.github/workflows/*`, `tools/*.xlsx` · GiUCAN https://github.com/anegrin/GiUCAN · canable-fw https://github.com/normaldotcom/canable-fw · PIDs https://github.com/danardi78/Alfaromeo-Giulia-Stelvio-PIDs · upstream issue #34 (author on power and three boards) · the author's direct answer to the owner on OBD power · the author's video walkthrough of the BACCAble PCB (owner's screenshots and transcript). The committed images in `firmware/ucan_prebuilt/` were rebuilt from this fork with `docs/build_ucan.sh` and came out byte-identical apart from the version tag.
