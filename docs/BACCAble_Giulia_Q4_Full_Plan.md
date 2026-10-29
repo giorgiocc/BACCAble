@@ -774,7 +774,7 @@ ESC/TC and the race screen need race mode enabled by **proxy alignment** (manual
 
 ## 13. Still open (only the hardware can answer)
 1. Real flash size of **your** UCANs (S1), and that your boards match the FYSETC V1.0 drawing (H0: ≈ 118 Ω across P1 before removing R1/R2, pads beep as in §2.2).
-1b. Which transceiver build your UCANs have: VP230 / U1 pin 3 ≈ 3.3 V on USB, or a 5 V build (§4.6, H0).
+   - Which transceiver build your UCANs have: VP230 / U1 pin 3 ≈ 3.3 V on USB, or a 5 V build (§4.6, H0).
 2. First boot of the prebuilt images and the `UCAN_LOW_CONSUME_PINS` sleep on real boards (S3, S4).
 3. Sleep current of the three-UCAN build (H11).
 4. Standby wire on your boards: transceiver pin 8 ↔ chip pin 2 continuity (H4) and ≈ 0 V awake / ≈ 3.3 V asleep (S4); bus recessive while asleep (S4 voltmeter check).
