@@ -1,0 +1,42 @@
+name: Build Giulia UCAN firmware
+
+on:
+  push:
+    branches:
+      - claude/peaceful-ritchie-aii7fs
+    paths:
+      - 'firmware/ledsStripController/**'
+      - 'docs/build_ucan.sh'
+      - '.github/workflows/build-giulia-ucan.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-ucan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this branch
+        uses: actions/checkout@v4
+      - name: Install ARM bare-metal compiler
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+      - name: Print compiler version
+        run: arm-none-eabi-gcc --version
+      - name: Build C1, C2, BH and bench-only binaries
+        run: bash docs/build_ucan.sh
+      - name: Upload flashable STM32CubeProgrammer images
+        uses: actions/upload-artifact@v4
+        with:
+          name: Giulia-UCAN-firmware-${{ github.sha }}
+          path: |
+            firmware/ucan_prebuilt/C1.elf
+            firmware/ucan_prebuilt/C2.elf
+            firmware/ucan_prebuilt/BH.elf
+            firmware/ucan_prebuilt/C1.bin
+            firmware/ucan_prebuilt/C2.bin
+            firmware/ucan_prebuilt/BH.bin
+            firmware/ucan_prebuilt/C1_BENCH_ONLY.elf
+            firmware/ucan_prebuilt/SNIFFER_ActAsCanable.elf
+            firmware/ucan_prebuilt/README.md
+          if-no-files-found: error
