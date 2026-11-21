@@ -8,6 +8,11 @@
 #include "processingMessage0x000000FC.h"
 
 void processingMessage0x000000FC(){
+	#if defined(C1baccable) && defined(AUTO_SHOW_DASHBOARD_ON_ENGINE_START)
+		// Show the existing version page once per engine start, not while the car is parked.
+		// A manual RES/DISTANCE long press can still hide the menu for this drive.
+		static uint8_t showVersionAtNextEngineStart = 1;
+	#endif
 
 	//message to dashboard containing rpm speed and not only
 	#if (defined(C1baccable) || defined(C2baccable))
@@ -44,6 +49,9 @@ void processingMessage0x000000FC(){
 	#endif
 	#if defined(C1baccable)
 		if(currentRpmSpeed<400){
+			#if defined(AUTO_SHOW_DASHBOARD_ON_ENGINE_START)
+				showVersionAtNextEngineStart=1;
+			#endif
 			startAndStopEnabled=1; //if motor off, re-enable start&stop logic
 			requestToDisableStartAndStop=0; //re set request trigger
 
@@ -62,6 +70,14 @@ void processingMessage0x000000FC(){
 
 			engineOnSinceMoreThan5seconds=0; //engine is off
 		}else{
+			#if defined(AUTO_SHOW_DASHBOARD_ON_ENGINE_START)
+				if(showVersionAtNextEngineStart){
+					showVersionAtNextEngineStart=0;
+					main_dashboardPageIndex=0; // existing FW_VERSION page
+					dashboard_menu_indent_level=0;
+					baccableDashboardMenuVisible=1;
+				}
+			#endif
 			shutdownDashboardMenuRequestTime=0;
 			if(baccabledashboardMenuWasVisible==1){
 				baccableDashboardMenuVisible=1; //show menu
